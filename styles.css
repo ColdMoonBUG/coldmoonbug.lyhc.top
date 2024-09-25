@@ -81,6 +81,17 @@ footer {
     width: 100%;
     position: relative;
     bottom: 0;
+    font-size: 18px;
+    transition: color 0.3s;
+}
+
+footer p {
+    margin: 0;
+    opacity: 0.9;
+}
+
+footer:hover p {
+    color: #ffeb3b; /* 悬停时改变字体颜色 */
 }
 
 /* 手机端适配 */
