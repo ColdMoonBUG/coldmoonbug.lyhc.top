@@ -1,4 +1,11 @@
-// 如果需要添加任何动态功能，可以在这里实现
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('页面加载完成');
-});
+function updateTime() {
+    const now = new Date();
+    const formattedTime = now.toLocaleTimeString();
+    document.getElementById('current-time').textContent = `当前时间：${formattedTime}`;
+}
+
+// 每秒更新一次时间
+setInterval(updateTime, 1000);
+
+// 页面加载时显示当前时间
+updateTime();
