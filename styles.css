@@ -117,7 +117,6 @@ h2 {
 footer {
     text-align: center;
     padding: 10px;
-    background: linear-gradient(to right, #00c6ff, #0072ff); /* 更新的渐变色背景 */
     color: #000000; /* 文字改为黑色 */
     text-shadow: 1px 1px 2px #ffffff; /* 添加白色描边 */
     width: 100%;
