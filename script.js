@@ -1,6 +1,6 @@
 async function setBackground() {
     try {
-        const response = await fetch('https://cors-anywhere.herokuapp.com/https://www.loliapi.com/acg/');
+        const response = await fetch('https://www.loliapi.com/acg/');
         if (!response.ok) {
             throw new Error('Network request failed: ' + response.status);
         }
