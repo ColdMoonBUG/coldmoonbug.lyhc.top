@@ -1,5 +1,7 @@
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
@@ -11,20 +13,21 @@ body {
 }
 
 header {
-    background: rgba(76, 175, 80, 0.8);
     color: #000000; /* 文字改为黑色 */
-    text-shadow: 1px 1px 2px #ffffff; /* 添加白色描边 */
-    background-image: linear-gradient(to right, #ff7e5f, #feb47b);
-    -webkit-background-clip: text;
-    background-clip: text;
     padding: 20px;
     text-align: center;
     width: 100%;
-    /* 移除 backdrop-filter */
 }
 
 h1 {
     margin: 0;
+}
+
+a {
+    color: #000000; /* 文字改为黑色 */
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s;
 }
 
 nav ul {
@@ -42,12 +45,10 @@ nav a {
     text-decoration: none;
     font-weight: bold;
     transition: color 0.3s;
-    text-shadow: 1px 1px 2px #ffffff; /* 添加白色描边 */
 }
 
 nav a:hover {
     color: #ffeb3b;
-    text-shadow: 1px 1px 2px #ffffff; /* 添加白色描边 */
 }
 
 main {
@@ -57,8 +58,7 @@ main {
 }
 
 .module {
-    background: rgba(255, 255, 255, 0.2);
-    /* 移除 backdrop-filter */
+    background: rgba(255, 255, 255, 0.029);
     border-radius: 12px;
     box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
@@ -68,16 +68,12 @@ main {
 
 .module:hover {
     box-shadow: 0 6px 35px rgba(0, 0, 0, 0.2);
-    background-color: rgba(0, 0, 0, 0.05); /* 添加淡淡黑色阴影 */
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 h2 {
     margin-top: 0;
-    color: #000000; /* 文字改为黑色 */
-    text-shadow: 1px 1px 2px #ffffff; /* 添加白色描边 */
-    background-image: linear-gradient(to right, #ff7e5f, #feb47b);
-    -webkit-background-clip: text;
-    background-clip: text;
+    color: #000000;
 }
 
 .button-container {
@@ -88,13 +84,11 @@ h2 {
 
 .button {
     background: rgba(255, 255, 255, 0.2);
-    /* 移除 backdrop-filter */
-    color: #000000; /* 文字改为黑色 */
-    text-shadow: 1px 1px 2px #ffffff; /* 添加白色描边 */
+    color: #000000;
     padding: 15px 20px;
     text-decoration: none;
     border-radius: 5px;
-    transition: transform 0.2s, box-shadow 0.3s, background 0.3s;
+    transition: transform 0.2s, box-shadow 0.3s;
     flex: 1 1 calc(50% - 15px);
     text-align: center;
     font-weight: bold;
@@ -103,8 +97,7 @@ h2 {
 
 .button:hover {
     background: linear-gradient(135deg, #4CAF50, #81c784);
-    color: #000000; /* 文字改为黑色 */
-    text-shadow: 1px 1px 2px #ffffff; /* 添加白色描边 */
+    color: #000000;
     transform: translateY(-3px);
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
@@ -117,11 +110,9 @@ h2 {
 footer {
     text-align: center;
     padding: 10px;
-    color: #000000; /* 文字改为黑色 */
-    text-shadow: 1px 1px 2px #ffffff; /* 添加白色描边 */
+    color: #000000;
     width: 100%;
-    position: absolute;
-    bottom: 0;
+    position: relative;
     font-size: 18px;
     opacity: 0.9;
 }
@@ -136,13 +127,22 @@ footer:hover p {
 
 /* 手机端适配 */
 @media (max-width: 600px) {
-  .button {
+    .button {
         flex: 1 1 100%;
     }
 
+    nav ul {
+        display: flex;
+        flex-direction: column; /* 垂直排列 */
+        align-items: center; /* 水平居中 */
+    }
+
     nav ul li {
-        display: block;
-        margin: 10px 0;
+        margin: 10px 0; /* 上下间距 */
+    }
+
+    h1 {
+        font-size: 24px; /* 调整标题大小 */
     }
 }
 
@@ -150,23 +150,15 @@ footer:hover p {
     position: relative;
     text-align: center;
     background: linear-gradient(60deg, rgba(84, 58, 183, 1) 0%, rgba(0, 172, 193, 1) 100%);
-/* 	background: #FFAFBD;  
-	background: -webkit-linear-gradient(to right, #ffc3a0, #FFAFBD);  
-	background: linear-gradient(to right, #ffc3a0, #FFAFBD); 
- */
-    color: 00c6ff;
 }
- 
- 
+
 .inner-header {
     height: 65vh;
     width: 100%;
     margin: 0;
     padding: 0;
 }
- 
- 
- 
+
 .waves {
     position: relative;
     width: 100vw; /* 自适应宽度 */
@@ -175,28 +167,9 @@ footer:hover p {
     max-height: 150px;
 }
 
-.inner-header {
-    height: 65vh;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-}
-
 /* Animation */
 .parallax > use {
     animation: move-forever 5s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
-}
-.parallax > use:nth-child(1) {
-    animation-duration: 5s; /* 更短的时间以加快速度 */
-}
-.parallax > use:nth-child(2) {
-    animation-duration: 7s;
-}
-.parallax > use:nth-child(3) {
-    animation-duration: 9s;
-}
-.parallax > use:nth-child(4) {
-    animation-duration: 12s;
 }
 
 @keyframes move-forever {
@@ -210,14 +183,131 @@ footer:hover p {
 
 /* Shrinking for mobile */
 @media (max-width: 768px) {
-  .waves {
+    .waves {
         height: 40px;
         min-height: 40px;
     }
-  .content {
+    .content {
         height: 30vh;
     }
-    h1 {
-        font-size: 24px;
+}
+
+.buttons {
+    margin-top: 50px;
+    text-align: center;
+}
+
+/* Blob Button Styles */
+.blob-btn {
+    z-index: 1;
+    position: relative;
+    padding: 20px 46px;
+    margin-bottom: 30px;
+    text-align: center;
+    text-transform: uppercase;
+    color: #0fe0f5;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: transparent;
+    outline: none;
+    border: none;
+    transition: color 0.5s;
+    cursor: pointer;
+}
+
+.blob-btn:before {
+    content: "";
+    z-index: 1;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    border: 6px solid #0fe0f5;
+}
+
+.blob-btn:after {
+    content: "";
+    z-index: -2;
+    position: absolute;
+    left: 9px;
+    top: 9px;
+    width: 100%;
+    height: 100%;
+    border: 6px solid #222;
+    transition: all 0.3s 0.2s;
+}
+
+.blob-btn:hover {
+    color: #222;
+}
+
+.blob-btn:hover:after {
+    transition: all 0.3s;
+    left: 0;
+    top: 0;
+}
+
+.blob-btn__inner {
+    z-index: -1;
+    overflow: hidden;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.blob-btn__blobs {
+    position: relative;
+    display: block;
+    height: 100%;
+    filter: url("#goo");
+}
+
+.blob-btn__blob {
+    position: absolute;
+    top: 6px;
+    width: 25%;
+    height: 100%;
+    background: #0fe0f5;
+    border-radius: 100%;
+    transform: translate3d(0, 150%, 0) scale(1.7);
+    transition: transform 0.45s;
+}
+
+@supports (filter: url("#goo")) {
+    .blob-btn__blob {
+        transform: translate3d(0, 150%, 0) scale(1.4);
+    }
+}
+
+.blob-btn__blob:nth-child(1) {
+    left: 0%;
+    transition-delay: 0s;
+}
+
+.blob-btn__blob:nth-child(2) {
+    left: 30%;
+    transition-delay: 0.08s;
+}
+
+.blob-btn__blob:nth-child(3) {
+    left: 60%;
+    transition-delay: 0.16s;
+}
+
+.blob-btn__blob:nth-child(4) {
+    left: 90%;
+    transition-delay: 0.24s;
+}
+
+.blob-btn:hover .blob-btn__blob {
+    transform: translateZ(0) scale(1.7);
+}
+
+@supports (filter: url("#goo")) {
+    .blob-btn:hover .blob-btn__blob {
+        transform: translateZ(0) scale(1.4);
     }
 }
