@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>快捷链接页面</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <header>
         <h1>快捷链接管理</h1>
@@ -21,46 +23,137 @@
         <section id="info" class="module">
             <h2>信息类</h2>
             <div class="button-container">
-                <a href="https://api.03c3.cn/api/zb" class="button">60S</a>
-                <a href="weather.html" class="button">天气</a>
-            </div>
+                <div class="buttons">
+                    <button class="blob-btn">
+                        <a href="https://api.03c3.cn/api/zb">60S</a>
+                        <span class="blob-btn__inner">
+                            <span class="blob-btn__blobs">
+                                <span class="blob-btn__blob"></span>
+                                <span class="blob-btn__blob"></span>
+                                <span class="blob-btn__blob"></span>
+                                <span class="blob-btn__blob"></span>
+                            </span>
+                        </span>
+                    </button>
+                    <br />
+                </div>
+                <div class="button-container">
+                    <div class="buttons">
+                        <button class="blob-btn">
+                            <a href="weather.html">郑州天气</a>
+                            <span class="blob-btn__inner">
+                                <span class="blob-btn__blobs">
+                                    <span class="blob-btn__blob"></span>
+                                    <span class="blob-btn__blob"></span>
+                                    <span class="blob-btn__blob"></span>
+                                    <span class="blob-btn__blob"></span>
+                                </span>
+                            </span>
+                        </button>
+                        <br />
+                    </div>
+                </div>
         </section>
         <section id="tools" class="module">
             <h2>工具类</h2>
             <div class="button-container">
-                <a href="https://example3.com" class="button">链接3</a>
-                <a href="https://example4.com" class="button">链接4</a>
-            </div>
+                <div class="buttons">
+                    <button class="blob-btn">
+                        <a href="https://api.03c3.cn/api/zb">60S</a>
+                        <span class="blob-btn__inner">
+                            <span class="blob-btn__blobs">
+                                <span class="blob-btn__blob"></span>
+                                <span class="blob-btn__blob"></span>
+                                <span class="blob-btn__blob"></span>
+                                <span class="blob-btn__blob"></span>
+                            </span>
+                        </span>
+                    </button>
+                    <br />
+                </div>
+                <div class="button-container">
+                    <div class="buttons">
+                        <button class="blob-btn">
+                            <a href="weather.html">郑州天气</a>
+                            <span class="blob-btn__inner">
+                                <span class="blob-btn__blobs">
+                                    <span class="blob-btn__blob"></span>
+                                    <span class="blob-btn__blob"></span>
+                                    <span class="blob-btn__blob"></span>
+                                    <span class="blob-btn__blob"></span>
+                                </span>
+                            </span>
+                        </button>
+                        <br />
+                    </div>
+                </div>
         </section>
         <section id="entertainment" class="module">
             <h2>娱乐类</h2>
             <div class="button-container">
-                <a href="https://example5.com" class="button">链接5</a>
-                <a href="https://example6.com" class="button">链接6</a>
-            </div>
+                <div class="buttons">
+                    <button class="blob-btn">
+                        <a href="https://api.03c3.cn/api/zb">60S</a>
+                        <span class="blob-btn__inner">
+                            <span class="blob-btn__blobs">
+                                <span class="blob-btn__blob"></span>
+                                <span class="blob-btn__blob"></span>
+                                <span class="blob-btn__blob"></span>
+                                <span class="blob-btn__blob"></span>
+                            </span>
+                        </span>
+                    </button>
+                    <br />
+                </div>
+                <div class="button-container">
+                    <div class="buttons">
+                        <button class="blob-btn">
+                            <a href="weather.html">郑州天气</a>
+                            <span class="blob-btn__inner">
+                                <span class="blob-btn__blobs">
+                                    <span class="blob-btn__blob"></span>
+                                    <span class="blob-btn__blob"></span>
+                                    <span class="blob-btn__blob"></span>
+                                    <span class="blob-btn__blob"></span>
+                                </span>
+                            </span>
+                        </button>
+                        <br />
+                    </div>
+                </div>
         </section>
     </main>
     <div class="header">
-        </div>
-        <div>
-            <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
-                <defs>
-                    <path id="gentle-wave"
-                        d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-                </defs>
-                <g class="parallax">
-                    <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(224,233,239,0.7" />
-                    <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(224,233,239,0.5)" />
-                    <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(224,233,239,0.3)" />
-                    <use xlink:href="#gentle-wave" x="48" y="7" fill="#fff" />
-                </g>
-            </svg>
-        </div>
     </div>
     <footer>
         <p id="current-time"></p>
     </footer>
+    <div>
+        <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+            viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+            <defs>
+                <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+            </defs>
+            <g class="parallax">
+                <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(224,233,239,0.7" />
+                <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(224,233,239,0.5)" />
+                <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(224,233,239,0.3)" />
+                <use xlink:href="#gentle-wave" x="48" y="7" fill="#fff" />
+            </g>
+        </svg>
+    </div>
+    </div>
+    <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+        <defs>
+            <filter id="goo">
+                <feGaussianBlur in="SourceGraphic" result="blur" stdDeviation="10"></feGaussianBlur>
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 21 -7" result="goo">
+                </feColorMatrix>
+                <feBlend in2="goo" in="SourceGraphic" result="mix"></feBlend>
+            </filter>
+        </defs>
+    </svg>
     <script src="script.js"></script>
 </body>
+
 </html>
