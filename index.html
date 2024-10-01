@@ -1,16 +1,18 @@
+<!-- 代码均由ChatGPT生成，如有侵权请联系作者删除
+作者：张敬玉 -->
 <!DOCTYPE html>
 <html lang="zh">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>快捷链接页面</title>
+    <title>网页正在加载中···</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
     <header>
-        <h1>快捷链接管理</h1>
+        <h1>快速跳转</h1>
+        <br>
         <nav>
             <ul>
                 <li><a href="#info">信息类</a></li>
@@ -24,7 +26,7 @@
             <h2>信息类</h2>
             <div class="button-container">
                 <div class="buttons">
-                    <a href="https://api.03c3.cn/api/zb">
+                    <a href="https://api.03c3.cn/api/zb" target="_blank">
                         <button class="blob-btn">
                             60S
                             <span class="blob-btn__inner">
@@ -42,7 +44,7 @@
                 </div>
                 <div class="button-container">
                     <div class="buttons">
-                        <a href="weather.html?city=郑州">
+                        <a href="weather.html?city=郑州" target="_blank">
                             <button class="blob-btn">
                                 郑州天气
                                 <span class="blob-btn__inner">
@@ -60,7 +62,7 @@
                 </div>
                 <div class="button-container">
                     <div class="buttons">
-                        <a href="weather.html?city=南阳">
+                        <a href="weather.html?city=南阳" target="_blank">
                             <button class="blob-btn">
                                 南阳天气
                                 <span class="blob-btn__inner">
@@ -158,23 +160,74 @@
             </filter>
         </defs>
     </svg>
-    <footer>
-        <p id="current-time"></p>
-    </footer>
+  
+    <div class="clock">
+        <div class="flip">
+            <div class="digital front" data-number="0"></div>
+            <div class="digital back" data-number="1"></div>
+        </div>
+        <div class="flip">
+            <div class="digital front" data-number="0"></div>
+            <div class="digital back" data-number="1"></div>
+        </div>
+        <em class="divider">:</em>
+        <div class="flip">
+            <div class="digital front" data-number="0"></div>
+            <div class="digital back" data-number="1"></div>
+        </div>
+        <div class="flip">
+            <div class="digital front" data-number="0"></div>
+            <div class="digital back" data-number="1"></div>
+        </div>
+        <em class="divider">:</em>
+        <div class="flip">
+            <div class="digital front" data-number="0"></div>
+            <div class="digital back" data-number="1"></div>
+        </div>
+        <div class="flip">
+            <div class="digital front" data-number="0"></div>
+            <div class="digital back" data-number="1"></div>
+        </div>
+    </div>
+      
     <div>
         <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
             viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
             <defs>
-                <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+                <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
             </defs>
             <g class="parallax">
-                <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(224,233,239,0.7" />
-                <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(224,233,239,0.5)" />
-                <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(224,233,239,0.3)" />
-                <use xlink:href="#gentle-wave" x="48" y="7" fill="#fff" />
+                <!-- 第一层波浪 -->
+                <use xlink:href="#gentle-wave" x="48" y="0" fill="url(#wave-gradient-1)" />
+                <!-- 第二层波浪 -->
+                <use xlink:href="#gentle-wave" x="48" y="3" fill="url(#wave-gradient-2)" />
+                <!-- 第三层波浪-->
+                <use xlink:href="#gentle-wave" x="48" y="6" fill="url(#wave-gradient-3)" />
+                <!-- 第四层波浪-->
+                <use xlink:href="#gentle-wave" x="48" y="9" fill="url(#wave-gradient-4)" />
             </g>
+            <defs>
+                <!-- 波浪渐变色 -->
+                <linearGradient id="wave-gradient-1" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color: rgba(105, 159, 204, 0.6);" />
+                    <stop offset="100%" style="stop-color: rgba(224, 233, 239, 0.7);" />
+                </linearGradient>
+                <linearGradient id="wave-gradient-2" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color: rgba(105, 159, 204, 0.4);" />
+                    <stop offset="100%" style="stop-color: rgba(224, 233, 239, 0.5);" />
+                </linearGradient>
+                <linearGradient id="wave-gradient-3" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color: rgba(105, 159, 204, 0.3);" />
+                    <stop offset="100%" style="stop-color: rgba(224, 233, 239, 0.4);" />
+                </linearGradient>
+                <linearGradient id="wave-gradient-4" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" style="stop-color: rgba(105, 159, 204, 0.2);" />
+                    <stop offset="100%" style="stop-color: rgba(224, 233, 239, 0.3);" />
+                </linearGradient>
+            </defs>
         </svg>
     </div>
+    
 
     <script src="script.js"></script>
 </body>
