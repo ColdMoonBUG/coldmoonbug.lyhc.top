@@ -75,6 +75,7 @@ main {
     margin-bottom: 20px;
     padding: 20px;
     transition: box-shadow 0.3s;
+    border: 4px solid #66ccff; /* 添加边框 */
 }
 
 .module:hover {
