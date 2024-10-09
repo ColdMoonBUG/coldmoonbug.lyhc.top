@@ -1,9 +1,27 @@
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="title"></title>
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,6 +31,7 @@
             transition: background-color 0.5s ease;
             overflow-x: hidden;
         }
+
         h1 {
             text-align: center;
             color: #00796b;
@@ -24,29 +43,35 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+
         @keyframes pulse {
             0% {
                 transform: scale(1);
                 text-shadow: 0 0 5px #00796b;
             }
+
             100% {
                 transform: scale(1.05);
                 text-shadow: 0 0 15px #4db6ac;
             }
         }
+
         .container {
             max-width: 800px;
             margin: 0 auto;
         }
+
         .cover-image {
             width: 100%;
             border-radius: 8px;
             transition: transform 0.5s ease, box-shadow 0.5s ease;
         }
+
         .cover-image:hover {
             transform: scale(1.03);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
         }
+
         .news-card {
             background: white;
             border-radius: 8px;
@@ -57,13 +82,16 @@
             cursor: pointer;
             position: relative;
         }
+
         .news-card:hover {
             transform: translateY(-5px) scale(1.02);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
         }
+
         .news-card:active {
             transform: translateY(0) scale(0.98);
         }
+
         .news-card-number {
             font-size: 20px;
             font-weight: bold;
@@ -74,9 +102,11 @@
             left: 10px;
             transform: translateY(-50%);
         }
+
         .news-content {
             margin-left: 40px;
         }
+
         .tip-card {
             background: #00796b;
             color: #fff;
@@ -86,23 +116,30 @@
             text-align: center;
             transition: background 0.5s ease;
         }
+
         .tip-card:hover {
             background: #004d40;
         }
+
         @media (max-width: 768px) {
             body {
                 padding: 10px;
             }
-            .news-card, .tip-card, .cover-image {
+
+            .news-card,
+            .tip-card,
+            .cover-image {
                 padding: 15px;
                 max-width: 100%;
             }
+
             .news-card-number {
                 font-size: 16px;
             }
         }
     </style>
 </head>
+
 <body>
     <h1 id="date-title"></h1>
     <div class="container">
@@ -151,4 +188,5 @@
         init();
     </script>
 </body>
+
 </html>
