@@ -304,11 +304,10 @@
                 if (response.status === 200) {
                     // 从响应数据中提取城市名称
                     const address = data.data.city; // 例如："郑州市"
+                    // 更新页面标题
+                    document.querySelector('h1').textContent = `${address}未来一周天气`;
                     const cityName = extractCityName(address);
                     console.log(cityName);
-
-                    // 更新页面标题
-                    document.querySelector('h1').textContent = `${cityName}未来一周天气`;
 
                     // 获取天气数据
                     const weatherData = await fetchWeatherData(cityName);
