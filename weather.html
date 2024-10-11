@@ -296,10 +296,9 @@
             try {
                 const response = await fetch('https://qifu-api.baidubce.com/ip/local/geo/v1/district');
                 console.log(response)
-                const data = await response.json();
                 console.log(data);
 
-                if (data.status === 200) {
+                if (response.status === 200) {
                     // 从地址中提取城市名称
                     const address = data.data.city; // 例如："中国 河南 郑州 移动"
                     const cityName = extractCityName(address);
