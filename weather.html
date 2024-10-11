@@ -298,7 +298,7 @@
                 const data = await response.json();
                 console.log(data);
 
-                if (data.code === 200 && data.data && data.data.address) {
+                if (data.code === 200) {
                     // 从地址中提取城市名称
                     const address = data.data.address; // 例如："中国 河南 郑州 移动"
                     const cityName = extractCityName(address);
