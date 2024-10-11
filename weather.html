@@ -336,13 +336,7 @@
         }
 
         function extractCityName(address) {
-            // 使用正则表达式提取城市名称
-            const cityMatch = address.match(/[\u4e00-\u9fa5]+市|[\u4e00-\u9fa5]+地区|[\u4e00-\u9fa5]+盟|[\u4e00-\u9fa5]+州/g);
-            if (cityMatch && cityMatch.length >= 1) {
-                return cityMatch[0].replace(/市|地区|盟|州/, ''); // 去除后缀
-            } else {
-                return '南阳'; // 默认城市
-            }
+            return address.replace(/市|地区|盟|州/g, '');
         }
 
         async function useDefaultCity() {
