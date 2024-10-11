@@ -336,7 +336,11 @@
         }
 
         function extractCityName(address) {
-            return address.replace(/市|地区|盟|州/g, '');
+            if (address.endsWith("市")) {
+                return address.substring(0, address.length - 1);
+            } else {
+                return address;
+            }
         }
 
         async function useDefaultCity() {
