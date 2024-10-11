@@ -295,6 +295,7 @@
         async function getCityByIP() {
             try {
                 const response = await fetch('https://searchplugin.csdn.net/api/v1/ip/get?ip=');
+                console.log(response)
                 const data = await response.json();
                 console.log(data)
                 if (data.code === 200 && data.data && data.data.address) {
