@@ -1,3 +1,7 @@
+<!-- 代码均由ChatGPT生成，如有侵权请联系作者删除
+作者：张敬玉
+时间: 2024年10月11日
+-->
 <!DOCTYPE html>
 <html lang="zh">
 
@@ -5,290 +9,348 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title></title>
-    <link rel="apple-touch-icon" sizes="57x57" href="logoicon/apple-icon-57x57.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="logoicon/apple-icon-60x60.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="logoicon/apple-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="logoicon/apple-icon-76x76.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="logoicon/apple-icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="logoicon/apple-icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="logoicon/apple-icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="logoicon/apple-icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="logoicon/apple-icon-180x180.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="logoicon/android-icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="logoicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="logoicon/favicon-96x96.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="logoicon/favicon-16x16.png">
-    <link rel="manifest" href="logoicon/manifest.json">
-    <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
-    <meta name="theme-color" content="#ffffff">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #e0f7fa;
+        body,
+        html {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            background-color: #e0f7fa;
+            font-family: Arial, sans-serif;
             color: #333;
-            transition: background-color 0.5s ease;
         }
 
         h1 {
             text-align: center;
             color: #00796b;
-            margin-bottom: 20px;
+            margin: 20px 0;
         }
 
-        .weather-card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            margin: 10px auto;
-            padding: 15px;
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+
+        .layer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 600px;
-            transition: transform 0.3s ease;
-            flex-direction: row;
+            margin-bottom: 10px;
+            width: 100%;
         }
 
-        .weather-card:hover {
-            transform: scale(1.02);
+        .date,
+        .day-weather-icon,
+        .night-weather-icon,
+        .weather-type,
+        .wind-power {
+            text-align: center;
+            flex: 1;
         }
 
-        .date {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 5px;
+        .chart-container {
+            width: 100%;
+            height: 174px;
+            position: relative;
         }
 
-        .type {
+        .air-quality {
             font-size: 18px;
-            color: #f57c00;
-            display: flex;
-            align-items: center;
-        }
-
-        .temp {
-            font-size: 24px;
-            color: #0288d1;
-            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
         }
 
         .icon {
             width: 50px;
-            margin-left: 10px;
         }
 
-        .air-quality {
-            margin-top: 20px;
-            font-size: 16px;
-            color: #c2185b;
-            text-align: center;
-        }
-
-        @media (max-width: 600px) {
-            .weather-card {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .date,
-            .type,
-            .temp {
-                text-align: left;
-            }
-        }
-
-
-        .header {
-            position: relative;
-            text-align: center;
-            background: linear-gradient(60deg, rgba(84, 58, 183, 1) 0%, rgba(0, 172, 193, 1) 100%);
-            /* 	background: #FFAFBD;  
-	background: -webkit-linear-gradient(to right, #ffc3a0, #FFAFBD);  
-	background: linear-gradient(to right, #ffc3a0, #FFAFBD); 
- */
-            color: 00c6ff;
-        }
-
-
-        .inner-header {
-            height: 65vh;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-        }
-
-
-
-        .waves {
-            position: relative;
-            width: 100vw;
-            /* 自适应宽度 */
-            height: 15vh;
-            min-height: 100px;
-            max-height: 150px;
-        }
-
-        .inner-header {
-            height: 65vh;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-        }
-
-        /* Animation */
-        .parallax>use {
-            animation: move-forever 5s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
-        }
-
-        .parallax>use:nth-child(1) {
-            animation-duration: 5s;
-            /* 更短的时间以加快速度 */
-        }
-
-        .parallax>use:nth-child(2) {
-            animation-duration: 7s;
-        }
-
-        .parallax>use:nth-child(3) {
-            animation-duration: 9s;
-        }
-
-        .parallax>use:nth-child(4) {
-            animation-duration: 12s;
-        }
-
-        @keyframes move-forever {
-            0% {
-                transform: translate3d(-90px, 0, 0);
-            }
-
-            100% {
-                transform: translate3d(85px, 0, 0);
-            }
-        }
-
-        /* Shrinking for mobile */
-        @media (max-width: 768px) {
-            .waves {
-                height: 40px;
-                min-height: 40px;
-            }
-
-            .content {
-                height: 30vh;
-            }
-
-            h1 {
-                font-size: 24px;
-            }
+        .date,
+        .weather-type,
+        .wind-power {
+            font-size: 14px;
+            margin-bottom: 5px;
         }
     </style>
 </head>
 
 <body>
-    <h1></h1>
-    <div id="weather-container"></div>
-    <div class="header">
-    </div>
-    <div>
-        <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-            viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
-            <defs>
-                <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
-            </defs>
-            <g class="parallax">
-                <use xlink:href="#gentle-wave" x="48" y="0" fill="rgba(224,233,239,0.7" />
-                <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(224,233,239,0.5)" />
-                <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(224,233,239,0.3)" />
-                <use xlink:href="#gentle-wave" x="48" y="7" fill="#fff" />
-            </g>
-        </svg>
-    </div>
-    </div>
-    <script>
-        function getUrlParams() {
-            var params = {};
-            var parts = window.location.search.substr(1).split('&');
-            for (var i = 0; i < parts.length; i++) {
-                var keyValuePair = parts[i].split('=');
-                var key = decodeURIComponent(keyValuePair[0]);
-                var value = decodeURIComponent(keyValuePair[1]);
-                params[key] = value;
-            }
-            return params;
-        }
-        async function fetchWeatherData(city) {
-            let response
-            while(true){
-                response = await fetch(`https://api.vvhan.com/api/weather?city=${city}&type=week`);
-                if(response.status === 200){
-                    break
-                }
-            }
-            return await response.json();   
-        }
+    <h1>未来一周天气</h1>
+    <div class="container">
+        <!-- 第一层：展示日期 -->
+        <div class="layer" id="date-layer"></div>
 
+        <!-- 第二层：展示白天天气图标 -->
+        <div class="layer" id="day-weather-icons-layer"></div>
+
+        <!-- 第三层：展示天气类型 -->
+        <div class="layer" id="weather-type-layer"></div>
+
+        <!-- 第四层：展示温度折线图 -->
+        <div class="chart-container">
+            <canvas id="canvas"></canvas>
+        </div>
+
+        <!-- 第五层：晚上的天气图标 -->
+        <div class="layer" id="night-weather-icons-layer"></div>
+
+        <!-- 第六层：展示风力信息 -->
+        <div class="layer" id="wind-power-layer"></div>
+
+        <!-- 第七层：展示空气质量信息 -->
+        <div class="air-quality" id="air-quality"></div>
+    </div>
+
+    <script>
         function getWeatherIcon(type) {
             const icons = {
                 "晴": "https://img.icons8.com/ios-filled/50/000000/sun.png",
-                "多云": "https://img.icons8.com/ios-filled/50/000000/cloud.png",
+                "多云": "https://img.icons8.com/ios-filled/50/000000/partly-cloudy-day--v1.png",
                 "阴": "https://img.icons8.com/ios-filled/50/000000/cloud.png",
-                "中雨": "https://img.icons8.com/ios-filled/50/000000/rain.png",
-                "小雨": "https://img.icons8.com/ios-filled/50/000000/rain.png",
+                "中雨": "https://img.icons8.com/ios-filled/50/000000/moderate-rain.png",
+                "小雨": "https://img.icons8.com/ios-filled/50/000000/light-rain.png",
                 "大雨": "https://img.icons8.com/ios-filled/50/000000/heavy-rain.png",
-                "暴雨": "https://img.icons8.com/ios-filled/50/000000/storm.png",
+                "暴雨": "https://img.icons8.com/ios-filled/50/000000/extreme-rain.png",
                 "雪": "https://img.icons8.com/ios-filled/50/000000/snow.png",
                 "霾": "https://img.icons8.com/ios-filled/50/000000/haze.png"
-                // 可以继续添加其他天气类型的图标
             };
-            return icons[type] || "https://img.icons8.com/ios-filled/50/000000/sun.png"; // 默认图标
+            return icons[type] || "https://img.icons8.com/ios-filled/50/000000/sun.png";
         }
-
-        function displayWeather(data) {
-            const container = document.getElementById('weather-container');
+    
+        // 定义全局变量以便在 resize 事件中访问
+        let highTemps = [];
+        let lowTemps = [];
+        let data; // 保存天气数据
+    
+        async function fetchWeatherData(city) {
+            let response;
+            while (true) {
+                response = await fetch(`https://api.vvhan.com/api/weather?city=${city}&type=week`);
+                if (response.status === 200) {
+                    break;
+                } else {
+                    console.error("获取天气数据失败，使用默认城市郑州");
+                    city = '郑州';
+                }
+            }
+            return await response.json();
+        }
+    
+        function displayWeather(weatherData) {
+            data = weatherData; // 将数据保存到全局变量
+            const dateLayer = document.getElementById('date-layer');
+            const dayWeatherLayer = document.getElementById('day-weather-icons-layer');
+            const weatherTypeLayer = document.getElementById('weather-type-layer');
+            const nightWeatherLayer = document.getElementById('night-weather-icons-layer');
+            const windPowerLayer = document.getElementById('wind-power-layer');
+    
+            // 清空之前的内容
+            dateLayer.innerHTML = '';
+            dayWeatherLayer.innerHTML = '';
+            weatherTypeLayer.innerHTML = '';
+            nightWeatherLayer.innerHTML = '';
+            windPowerLayer.innerHTML = '';
+            highTemps = [];
+            lowTemps = [];
+    
             data.data.forEach(day => {
-                const card = document.createElement('div');
-                card.className = 'weather-card';
-                card.innerHTML = `
-                    <div>
-                        <div class="date">${day.date} (${day.week})</div>
-                        <div class="type">
-                            ${day.type} <img src="${getWeatherIcon(day.type)}" class="icon" alt="${day.type}">
-                        </div>
-                    </div>
-                    <div class="temp">白天: ${day.low} ~ ${day.high}</div>
-                `;
-                container.appendChild(card);
+                // 第一层：展示日期
+                const dateDiv = document.createElement('div');
+                dateDiv.className = 'date';
+                dateDiv.innerHTML = `${day.date} (${day.week})`;
+                dateLayer.appendChild(dateDiv);
+    
+                // 第二层：白天天气图标
+                const dayWeatherIcon = document.createElement('div');
+                dayWeatherIcon.className = 'day-weather-icon';
+                dayWeatherIcon.innerHTML = `<img src="${getWeatherIcon(day.type)}" class="icon" alt="${day.type}">`;
+                dayWeatherLayer.appendChild(dayWeatherIcon);
+    
+                // 第三层：天气类型
+                const weatherTypeDiv = document.createElement('div');
+                weatherTypeDiv.className = 'weather-type';
+                weatherTypeDiv.innerHTML = day.type;
+                weatherTypeLayer.appendChild(weatherTypeDiv);
+    
+                // 第五层：晚上的天气图标
+                const nightWeatherIcon = document.createElement('div');
+                nightWeatherIcon.className = 'night-weather-icon';
+                nightWeatherIcon.innerHTML = `<img src="${getWeatherIcon(day.night.type)}" class="icon" alt="${day.night.type}">`;
+                nightWeatherLayer.appendChild(nightWeatherIcon);
+    
+                // 第六层：风力信息
+                const windPowerDiv = document.createElement('div');
+                windPowerDiv.className = 'wind-power';
+                windPowerDiv.innerHTML = `${day.fengxiang} ${day.fengli}`;
+                windPowerLayer.appendChild(windPowerDiv);
+    
+                // 收集温度数据
+                highTemps.push(parseInt(day.high));
+                lowTemps.push(parseInt(day.low));
             });
-            const airQuality = document.createElement('div');
-            airQuality.className = 'air-quality';
+    
+            // 第七层：展示空气质量信息
+            const airQuality = document.getElementById('air-quality');
             airQuality.innerHTML = `空气质量: ${data.air.aqi_name} (AQI: ${data.air.aqi})`;
-            container.appendChild(airQuality);
+    
+            // 绘制温度折线图
+            drawTemperatureChart(highTemps, lowTemps);
         }
-
-        async function init() {
-            const params = getUrlParams();
-            if (params.city) {
-                const weatherData = await fetchWeatherData(params.city);
-                displayWeather(weatherData);
-                document.title = `${params.city}未来一周天气`;
-                const cityName = params.city || '郑州'; // 获取城市名称，如果没有则默认为郑州
-                document.querySelector('h1').textContent = `${cityName}未来一周天气`; // 修改h1标签的文本内容
-
-            } else {
-                params.city = '郑州';
-                const weatherData = await fetchWeatherData(params.city);
-                displayWeather(weatherData);
-                document.title = `${params.city}未来一周天气`;
+    
+        function drawTemperatureChart(highTemps, lowTemps) {
+            var maxTemp = Math.max(...highTemps);
+            var minTemp = Math.min(...lowTemps);
+    
+            var canvas = document.getElementById("canvas");
+            var context = canvas.getContext("2d");
+    
+            // 将画布宽度设置为画布容器的宽度
+            var containerWidth = document.querySelector('.chart-container').clientWidth;
+            canvas.width = containerWidth;
+            canvas.height = 174;
+    
+            // 清除画布内容
+            context.clearRect(0, 0, canvas.width, canvas.height);
+    
+            // 获取所有日期元素，计算每个元素的中心位置
+            var dateElements = document.querySelectorAll('.date');
+            var positions = [];
+            dateElements.forEach(element => {
+                var rect = element.getBoundingClientRect();
+                var x = rect.left + rect.width / 2 - canvas.getBoundingClientRect().left;
+                positions.push(x);
+            });
+    
+            var temp_range = maxTemp - minTemp;
+            var temp_per_pixel = (canvas.height - 60) / temp_range;
+    
+            // 平移画布坐标系，方便绘制
+            context.save();
+            context.translate(0, maxTemp * temp_per_pixel + 30);
+    
+            // 绘制折线和温度标签的函数
+            function draw_line(tempArray, color, position) {
+                context.beginPath();
+    
+                tempArray.forEach((temp, index) => {
+                    var y = -temp * temp_per_pixel;
+                    var x = positions[index];
+    
+                    if (index === 0) {
+                        context.moveTo(x, y);
+                    } else {
+                        context.lineTo(x, y);
+                    }
+                });
+    
+                // 绘制折线
+                context.strokeStyle = color;
+                context.lineWidth = 2;
+                context.stroke();
+                context.closePath();
+    
+                // 绘制数据点和温度标签
+                tempArray.forEach((temp, index) => {
+                    var y = -temp * temp_per_pixel;
+                    var x = positions[index];
+    
+                    // 绘制圆点
+                    context.fillStyle = color;
+                    context.beginPath();
+                    context.arc(x, y, 4, 0, 2 * Math.PI, true);
+                    context.fill();
+    
+                    // 绘制温度标签
+                    context.fillStyle = "#333";
+                    if (position === 'above') {
+                        context.fillText(temp + "°", x - 10, y - 10);
+                    } else {
+                        context.fillText(temp + "°", x - 10, y + 20);
+                    }
+                });
+            }
+    
+            draw_line(highTemps, '#fcc370', 'above'); // 绘制高温折线
+            draw_line(lowTemps, '#94ccf9', 'below');  // 绘制低温折线
+    
+            context.restore(); // 恢复坐标系
+        }
+    
+        async function getCityByIP() {
+            try {
+                const response = await fetch('https://searchplugin.csdn.net/api/v1/ip/get?ip=');
+                const data = await response.json();
+                if (data.code === 200 && data.data && data.data.address) {
+                    // 从地址中提取城市名称
+                    const address = data.data.address; // 例如："中国 河南 郑州 移动"
+                    const cityName = extractCityName(address);
+                    
+                    // 更新页面标题
+                    document.querySelector('h1').textContent = `${cityName}未来一周天气`;
+            
+                    // 获取天气数据
+                    const weatherData = await fetchWeatherData(cityName);
+                    displayWeather(weatherData);
+            
+                    // 监听窗口大小变化，重新绘制折线图
+                    let resizeTimer;
+                    window.addEventListener('resize', () => {
+                        clearTimeout(resizeTimer);
+                        resizeTimer = setTimeout(() => {
+                            requestAnimationFrame(() => {
+                                displayWeather(data);
+                            });
+                        }, 100); // 延迟100毫秒
+                    });
+                } else {
+                    console.error("获取城市信息失败，使用默认城市");
+                    useDefaultCity();
+                }
+            } catch (error) {
+                console.error("通过 IP 获取城市信息失败:", error);
+                useDefaultCity();
             }
         }
-
-        init();
-
+    
+        function extractCityName(address) {
+            // 使用正则表达式提取城市名称
+            const cityMatch = address.match(/[\u4e00-\u9fa5]+市|[\u4e00-\u9fa5]+地区|[\u4e00-\u9fa5]+盟|[\u4e00-\u9fa5]+州/g);
+            if (cityMatch && cityMatch.length >= 1) {
+                return cityMatch[0].replace(/市|地区|盟|州/, ''); // 去除后缀
+            } else {
+                return '南阳'; // 默认城市
+            }
+        }
+    
+        async function useDefaultCity() {
+            const cityName = '郑州';
+            document.querySelector('h1').textContent = `${cityName}未来一周天气`;
+            const weatherData = await fetchWeatherData(cityName);
+            displayWeather(weatherData);
+    
+            // 监听窗口大小变化，重新绘制折线图
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    requestAnimationFrame(() => {
+                        displayWeather(data);
+                    });
+                }, 100); // 延迟100毫秒
+            });
+        }
+    
+        // 主函数
+        function main() {
+            getCityByIP();
+        }
+    
+        main();
     </script>
+    
+    
 </body>
 
 </html>
