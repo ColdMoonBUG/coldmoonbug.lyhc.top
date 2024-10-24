@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>短视频滚动播放</title>
+    <title>冷月的小视频</title>
     <style>
+        /* 全局样式 */
         body {
             margin: 0;
             padding: 0;
@@ -12,6 +13,8 @@
             background-color: #f0f0f0;
             overflow-x: hidden;
         }
+
+        /* 视频容器样式 */
         .video-container {
             display: flex;
             flex-direction: column;
@@ -19,6 +22,8 @@
             justify-content: center;
             padding: 10px;
         }
+
+        /* 视频样式 */
         video {
             width: 100%;
             max-width: 600px;
@@ -29,14 +34,45 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             transition: transform 0.3s ease;
         }
+
+        /* 当前播放视频的样式（可选） */
         video.current {
             transform: scale(1.05);
         }
+
+        /* 加载指示器样式 */
         .loading {
             text-align: center;
             font-size: 1.2em;
             color: #555;
             margin: 20px 0;
+        }
+
+        /* 响应式设计：针对移动设备的调整 */
+        @media (max-width: 768px) {
+            video {
+                max-width: 100%;
+                max-height: 90vh;
+                margin-bottom: 15px;
+            }
+
+            .loading {
+                font-size: 1em;
+                margin: 15px 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            video {
+                max-width: 100%;
+                max-height: 80vh;
+                margin-bottom: 10px;
+            }
+
+            .loading {
+                font-size: 0.9em;
+                margin: 10px 0;
+            }
         }
     </style>
 </head>
@@ -50,8 +86,8 @@
             const videoContainer = document.getElementById('videoContainer');
             const loadingIndicator = document.getElementById('loading');
             let currentVideoIndex = 0;
-            const maxPreload = 5; // 预加载视频数量
-            const maxVideosOnScreen = 10; // 屏幕上最多显示视频数量
+            const maxPreload = 3; // 预加载视频数量，适当减少以适配移动设备性能
+            const maxVideosOnScreen = 5; // 屏幕上最多显示视频数量，适当减少以适配移动设备性能
             let loading = false; // 避免重复加载
             let videoHistory = []; // 记录加载过的视频链接
 
@@ -114,7 +150,7 @@
                     currentVideoIndex++;
 
                     // 控制内存：超过一定数量的视频时移除最早的视频
-                    if (videoContainer.children.length > maxVideosOnScreen) {
+                    if (videoContainer.children.length > maxVideosOnScreen + 1) { // +1 为加载指示器
                         let firstVideo = videoContainer.querySelector('video');
                         if (firstVideo) {
                             firstVideo.pause(); // 暂停第一个视频
@@ -234,8 +270,8 @@
                 let thresholds = [];
                 let numSteps = 100;
 
-                for (let i=1.0; i<=numSteps; i++) {
-                    let ratio = i/numSteps;
+                for (let i = 1.0; i <= numSteps; i++) {
+                    let ratio = i / numSteps;
                     thresholds.push(ratio);
                 }
 
