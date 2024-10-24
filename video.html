@@ -1,6 +1,7 @@
 <!-- 该页面均是由ChatGPT生成的，如有侵权，请联系我删除。 -->
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -32,7 +33,7 @@
             margin-bottom: 20px;
             background: black;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             transition: transform 0.3s ease;
         }
 
@@ -77,209 +78,246 @@
         }
     </style>
 </head>
+
 <body>
     <div class="video-container" id="videoContainer">
         <div class="loading" id="loading">正在加载视频...</div>
     </div>
 
     <script>
-        (function() {
-            const videoContainer = document.getElementById('videoContainer');
-            const loadingIndicator = document.getElementById('loading');
-            let currentVideoIndex = 0;
-            const maxPreload = 3; // 预加载视频数量，适当减少以适配移动设备性能
-            const maxVideosOnScreen = 5; // 屏幕上最多显示视频数量，适当减少以适配移动设备性能
-            let loading = false; // 避免重复加载
-            let videoHistory = []; // 记录加载过的视频链接
+(function() {
+    const videoContainer = document.getElementById('videoContainer');
+    const loadingIndicator = document.getElementById('loading');
+    let currentVideoIndex = 0;
+    const maxPreload = 6; // 预加载视频数量
+    const maxVideosOnScreen = 9; // 屏幕上最多显示视频数量
+    let loading = false; // 避免重复加载
+    let videoHistory = []; // 记录加载过的视频链接
 
-            // 初次加载第一个视频并预加载后续视频
-            document.addEventListener('DOMContentLoaded', () => {
+    // 初次加载第一个视频并预加载后续视频
+    document.addEventListener('DOMContentLoaded', () => {
+        loadNextVideo();
+        preloadVideos(maxPreload - 1);
+        initializeIntersectionObserver();
+    });
+
+    // 防抖函数，避免滚动事件频繁触发
+    function debounce(func, delay) {
+        let debounceTimer;
+        return function() {
+            const context = this;
+            const args = arguments;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => func.apply(context, args), delay);
+        };
+    }
+
+    // 监听滚动事件，检测是否接近页面底部或顶部
+    window.addEventListener('scroll', debounce(() => {
+        if (!loading) {
+            const scrollY = window.scrollY;
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.body.offsetHeight;
+
+            // 用户接近页面底部，加载下一个视频
+            if (scrollY + windowHeight >= documentHeight - 100) {
                 loadNextVideo();
-                preloadVideos(maxPreload - 1);
-                initializeIntersectionObserver();
-            });
+                preloadVideos(1); // 继续预加载下一个视频
+            }
+            // 用户接近页面顶部，加载上一个视频
+            else if (scrollY <= 100) {
+                loadPreviousVideo();
+            }
+        }
+    }, 200));
 
-            // 防抖函数，避免滚动事件频繁触发
-            function debounce(func, delay) {
-                let debounceTimer;
-                return function() {
-                    const context = this;
-                    const args = arguments;
-                    clearTimeout(debounceTimer);
-                    debounceTimer = setTimeout(() => func.apply(context, args), delay);
-                };
+    // 加载下一个视频并显示
+    async function loadNextVideo() {
+        if (loading) return; // 避免重复加载
+        loading = true;
+        loadingIndicator.style.display = 'block';
+
+        try {
+            let videoUrl;
+            if (currentVideoIndex < videoHistory.length) {
+                // 从预加载的视频池中获取下一个视频
+                videoUrl = videoHistory[currentVideoIndex];
+            } else {
+                // 从接口获取新的视频
+                const response = await fetch('https://v2.api-m.com/api/meinv');
+                if (!response.ok) throw new Error('网络响应不是OK');
+                const result = await response.json();
+                videoUrl = result.data;
+
+                videoHistory.push(videoUrl);
             }
 
-            // 监听滚动事件，检测是否接近页面底部
-            window.addEventListener('scroll', debounce(() => {
-                if (!loading && window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
-                    // 用户接近页面底部，加载下一个视频
-                    loadNextVideo();
-                    preloadVideos(1); // 继续预加载下一个视频
-                }
-            }, 200));
+            showVideo(videoUrl);
+            currentVideoIndex++;
 
-            // 键盘监听，s键和下箭头键加载下一个视频
-            window.addEventListener('keydown', (e) => {
-                if (e.key === 's' || e.key === 'ArrowDown') {
-                    loadNextVideo();
+            // 控制内存：超过一定数量的视频时移除最早的视频
+            if (videoContainer.children.length > maxVideosOnScreen + 1) { // +1 为加载指示器
+                let firstVideo = videoContainer.querySelector('video');
+                if (firstVideo) {
+                    firstVideo.pause(); // 暂停第一个视频
+                    videoContainer.removeChild(firstVideo);
+                }
+            }
+        } catch (error) {
+            console.error('获取视频失败:', error);
+            const errorMsg = document.createElement('div');
+            errorMsg.className = 'loading';
+            errorMsg.textContent = '无法加载视频。';
+            videoContainer.appendChild(errorMsg);
+        }
+
+        loading = false;
+        loadingIndicator.style.display = 'none';
+    }
+
+    // 加载上一个视频并显示
+    async function loadPreviousVideo() {
+        if (currentVideoIndex > 0) {
+            currentVideoIndex--;
+            const videoUrl = videoHistory[currentVideoIndex];
+            showVideo(videoUrl);
+        }
+    }
+
+    // 预加载指定数量的视频
+    async function preloadVideos(count) {
+        for (let i = 0; i < count; i++) {
+            try {
+                const response = await fetch('https://v2.api-m.com/api/meinv');
+                if (!response.ok) throw new Error('网络响应不是OK');
+                const result = await response.json();
+                const videoUrl = result.data;
+                videoHistory.push(videoUrl);
+            } catch (error) {
+                console.error('预加载视频失败:', error);
+                break;
+            }
+        }
+    }
+
+    // 显示视频
+    function showVideo(videoUrl) {
+        // 暂停所有其他视频
+        const videos = videoContainer.querySelectorAll('video');
+        videos.forEach(video => {
+            video.pause();
+            video.classList.remove('current');
+        });
+
+        // 创建并添加新视频
+        let videoElement = document.createElement('video');
+        videoElement.src = videoUrl;
+        videoElement.controls = true;
+        videoElement.autoplay = true; // 自动播放
+        videoElement.playsInline = true; // 在移动设备上内联播放
+        videoElement.preload = 'metadata'; // 预加载元数据
+
+        videoContainer.appendChild(videoElement);
+    }
+
+    // 初始化 Intersection Observer
+    function initializeIntersectionObserver() {
+        const options = {
+            root: null,
+            rootMargin: '0px',
+            threshold: buildThresholdList()
+        };
+
+        let visibleVideos = [];
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const video = entry.target;
+                if (entry.isIntersecting) {
+                    visibleVideos.push({
+                        video: video,
+                        intersectionRatio: entry.intersectionRatio
+                    });
+                } else {
+                    visibleVideos = visibleVideos.filter(v => v.video !== video);
                 }
             });
 
-            // 加载下一个视频并显示
-            async function loadNextVideo() {
-                if (loading) return; // 避免重复加载
-                loading = true;
-                loadingIndicator.style.display = 'block';
+            if (visibleVideos.length > 0) {
+                // 找到当前最可见的视频
+                visibleVideos.sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+                const mostVisibleVideo = visibleVideos[0].video;
 
-                try {
-                    let videoUrl;
-                    if (currentVideoIndex < videoHistory.length) {
-                        // 从预加载的视频池中获取下一个视频
-                        videoUrl = videoHistory[currentVideoIndex];
+                // 播放最可见的视频，暂停其他视频
+                document.querySelectorAll('video').forEach(v => {
+                    if (v === mostVisibleVideo) {
+                        v.play().catch(error => {
+                            console.error('视频播放失败:', error);
+                        });
+                        v.classList.add('current');
                     } else {
-                        // 从接口获取新的视频
-                        const response = await fetch('https://v2.api-m.com/api/meinv');
-                        if (!response.ok) throw new Error('网络响应不是OK');
-                        const result = await response.json();
-                        videoUrl = result.data;
-
-                        videoHistory.push(videoUrl);
+                        v.pause();
+                        v.classList.remove('current');
                     }
-
-                    showVideo(videoUrl);
-                    currentVideoIndex++;
-
-                    // 控制内存：超过一定数量的视频时移除最早的视频
-                    if (videoContainer.children.length > maxVideosOnScreen + 1) { // +1 为加载指示器
-                        let firstVideo = videoContainer.querySelector('video');
-                        if (firstVideo) {
-                            firstVideo.pause(); // 暂停第一个视频
-                            videoContainer.removeChild(firstVideo);
-                        }
-                    }
-                } catch (error) {
-                    console.error('获取视频失败:', error);
-                    const errorMsg = document.createElement('div');
-                    errorMsg.className = 'loading';
-                    errorMsg.textContent = '无法加载视频。';
-                    videoContainer.appendChild(errorMsg);
-                }
-
-                loading = false;
-                loadingIndicator.style.display = 'none';
-            }
-
-            // 预加载指定数量的视频
-            async function preloadVideos(count) {
-                for (let i = 0; i < count; i++) {
-                    try {
-                        const response = await fetch('https://v2.api-m.com/api/meinv');
-                        if (!response.ok) throw new Error('网络响应不是OK');
-                        const result = await response.json();
-                        const videoUrl = result.data;
-                        videoHistory.push(videoUrl);
-                    } catch (error) {
-                        console.error('预加载视频失败:', error);
-                        break;
-                    }
-                }
-            }
-
-            // 显示视频
-            function showVideo(videoUrl) {
-                // 暂停所有其他视频
-                const videos = videoContainer.querySelectorAll('video');
-                videos.forEach(video => {
-                    video.pause();
-                    video.classList.remove('current');
                 });
-
-                // 创建并添加新视频
-                let videoElement = document.createElement('video');
-                videoElement.src = videoUrl;
-                videoElement.controls = true;
-                videoElement.autoplay = true; // 自动播放
-                videoElement.playsInline = true; // 在移动设备上内联播放
-                videoElement.preload = 'metadata'; // 预加载元数据
-
-                videoContainer.appendChild(videoElement);
             }
+        }, options);
 
-            // 初始化 Intersection Observer
-            function initializeIntersectionObserver() {
-                const options = {
-                    root: null,
-                    rootMargin: '0px',
-                    threshold: buildThresholdList()
-                };
-
-                let visibleVideos = [];
-
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        const video = entry.target;
-                        if (entry.isIntersecting) {
-                            visibleVideos.push({
-                                video: video,
-                                intersectionRatio: entry.intersectionRatio
-                            });
-                        } else {
-                            visibleVideos = visibleVideos.filter(v => v.video !== video);
+        // 监听所有当前和未来添加的视频
+        const config = { childList: true, subtree: true };
+        const containerObserver = new MutationObserver((mutationsList) => {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach(node => {
+                        if (node.tagName === 'VIDEO') {
+                            observer.observe(node);
                         }
                     });
-
-                    if (visibleVideos.length > 0) {
-                        // 找到当前最可见的视频
-                        visibleVideos.sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-                        const mostVisibleVideo = visibleVideos[0].video;
-
-                        // 播放最可见的视频，暂停其他视频
-                        document.querySelectorAll('video').forEach(v => {
-                            if (v === mostVisibleVideo) {
-                                v.play().catch(error => {
-                                    console.error('视频播放失败:', error);
-                                });
-                                v.classList.add('current');
-                            } else {
-                                v.pause();
-                                v.classList.remove('current');
-                            }
-                        });
-                    }
-                }, options);
-
-                // 监听所有当前和未来添加的视频
-                const config = { childList: true, subtree: true };
-                const containerObserver = new MutationObserver((mutationsList) => {
-                    for (let mutation of mutationsList) {
-                        if (mutation.type === 'childList') {
-                            mutation.addedNodes.forEach(node => {
-                                if (node.tagName === 'VIDEO') {
-                                    observer.observe(node);
-                                }
-                            });
-                        }
-                    }
-                });
-
-                containerObserver.observe(videoContainer, config);
-            }
-
-            // 构建阈值列表以获得更精确的交叉比例
-            function buildThresholdList() {
-                let thresholds = [];
-                let numSteps = 100;
-
-                for (let i = 1.0; i <= numSteps; i++) {
-                    let ratio = i / numSteps;
-                    thresholds.push(ratio);
                 }
-
-                thresholds.push(0);
-                return thresholds;
             }
-        })();
+        });
+
+        containerObserver.observe(videoContainer, config);
+    }
+
+    // 构建阈值列表以获得更精确的交叉比例
+    function buildThresholdList() {
+        let thresholds = [];
+        let numSteps = 100;
+
+        for (let i = 1.0; i <= numSteps; i++) {
+            let ratio = i / numSteps;
+            thresholds.push(ratio);
+        }
+
+        thresholds.push(0);
+        return thresholds;
+    }
+
+    // 手机端触摸适配
+    let touchStartY = 0; // 触摸开始的Y坐标
+
+    window.addEventListener('touchstart', (e) => {
+        touchStartY = e.touches[0].clientY;
+    });
+
+    window.addEventListener('touchmove', (e) => {
+        const touchEndY = e.touches[0].clientY;
+        const touchDifference = touchStartY - touchEndY;
+
+        // 向上滑动，加载下一个视频
+        if (touchDifference > 50) {
+            loadNextVideo();
+            preloadVideos(1);
+        }
+        // 向下滑动，加载上一个视频
+        else if (touchDifference < -50) {
+            loadPreviousVideo();
+        }
+    });
+})();
+
     </script>
 </body>
+
 </html>
