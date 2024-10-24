@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>优美丝滑的文本展示</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f0f8ff, #e6e6fa);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+            position: relative;
+            transition: all 0.4s ease-in-out;
+        }
+
+        .text-display {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #333;
+            opacity: 0;
+            transition: opacity 0.6s ease-in-out;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        button {
+            background: linear-gradient(135deg, #87cefa, #6495ed);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s ease-in-out, transform 0.2s;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #6495ed, #87cefa);
+            transform: scale(1.05);
+        }
+
+        /* 提示信息样式 */
+        .toast {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: #4caf50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(100%);
+            transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(-50%);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="text" class="text-display">加载中...</div>
+    <div class="buttons">
+        <button id="copyBtn">复制文本</button>
+        <button id="newTextBtn">再来一条</button>
+    </div>
+    <div id="toast" class="toast">复制成功！</div> <!-- 提示信息 -->
+</div>
+
+<script>
+    function fetchText() {
+        const textDisplay = document.getElementById('text');
+        textDisplay.style.opacity = 0; // 文本淡出
+        fetch('https://vme.im/api?format=text')
+            .then(response => response.text())
+            .then(data => {
+                textDisplay.textContent = data;
+                setTimeout(() => {
+                    textDisplay.style.opacity = 1; // 文本淡入
+                }, 100); // 添加一点延迟，显得更流畅
+            })
+            .catch(error => {
+                textDisplay.textContent = '获取文本失败，请重试';
+                textDisplay.style.opacity = 1;
+                console.error('Error fetching the text:', error);
+            });
+    }
+
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+
+        // 3秒后自动消失
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+        const textToCopy = document.getElementById('text').textContent;
+        navigator.clipboard.writeText(textToCopy)
+            .then(() => showToast('复制成功！'))
+            .catch(() => showToast('复制失败！'));
+    });
+
+    document.getElementById('newTextBtn').addEventListener('click', () => {
+        fetchText();
+    });
+
+    // 初始加载文本
+    fetchText();
+</script>
+
+</body>
+</html>
