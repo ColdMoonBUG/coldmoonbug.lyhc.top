@@ -13,7 +13,6 @@
             padding: 0;
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
-            overflow-x: hidden;
         }
 
         /* 视频容器样式 */
@@ -28,14 +27,12 @@
         video {
             width: 100%;
             max-width: 600px;
-            /* 移除或调整此行 */
+            height: auto; /* 保持原始比例 */
             margin-bottom: 20px;
             background: black;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             transition: transform 0.3s ease;
-            /* 禁用自动播放以提升移动端体验 */
-            /* autoplay: 不能在CSS中设置，因此在JavaScript中控制 */
         }
 
         /* 当前播放视频的样式（可选） */
@@ -51,15 +48,20 @@
             margin: 20px 0;
         }
 
+        /* 错误消息样式 */
+        .error-message {
+            text-align: center;
+            background-color: rgba(255, 0, 0, 0.7);
+            color: #FFF;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
         /* 响应式设计：针对移动设备的调整 */
         @media (max-width: 768px) {
             video {
                 max-width: 100%;
-                /* 确保视频宽度为100% */
-                height: 56.25vw;
-                /* 16:9 纵横比 */
-                max-height: 100vh;
-                /* 不超过视口高度 */
                 margin-bottom: 15px;
             }
 
@@ -67,18 +69,25 @@
                 font-size: 1em;
                 margin: 15px 0;
             }
+
+            .error-message {
+                font-size: 1em;
+                margin: 10px 0;
+            }
         }
 
         @media (max-width: 480px) {
             video {
                 max-width: 100%;
-                height: 56.25vw;
-                /* 16:9 纵横比 */
-                max-height: 100vh;
                 margin-bottom: 10px;
             }
 
             .loading {
+                font-size: 0.9em;
+                margin: 10px 0;
+            }
+
+            .error-message {
                 font-size: 0.9em;
                 margin: 10px 0;
             }
@@ -98,7 +107,7 @@
             let currentVideoIndex = 0;
             const initialLoadCount = 5; // 初始加载的视频数量
             const preloadCount = 5; // 每次预加载的视频数量
-            const maxVideosOnScreen = 20; // 屏幕上最多显示视频数量
+            const maxVideosOnScreen = 15; // 屏幕上最多保留的视频数量
             let loading = false; // 避免重复加载
             let videoHistory = []; // 记录加载过的视频链接
 
@@ -107,11 +116,6 @@
                 loadInitialVideos(initialLoadCount);
                 initializeIntersectionObserver();
             });
-
-            // 检测设备类型
-            function isMobile() {
-                return /Mobi|Android/i.test(navigator.userAgent);
-            }
 
             // 防抖函数，避免滚动事件频繁触发
             function debounce(func, delay) {
@@ -155,7 +159,7 @@
                             videoUrl = await fetchNewVideo();
                         }
 
-                        await showVideo(videoUrl);
+                        await showVideo(videoUrl, currentVideoIndex);
                         currentVideoIndex++;
                     }
 
@@ -163,10 +167,7 @@
                     preloadVideos(preloadCount);
                 } catch (error) {
                     console.error('初始加载视频失败:', error);
-                    const errorMsg = document.createElement('div');
-                    errorMsg.className = 'loading';
-                    errorMsg.textContent = '无法加载视频。';
-                    videoContainer.appendChild(errorMsg);
+                    showError('无法加载视频。');
                 }
 
                 loading = false;
@@ -189,26 +190,20 @@
                         videoUrl = await fetchNewVideo();
                     }
 
-                    await showVideo(videoUrl);
+                    await showVideo(videoUrl, currentVideoIndex);
                     currentVideoIndex++;
 
                     // 控制内存：超过一定数量的视频时移除最早的视频
                     if (videoContainer.children.length > maxVideosOnScreen + 1) { // +1 为加载指示器
-                        let firstVideoWrapper = videoContainer.querySelector('.video-wrapper');
-                        if (firstVideoWrapper) {
-                            let firstVideo = firstVideoWrapper.querySelector('video');
-                            if (firstVideo) {
-                                firstVideo.pause(); // 暂停第一个视频
-                            }
-                            videoContainer.removeChild(firstVideoWrapper);
+                        let firstVideo = videoContainer.querySelector('video');
+                        if (firstVideo) {
+                            firstVideo.pause(); // 暂停第一个视频
+                            videoContainer.removeChild(firstVideo);
                         }
                     }
                 } catch (error) {
                     console.error('获取视频失败:', error);
-                    const errorMsg = document.createElement('div');
-                    errorMsg.className = 'loading';
-                    errorMsg.textContent = '无法加载视频。';
-                    videoContainer.appendChild(errorMsg);
+                    showError('无法加载视频。');
                 }
 
                 loading = false;
@@ -274,32 +269,18 @@
             }
 
             // 显示视频
-            async function showVideo(videoUrl) {
+            async function showVideo(videoUrl, index) {
                 return new Promise((resolve, reject) => {
                     // 创建并添加新视频
                     let videoElement = document.createElement('video');
                     videoElement.src = videoUrl;
                     videoElement.controls = true;
-                    videoElement.autoplay = false; // 禁用自动播放以提升移动端体验
+                    videoElement.autoplay = false; // 禁用自动播放
                     videoElement.playsInline = true; // 在移动设备上内联播放
                     videoElement.preload = 'metadata'; // 预加载元数据
 
-                    // 创建一个包装器 div
-                    let wrapper = document.createElement('div');
-                    wrapper.className = 'video-wrapper';
-                    wrapper.style.position = 'relative';
-                    wrapper.style.width = '100%';
-                    wrapper.style.maxWidth = '600px';
-                    wrapper.style.marginBottom = '20px';
-                    wrapper.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
-                    wrapper.style.borderRadius = '10px';
-                    wrapper.style.background = 'black';
-
-                    // 将 videoElement 添加到包装器中
-                    wrapper.appendChild(videoElement);
-
-                    // 将包装器添加到 videoContainer
-                    videoContainer.appendChild(wrapper);
+                    // 添加到容器
+                    videoContainer.appendChild(videoElement);
 
                     // 当视频元数据加载完成后，尝试播放（仅在桌面端自动播放）
                     videoElement.addEventListener('loadedmetadata', () => {
@@ -317,6 +298,21 @@
                         reject(new Error('视频元素加载错误'));
                     });
                 });
+            }
+
+            // 显示错误消息
+            function showError(message) {
+                const errorMsg = document.createElement('div');
+                errorMsg.className = 'error-message';
+                errorMsg.textContent = message;
+                videoContainer.appendChild(errorMsg);
+
+                // 自动移除错误消息
+                setTimeout(() => {
+                    if (errorMsg.parentNode) {
+                        errorMsg.parentNode.removeChild(errorMsg);
+                    }
+                }, 3000);
             }
 
             // 初始化 Intersection Observer
@@ -368,11 +364,8 @@
                     for (let mutation of mutationsList) {
                         if (mutation.type === 'childList') {
                             mutation.addedNodes.forEach(node => {
-                                if (node.classList && node.classList.contains('video-wrapper')) {
-                                    const video = node.querySelector('video');
-                                    if (video) {
-                                        observer.observe(video);
-                                    }
+                                if (node.tagName === 'VIDEO') {
+                                    observer.observe(node);
                                 }
                             });
                         }
@@ -394,6 +387,11 @@
 
                 thresholds.push(0);
                 return thresholds;
+            }
+
+            // 检测设备类型
+            function isMobile() {
+                return /Mobi|Android/i.test(navigator.userAgent);
             }
 
         })();
