@@ -21,20 +21,21 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             padding: 10px;
-            position: relative;
         }
 
         /* 视频样式 */
         video {
             width: 100%;
             max-width: 600px;
-            max-height: 100vh;
+            /* 移除或调整此行 */
+            margin-bottom: 20px;
             background: black;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             transition: transform 0.3s ease;
+            /* 禁用自动播放以提升移动端体验 */
+            /* autoplay: 不能在CSS中设置，因此在JavaScript中控制 */
         }
 
         /* 当前播放视频的样式（可选） */
@@ -50,40 +51,15 @@
             margin: 20px 0;
         }
 
-        /* 按钮样式 */
-        .nav-button {
-            display: none; /* 默认隐藏，仅在移动设备上显示 */
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: rgba(0, 123, 255, 0.8);
-            color: #FFF;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-            z-index: 10;
-        }
-
-        .nav-button:hover {
-            background-color: rgba(0, 123, 255, 1);
-        }
-
-        .prev-button {
-            top: 10px;
-        }
-
-        .next-button {
-            bottom: 10px;
-        }
-
         /* 响应式设计：针对移动设备的调整 */
         @media (max-width: 768px) {
             video {
                 max-width: 100%;
-                max-height: 90vh;
+                /* 确保视频宽度为100% */
+                height: 56.25vw;
+                /* 16:9 纵横比 */
+                max-height: 100vh;
+                /* 不超过视口高度 */
                 margin-bottom: 15px;
             }
 
@@ -91,16 +67,14 @@
                 font-size: 1em;
                 margin: 15px 0;
             }
-
-            .nav-button {
-                display: block; /* 显示按钮 */
-            }
         }
 
         @media (max-width: 480px) {
             video {
                 max-width: 100%;
-                max-height: 80vh;
+                height: 56.25vw;
+                /* 16:9 纵横比 */
+                max-height: 100vh;
                 margin-bottom: 10px;
             }
 
@@ -122,15 +96,15 @@
             const videoContainer = document.getElementById('videoContainer');
             const loadingIndicator = document.getElementById('loading');
             let currentVideoIndex = 0;
-            const maxPreload = 10; // 调整预加载视频数量
-            const maxVideosOnScreen = 15; // 屏幕上最多显示视频数量
+            const initialLoadCount = 5; // 初始加载的视频数量
+            const preloadCount = 5; // 每次预加载的视频数量
+            const maxVideosOnScreen = 20; // 屏幕上最多显示视频数量
             let loading = false; // 避免重复加载
             let videoHistory = []; // 记录加载过的视频链接
 
-            // 初次加载第一个视频并预加载后续视频
+            // 初次加载多个视频并预加载后续视频
             document.addEventListener('DOMContentLoaded', () => {
-                loadNextVideo();
-                preloadVideos(maxPreload - 1);
+                loadInitialVideos(initialLoadCount);
                 initializeIntersectionObserver();
             });
 
@@ -150,7 +124,7 @@
                 };
             }
 
-            // 监听滚动事件，检测是否接近页面底部或顶部
+            // 监听滚动事件，检测是否接近页面底部
             window.addEventListener('scroll', debounce(() => {
                 if (!loading) {
                     const scrollY = window.scrollY;
@@ -160,14 +134,44 @@
                     // 用户接近页面底部，加载下一个视频
                     if (scrollY + windowHeight >= documentHeight - 100) {
                         loadNextVideo();
-                        preloadVideos(2); // 继续预加载更多视频
-                    }
-                    // 用户接近页面顶部，加载上一个视频
-                    else if (scrollY <= 100) {
-                        loadPreviousVideo();
+                        preloadVideos(preloadCount); // 继续预加载更多视频
                     }
                 }
             }, 200));
+
+            // 初始加载多个视频
+            async function loadInitialVideos(count) {
+                loading = true;
+                loadingIndicator.style.display = 'block';
+
+                try {
+                    for (let i = 0; i < count; i++) {
+                        let videoUrl;
+                        if (currentVideoIndex < videoHistory.length) {
+                            // 从预加载的视频池中获取下一个视频
+                            videoUrl = videoHistory[currentVideoIndex];
+                        } else {
+                            // 从接口获取新的视频
+                            videoUrl = await fetchNewVideo();
+                        }
+
+                        await showVideo(videoUrl);
+                        currentVideoIndex++;
+                    }
+
+                    // 预加载后续视频
+                    preloadVideos(preloadCount);
+                } catch (error) {
+                    console.error('初始加载视频失败:', error);
+                    const errorMsg = document.createElement('div');
+                    errorMsg.className = 'loading';
+                    errorMsg.textContent = '无法加载视频。';
+                    videoContainer.appendChild(errorMsg);
+                }
+
+                loading = false;
+                loadingIndicator.style.display = 'none';
+            }
 
             // 加载下一个视频并显示
             async function loadNextVideo() {
@@ -185,7 +189,7 @@
                         videoUrl = await fetchNewVideo();
                     }
 
-                    showVideo(videoUrl);
+                    await showVideo(videoUrl);
                     currentVideoIndex++;
 
                     // 控制内存：超过一定数量的视频时移除最早的视频
@@ -209,15 +213,6 @@
 
                 loading = false;
                 loadingIndicator.style.display = 'none';
-            }
-
-            // 加载上一个视频并显示
-            async function loadPreviousVideo() {
-                if (currentVideoIndex > 0) {
-                    currentVideoIndex--;
-                    const videoUrl = videoHistory[currentVideoIndex];
-                    showVideo(videoUrl);
-                }
             }
 
             // 预加载指定数量的视频
@@ -279,73 +274,49 @@
             }
 
             // 显示视频
-            function showVideo(videoUrl) {
-                // 暂停所有其他视频
-                const videos = videoContainer.querySelectorAll('video');
-                videos.forEach(video => {
-                    video.pause();
-                    video.classList.remove('current');
+            async function showVideo(videoUrl) {
+                return new Promise((resolve, reject) => {
+                    // 创建并添加新视频
+                    let videoElement = document.createElement('video');
+                    videoElement.src = videoUrl;
+                    videoElement.controls = true;
+                    videoElement.autoplay = false; // 禁用自动播放以提升移动端体验
+                    videoElement.playsInline = true; // 在移动设备上内联播放
+                    videoElement.preload = 'metadata'; // 预加载元数据
+
+                    // 创建一个包装器 div
+                    let wrapper = document.createElement('div');
+                    wrapper.className = 'video-wrapper';
+                    wrapper.style.position = 'relative';
+                    wrapper.style.width = '100%';
+                    wrapper.style.maxWidth = '600px';
+                    wrapper.style.marginBottom = '20px';
+                    wrapper.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+                    wrapper.style.borderRadius = '10px';
+                    wrapper.style.background = 'black';
+
+                    // 将 videoElement 添加到包装器中
+                    wrapper.appendChild(videoElement);
+
+                    // 将包装器添加到 videoContainer
+                    videoContainer.appendChild(wrapper);
+
+                    // 当视频元数据加载完成后，尝试播放（仅在桌面端自动播放）
+                    videoElement.addEventListener('loadedmetadata', () => {
+                        if (!isMobile()) {
+                            videoElement.play().catch(error => {
+                                console.error('视频播放失败:', error);
+                            });
+                        }
+                        resolve();
+                    });
+
+                    // 处理视频加载错误
+                    videoElement.addEventListener('error', (e) => {
+                        console.error('视频元素加载错误:', e);
+                        reject(new Error('视频元素加载错误'));
+                    });
                 });
-
-                // 创建并添加新视频
-                let videoElement = document.createElement('video');
-                videoElement.src = videoUrl;
-                videoElement.controls = true;
-                videoElement.autoplay = true; // 自动播放
-                videoElement.playsInline = true; // 在移动设备上内联播放
-                videoElement.preload = 'metadata'; // 预加载元数据
-
-                // 创建一个包装器 div
-                let wrapper = document.createElement('div');
-                wrapper.className = 'video-wrapper';
-                wrapper.style.position = 'relative';
-                wrapper.style.width = '100%';
-                wrapper.style.maxWidth = '600px';
-                wrapper.style.marginBottom = '20px';
-                wrapper.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
-                wrapper.style.borderRadius = '10px';
-                wrapper.style.background = 'black';
-
-                // 将 videoElement 添加到包装器中
-                wrapper.appendChild(videoElement);
-
-                // 如果是移动设备，添加导航按钮
-                if (isMobile()) {
-                    addNavigationButtons(wrapper, videoElement);
-                }
-
-                // 将包装器添加到 videoContainer
-                videoContainer.appendChild(wrapper);
-            }
-
-            // 添加上下导航按钮（仅移动设备）
-            function addNavigationButtons(wrapper, videoElement) {
-                // 创建“上一个”按钮
-                const prevButton = document.createElement('button');
-                prevButton.textContent = '上一个视频';
-                prevButton.className = 'nav-button prev-button';
-                prevButton.onclick = () => {
-                    loadPreviousVideo();
-                    scrollToVideo(wrapper);
-                };
-
-                // 创建“下一个”按钮
-                const nextButton = document.createElement('button');
-                nextButton.textContent = '下一个视频';
-                nextButton.className = 'nav-button next-button';
-                nextButton.onclick = () => {
-                    loadNextVideo();
-                    scrollToVideo(wrapper);
-                };
-
-                // 将按钮添加到包装器
-                wrapper.appendChild(prevButton);
-                wrapper.appendChild(nextButton);
-            }
-
-            // 平滑滚动到特定视频
-            function scrollToVideo(wrapper) {
-                wrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
 
             // 初始化 Intersection Observer
@@ -424,10 +395,6 @@
                 thresholds.push(0);
                 return thresholds;
             }
-
-            // 手机端触摸适配（移除，因为我们使用按钮）
-            // 如果需要保留，请确保它不会与按钮冲突
-            // 这里我们移除相关代码，因为现在使用按钮进行导航
 
         })();
     </script>
