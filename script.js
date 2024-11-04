@@ -5,8 +5,10 @@
 // 异步函数，用于设置背景图
 async function setBackground() {
     try {
+        // 判断用户设备类型
+        const userType = /Mobi|Android/i.test(navigator.userAgent) ? 'wap' : 'pc';
         // 发起请求获取背景图片
-        const response = await fetch('https://www.loliapi.com/acg/');
+        const response = await fetch('https://v2.api-m.com/api/randomAcgPic?type={usertype}');
 
         // 如果响应状态不是成功，抛出错误
         if (!response.ok) {
