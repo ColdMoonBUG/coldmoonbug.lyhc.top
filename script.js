@@ -15,10 +15,8 @@ async function setBackground() {
             throw new Error('网络请求失败，状态码：' + response.status);
         }else{
             response = await response.json().data;
+            const imageBlob = (await fetch(response)).blob();
         }
-
-        // 将响应转换为Blob对象，并生成一个图片URL
-        const imageBlob = await response.blob();
         const imageUrl = URL.createObjectURL(imageBlob);
 
         // 将获取到的图片设置为页面背景
