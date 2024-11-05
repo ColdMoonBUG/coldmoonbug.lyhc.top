@@ -5,21 +5,23 @@
 // 异步函数，用于设置背景图
 async function setBackground() {
     try {
-        // 判断用户设备类型
-        const userType = /Mobi|Android/i.test(navigator.userAgent) ? 'wap' : 'pc';
         // 发起请求获取背景图片
-        const response = await fetch('https://v2.api-m.com/api/randomAcgPic?type={usertype}');
+        const response = await fetch('https://www.loliapi.com/acg/');
         
         // 如果响应状态不是成功，抛出错误
         if (!response.ok) {
             throw new Error('网络请求失败，状态码：' + response.status);
         }else{
             response = await response.json().data;
+            const imageBlob = (await fetch(response)).blob;
         }
+
+        // 将响应转换为Blob对象，并生成一个图片URL
+        const imageBlob = await response.blob();
         const imageUrl = URL.createObjectURL(imageBlob);
 
         // 将获取到的图片设置为页面背景
-        document.body.style.backgroundImage = `url(${response})`;
+        document.body.style.backgroundImage = `url(${imageUrl})`;
         document.body.style.backgroundSize = 'cover'; // 背景图片覆盖整个页面
         document.body.style.backgroundPosition = 'center'; // 背景图片居中显示
         document.body.style.backgroundRepeat = 'no-repeat'; // 背景图片不重复
