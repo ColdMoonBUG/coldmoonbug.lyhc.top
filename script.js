@@ -15,12 +15,11 @@ async function setBackground() {
             throw new Error('网络请求失败，状态码：' + response.status);
         }else{
             response = await response.json().data;
-            const imageBlob = (await fetch(response)).blob();
         }
         const imageUrl = URL.createObjectURL(imageBlob);
 
         // 将获取到的图片设置为页面背景
-        document.body.style.backgroundImage = `url(${imageUrl})`;
+        document.body.style.backgroundImage = `url(${response})`;
         document.body.style.backgroundSize = 'cover'; // 背景图片覆盖整个页面
         document.body.style.backgroundPosition = 'center'; // 背景图片居中显示
         document.body.style.backgroundRepeat = 'no-repeat'; // 背景图片不重复
