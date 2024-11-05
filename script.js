@@ -9,10 +9,12 @@ async function setBackground() {
         const userType = /Mobi|Android/i.test(navigator.userAgent) ? 'wap' : 'pc';
         // 发起请求获取背景图片
         const response = await fetch('https://v2.api-m.com/api/randomAcgPic?type={usertype}');
-
+        
         // 如果响应状态不是成功，抛出错误
         if (!response.ok) {
             throw new Error('网络请求失败，状态码：' + response.status);
+        }else{
+            response = await response.json().data;
         }
 
         // 将响应转换为Blob对象，并生成一个图片URL
