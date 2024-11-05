@@ -71,8 +71,8 @@
 
             // 定义多个视频接口的 URL 列表
             const apiUrls = [
-                { url: 'https://v2.api-m.com/api/meinv', key: 'data' },  // 无需解析，直接返回视频地址
-                { url: 'https://api.lolimi.cn/API/xjj/xjj.php', key: 'direct' }, // JSON中 data 字段为视频地址
+                { url: 'https://v2.api-m.com/api/meinv', key: 'data' },  // JSON中 data 字段为视频地址
+                { url: 'https://api.lolimi.cn/API/xjj/xjj.php', key: 'direct' }, // 无需解析，直接返回视频地址
                 { url: 'https://api.pearktrue.cn/api/random/xjj/?type=json', key: 'video' } // JSON中 video 字段为视频地址
             ];
 
@@ -140,16 +140,17 @@
                     try {
                         // 随机选择一个接口
                         const randomApi = apiUrls[Math.floor(Math.random() * apiUrls.length)];
-                        const response = await fetch(randomApi.url);
+                        const response = await fetch(randomApi.url, { redirect: 'follow' });
 
+                        // 检查响应状态码
                         if (response.ok) {
                             let videoUrl;
 
                             if (randomApi.key === 'direct') {
-                                // 直接返回的视频地址
-                                videoUrl = await response.text().then(url => url.trim()); // 确保没有多余空格
+                                // 对于直接返回视频地址的接口，直接获取重定向后的最终 URL
+                                videoUrl = response.url;
                             } else {
-                                // JSON 响应，解析指定字段的视频地址
+                                // 对于返回 JSON 的接口，解析指定字段获取视频地址
                                 const result = await response.json();
                                 videoUrl = result[randomApi.key];
                             }
@@ -175,12 +176,16 @@
             // URL 验证函数
             function isValidUrl(url) {
                 try {
-                    new URL(url);
-                    return true;
+                    const parsedUrl = new URL(url);
+                    return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
                 } catch (_) {
                     return false;
                 }
             }
+
+
+
+
 
             async function showVideo(videoUrl) {
                 return new Promise((resolve, reject) => {
