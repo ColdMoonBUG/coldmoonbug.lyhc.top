@@ -3,6 +3,7 @@
  * 作者：张敬玉
  */
 // 异步函数，用于设置背景图
+// 异步函数，用于设置背景图
 async function setBackground() {
     try {
         // 发起请求获取背景图片
@@ -10,10 +11,8 @@ async function setBackground() {
         
         // 如果响应状态不是成功，抛出错误
         if (!response.ok) {
+            console.log("图片请求错误，无法获取连接");
             throw new Error('网络请求失败，状态码：' + response.status);
-        }else{
-            response = await response.json().data;
-            const imageBlob = (await fetch(response)).blob;
         }
 
         // 将响应转换为Blob对象，并生成一个图片URL
@@ -22,34 +21,29 @@ async function setBackground() {
 
         // 将获取到的图片设置为页面背景
         document.body.style.backgroundImage = `url(${imageUrl})`;
-        document.body.style.backgroundSize = 'cover'; // 背景图片覆盖整个页面
-        document.body.style.backgroundPosition = 'center'; // 背景图片居中显示
-        document.body.style.backgroundRepeat = 'no-repeat'; // 背景图片不重复
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+        document.body.style.backgroundRepeat = 'no-repeat';
     } catch (error) {
         // 如果请求失败，输出错误信息，并设置默认背景图
         console.error('无法加载背景图片：', error);
         document.body.style.backgroundImage = 'url("404.jpg")';
-        document.body.style.backgroundSize = '50%'; // 缩小背景图的尺寸
-        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundSize = '50%';
         document.body.style.backgroundPosition = 'center';
         document.body.style.backgroundRepeat = 'no-repeat';
         alert('背景图丢失，已设置默认背景图');
-        // 获取页面中所有的 <p> 标签（返回一个 HTMLCollection）
-        const pElements = document.getElementsByTagName('p');
-        // 将 HTMLCollection 转为数组，遍历所有的 <p> 元素并修改颜色
-        Array.from(pElements).forEach(p => {
-            p.style.color = 'white'; // 将每个 <p> 的文本颜色修改为蓝色
+        
+        // 修改页面文字颜色
+        Array.from(document.getElementsByTagName('p')).forEach(p => {
+            p.style.color = 'white';
         });
-        const h1Element = document.getElementsByTagName('h1')[0]; // 获取标题元素
-        h1Element.style.color = 'white'; // 修改 <h1> 的颜色
-        // 获取页面中所有的 <h2> 标签（返回一个 HTMLCollection）
-        const h2Elements = document.getElementsByTagName('h2');
-        // 将 HTMLCollection 转为数组，遍历所有的 <h2> 元素并修改颜色
-        Array.from(h2Elements).forEach(h2 => {
-            h2.style.color = 'white'; // 将每个 <h2> 的文本颜色修改为蓝色
+        document.querySelector('h1').style.color = 'white';
+        Array.from(document.getElementsByTagName('h2')).forEach(h2 => {
+            h2.style.color = 'white';
         });
     }
 }
+
 /**
  * 定义一个名为 Flipper 的类，用于创建和管理卡片翻转效果
  * @class Flipper
