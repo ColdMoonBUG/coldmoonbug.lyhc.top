@@ -18,13 +18,13 @@ async function setBackground() {
         // 将响应转换为Blob对象，并生成一个图片URL
         const imageBlob = await response.blob();
         const imageUrl = URL.createObjectURL(imageBlob);
-        var container = document.getElementById('background-container');
+        const container = document.getElementById('background-container');
         // 将获取到的图片设置为页面背景
         container.style.backgroundImage = `url(${imageUrl})`;
         container.style.backgroundSize = 'cover';
         container.style.backgroundPosition = 'center';
         container.style.backgroundRepeat = 'no-repeat';
-        container.style.filter = "brightness(0.5)"; // 设置页面的背景亮度为50%
+        container.style.filter = "brightness(0.5)"; 
     } catch (error) {
         // 如果请求失败，输出错误信息，并设置默认背景图
         console.error('无法加载背景图片：', error);
@@ -131,6 +131,4 @@ window.onfocus = function () {
 // 页面加载完成后，设置背景图并启动时间更新
 window.onload = function () {
     setBackground(); // 设置背景图片
-    setInterval(updateTime, 1000); // 每隔1秒更新一次时间
-    updateTime(); // 初始调用以确保页面载入时立即显示当前时间
 };
