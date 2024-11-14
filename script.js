@@ -18,20 +18,20 @@ async function setBackground() {
         // 将响应转换为Blob对象，并生成一个图片URL
         const imageBlob = await response.blob();
         const imageUrl = URL.createObjectURL(imageBlob);
-
+        var container = document.getElementById('background-container');
         // 将获取到的图片设置为页面背景
-        document.body.style.backgroundImage = `url(${imageUrl})`;
-        document.body.style.backgroundSize = 'cover';
-        document.body.style.backgroundPosition = 'center';
-        document.body.style.backgroundRepeat = 'no-repeat';
-        document.body.style.filter = "brightness(0.5)"; // 设置页面的背景亮度为50%
+        container.style.backgroundImage = `url(${imageUrl})`;
+        container.style.backgroundSize = 'cover';
+        container.style.backgroundPosition = 'center';
+        container.style.backgroundRepeat = 'no-repeat';
+        container.style.filter = "brightness(0.5)"; // 设置页面的背景亮度为50%
     } catch (error) {
         // 如果请求失败，输出错误信息，并设置默认背景图
         console.error('无法加载背景图片：', error);
-        document.body.style.backgroundImage = 'url("404.jpg")';
-        document.body.style.backgroundSize = '50%';
-        document.body.style.backgroundPosition = 'center';
-        document.body.style.backgroundRepeat = 'no-repeat';
+        container.style.backgroundImage = 'url("404.jpg")';
+        container.style.backgroundSize = '50%';
+        container.style.backgroundPosition = 'center';
+        container.style.backgroundRepeat = 'no-repeat';
         alert('背景图丢失，已设置默认背景图');
         
         // 修改页面文字颜色
