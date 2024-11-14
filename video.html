@@ -161,7 +161,7 @@
                         // 随机选择一个接口
                         const randomApi = apiUrls[Math.floor(Math.random() * apiUrls.length)];
                         const response = await fetch(randomApi.url, { redirect: 'follow',  method: 'GET',
-                        mode: 'no-cors' });
+                        mode: 'cors' });
                         
                         // 检查响应状态码
                         if (response.ok) {
