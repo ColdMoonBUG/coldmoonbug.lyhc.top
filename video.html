@@ -92,7 +92,8 @@
                 { url: 'https://api.lolimi.cn/API/xjj/xjj.php', key: 'direct' }, // 无需解析，直接返回视频地址
                 { url: 'http://api.yujn.cn/api/xjj.php?type=video', key: 'direct'}, 
                 { url: 'http://api.yujn.cn/api/zzxjj.php?type=video', key: 'direct'},// 无需解析，直接返回视频地址
-                { url: 'https://api.pearktrue.cn/api/random/xjj/?type=json', key: 'video' } // JSON中 video 字段为视频地址
+                { url: 'https://api.pearktrue.cn/api/random/xjj/?type=json', key: 'video' },
+                { url: 'https://api.yujn.cn/api/kuaimao.php?type=json', key: 'video' }// JSON中 video 字段为视频地址
             ];
 
             document.addEventListener('DOMContentLoaded', () => {
