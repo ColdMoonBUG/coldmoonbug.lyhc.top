@@ -24,6 +24,7 @@ async function setBackground() {
         document.body.style.backgroundSize = 'cover';
         document.body.style.backgroundPosition = 'center';
         document.body.style.backgroundRepeat = 'no-repeat';
+        document.body.style.filter = "brightness(0.5)"; // 设置页面的背景亮度为50%
     } catch (error) {
         // 如果请求失败，输出错误信息，并设置默认背景图
         console.error('无法加载背景图片：', error);
