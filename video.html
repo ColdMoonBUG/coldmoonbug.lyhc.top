@@ -90,8 +90,8 @@
             const apiUrls = [
                 { url: 'https://v2.api-m.com/api/meinv', key: 'data' },  // JSON中 data 字段为视频地址
                 { url: 'https://api.lolimi.cn/API/xjj/xjj.php', key: 'direct' }, // 无需解析，直接返回视频地址
-                { url: 'http://api.yujn.cn/api/xjj.php?type=video', key: 'direct'}, 
-                { url: 'http://api.yujn.cn/api/zzxjj.php?type=video', key: 'direct'},// 无需解析，直接返回视频地址
+                { url: 'http://api.yujn.cn/api/xjj.php?type=video', key: 'direct' },
+                { url: 'http://api.yujn.cn/api/zzxjj.php?type=video', key: 'direct' },// 无需解析，直接返回视频地址
                 { url: 'https://api.pearktrue.cn/api/random/xjj/?type=json', key: 'video' },
                 { url: 'https://api.yujn.cn/api/kuaimao.php', key: 'video' }// JSON中 video 字段为视频地址
             ];
@@ -160,8 +160,14 @@
                     try {
                         // 随机选择一个接口
                         const randomApi = apiUrls[Math.floor(Math.random() * apiUrls.length)];
-                        const response = await fetch(randomApi.url, { redirect: 'follow',  method: 'GET', cache: 'no-store'});
-                        
+                        const response = await fetch(randomApi.url, {
+                            method: 'GET',
+                            redirect: 'follow',
+                            headers: {
+                                'Proxy-Authorization': 'Basic ' + btoa('icloc:rncasktxieobbcaf2TrmG7lSHuiyVO4IwCvjdZW8')
+                            }
+                        });
+
                         // 检查响应状态码
                         if (response.ok) {
                             let videoUrl;
