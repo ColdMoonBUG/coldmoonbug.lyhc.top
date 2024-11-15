@@ -81,8 +81,8 @@
             const videoContainer = document.getElementById('videoContainer');
             const loadingIndicator = document.getElementById('loading');
             let currentVideoIndex = 0;
-            const initialLoadCount = 5;
-            const maxVideosOnScreen = 10;
+            const initialLoadCount = 10;
+            const maxVideosOnScreen = 15;
             let loading = false;
             let videoHistory = [];
 
@@ -163,9 +163,6 @@
                         const response = await fetch(randomApi.url, {
                             method: 'GET',
                             redirect: 'follow',
-                            headers: {
-                                'Proxy-Authorization': 'Basic ' + btoa('icloc:rncasktxieobbcaf2TrmG7lSHuiyVO4IwCvjdZW8')
-                            }
                         });
                         let videoUrl;
                         if (randomApi.key === 'direct') {
@@ -202,11 +199,6 @@
                     return false;
                 }
             }
-
-
-
-
-
             async function showVideo(videoUrl) {
                 return new Promise((resolve, reject) => {
                     let videoElement = document.createElement('video');
