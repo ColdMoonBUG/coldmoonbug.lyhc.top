@@ -162,10 +162,7 @@
                         const randomApi = apiUrls[Math.floor(Math.random() * apiUrls.length)];
                         const response = await fetch(randomApi.url, {
                             method: 'GET',
-                            redirect: 'follow',
-                            headers: {
-                                'Proxy-Authorization': 'Basic ' + btoa('icloc:rncasktxieobbcaf2TrmG7lSHuiyVO4IwCvjdZW8')
-                            }
+                            redirect: 'follow'
                         });
                         let videoUrl;
                         if (randomApi.key === 'direct') {
