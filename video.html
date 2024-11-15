@@ -167,29 +167,22 @@
                                 'Proxy-Authorization': 'Basic ' + btoa('icloc:rncasktxieobbcaf2TrmG7lSHuiyVO4IwCvjdZW8')
                             }
                         });
-                        console.log(response.json())
-                        // 检查响应状态码
-                        if (response.ok) {
-                            let videoUrl;
-
-                            if (randomApi.key === 'direct') {
-                                // 对于直接返回视频地址的接口，直接获取重定向后的最终 URL
-                                videoUrl = response.url;
-                            } else {
-                                // 对于返回 JSON 的接口，解析指定字段获取视频地址
-                                const result = await response.json();
-                                videoUrl = result[randomApi.key];
-                                console.log("已加载"+videoUrl)
-                            }
-
-                            // 检查并返回有效的 URL
-                            if (isValidUrl(videoUrl)) {
-                                return videoUrl;
-                            } else {
-                                console.warn(`无效的视频 URL：${videoUrl}`);
-                            }
+                        let videoUrl;
+                        if (randomApi.key === 'direct') {
+                            // 对于直接返回视频地址的接口，直接获取重定向后的最终 URL
+                            videoUrl = response.url;
                         } else {
-                            console.warn(`请求失败，状态码：${response.status}`);
+                            // 对于返回 JSON 的接口，解析指定字段获取视频地址
+                            const result = await response.json();
+                            videoUrl = result[randomApi.key];
+                            console.log("已加载" + videoUrl)
+                        }
+
+                        // 检查并返回有效的 URL
+                        if (isValidUrl(videoUrl)) {
+                            return videoUrl;
+                        } else {
+                            console.warn(`无效的视频 URL：${videoUrl}`);
                         }
                     } catch (error) {
                         console.error('接口请求失败:', error);
