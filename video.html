@@ -77,7 +77,7 @@
     </div>
 
     <script>
-        (function () {
+(function () {
     const videoContainer = document.getElementById('videoContainer');
     const loadingIndicator = document.getElementById('loading');
     let currentVideoIndex = 0;
@@ -88,8 +88,8 @@
 
     // 定义多个视频接口的 URL 列表
     const apiUrls = [
-        { url: 'https://v2.api-m.com/api/meinv', key: 'data' },  // JSON中 data 字段为视频地址
-        { url: 'https://api.lolimi.cn/API/xjj/xjj.php', key: 'direct' }, 
+        { url: 'https://v2.api-m.com/api/meinv', key: 'data' },
+        { url: 'https://api.lolimi.cn/API/xjj/xjj.php', key: 'direct' },
         { url: 'http://api.yujn.cn/api/xjj.php?type=json', key: 'data' },
         { url: 'http://api.yujn.cn/api/zzxjj.php?type=json', key: 'data' },
         { url: 'https://api.pearktrue.cn/api/random/xjj/?type=json', key: 'video' },
@@ -173,7 +173,7 @@
     }
 
     async function fetchNewVideo() {
-        const maxRetries = 5; // 增加最大重试次数为 5
+        const maxRetries = 5;
         let attempts = 0;
 
         while (attempts < maxRetries) {
@@ -186,10 +186,8 @@
                 });
                 let videoUrl;
                 if (randomApi.key === 'direct') {
-                    // 对于直接返回视频地址的接口，直接获取重定向后的最终 URL
                     videoUrl = response.url;
                 } else {
-                    // 对于返回 JSON 的接口，解析指定字段获取视频地址
                     const result = await response.json();
                     videoUrl = result[randomApi.key];
                     console.log("已加载" + videoUrl);
@@ -257,22 +255,43 @@
         return window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 200;
     }
 
+    // 增加 IntersectionObserver 的配置，确保更好触发
     function initializeIntersectionObserver() {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
+                const video = entry.target;
                 if (entry.isIntersecting) {
-                    loadNextVideo();
+                    video.play().catch(error => {
+                        console.error('视频播放失败:', error);
+                    });
+                    video.classList.add('current');
+                } else {
+                    video.pause();
+                    video.classList.remove('current');
                 }
             });
         }, {
-            root: null,
-            rootMargin: '0px',
-            threshold: 0.25
+            rootMargin: '100px 0px', // 增加触发范围，当视频接近视口时提前触发加载
+            threshold: 0.5
         });
 
-        observer.observe(document.querySelector('#loading'));
+        const config = { childList: true, subtree: true };
+        const containerObserver = new MutationObserver((mutationsList) => {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach(node => {
+                        if (node.tagName === 'VIDEO') {
+                            observer.observe(node);
+                        }
+                    });
+                }
+            }
+        });
+
+        containerObserver.observe(videoContainer, config);
     }
 })();
+
 
     </script>
 </body>
