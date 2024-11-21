@@ -78,223 +78,202 @@
 
     <script>
         (function () {
-            const videoContainer = document.getElementById('videoContainer');
-            const loadingIndicator = document.getElementById('loading');
-            let currentVideoIndex = 0;
-            const initialLoadCount = 10;
-            const maxVideosOnScreen = 15;
-            let loading = false;
-            let videoHistory = [];
+    const videoContainer = document.getElementById('videoContainer');
+    const loadingIndicator = document.getElementById('loading');
+    let currentVideoIndex = 0;
+    const initialLoadCount = 10;
+    const maxVideosOnScreen = 15;
+    let loading = false;
+    const loadedVideos = new Set();  // 用来缓存已加载的视频URL
 
-            // 定义多个视频接口的 URL 列表
-            const apiUrls = [
-                { url: 'https://v2.api-m.com/api/meinv', key: 'data' },  // JSON中 data 字段为视频地址
-                { url: 'https://api.lolimi.cn/API/xjj/xjj.php', key: 'direct' }, 
-                { url: 'http://api.yujn.cn/api/xjj.php?type=video', key: 'direct' },
-                { url: 'http://api.yujn.cn/api/zzxjj.php?type=video', key: 'direct' },
-                { url: 'https://api.pearktrue.cn/api/random/xjj/?type=json', key: 'video' },
-                { url: 'https://rapid-sunset-f444.2991742315.workers.dev/?url=http://api.yujn.cn/api/kuaimao.php?type=json', key: 'video' },
-                { url: 'http://api.yujn.cn/api/COS.php?type=video', key: 'direct' },
-                { url: 'http://api.yujn.cn/api/qingchun.php?type=video', key: 'direct' },
-                { url: 'http://api.yujn.cn/api/nvgao.php?type=video', key: 'direct' },
-                { url: 'http://api.yujn.cn/api/ksbianzhuang.php?type=video', key: 'direct' },
-                { url: 'http://api.yujn.cn/api/luoli.php?type=video', key: 'direct' },
-                { url: 'http://api.yujn.cn/api/tianmei.php?type=video', key: 'direct' },
-                { url: 'http://api.yujn.cn/api/jksp.php?type=video', key: 'direct' },
-                { url: 'http://api.yujn.cn/api/yuzu.php?type=video', key: 'direct' },
-                { url: 'http://api.yujn.cn/api/rewu.php?type=video', key: 'direct' },
-                { url: 'http://api.yujn.cn/api/ksxjjsp.php?', key: 'direct' }
+    // 定义多个视频接口的 URL 列表
+    const apiUrls = [
+        { url: 'https://v2.api-m.com/api/meinv', key: 'data' },  // JSON中 data 字段为视频地址
+        { url: 'https://api.lolimi.cn/API/xjj/xjj.php', key: 'direct' }, 
+        { url: 'http://api.yujn.cn/api/xjj.php?type=json', key: 'data' },
+        { url: 'http://api.yujn.cn/api/zzxjj.php?type=json', key: 'data' },
+        { url: 'https://api.pearktrue.cn/api/random/xjj/?type=json', key: 'video' },
+        { url: 'https://rapid-sunset-f444.2991742315.workers.dev/?url=http://api.yujn.cn/api/kuaimao.php?type=json', key: 'video' },
+        { url: 'http://api.yujn.cn/api/COS.php?type=json', key: 'data' },
+        { url: 'http://api.yujn.cn/api/qingchun.php?type=json', key: 'data' },
+        { url: 'http://api.yujn.cn/api/nvgao.php?type=json', key: 'data' },
+        { url: 'http://api.yujn.cn/api/ksbianzhuang.php?type=json', key: 'data' },
+        { url: 'http://api.yujn.cn/api/luoli.php?type=json', key: 'data' },
+        { url: 'http://api.yujn.cn/api/tianmei.php?type=json', key: 'data' },
+        { url: 'http://api.yujn.cn/api/jksp.php?type=json', key: 'data' },
+        { url: 'http://api.yujn.cn/api/yuzu.php?type=json', key: 'data' },
+        { url: 'http://api.yujn.cn/api/rewu.php?type=json', key: 'data' },
+        { url: 'http://api.yujn.cn/api/ksxjjsp.php?', key: 'direct' }
+    ];
 
+    document.addEventListener('DOMContentLoaded', () => {
+        loadInitialVideos(initialLoadCount);
+        initializeIntersectionObserver();
+    });
 
-                // JSON中 video 字段为视频地址
-            ];
+    window.addEventListener('scroll', debounce(() => {
+        if (!loading && isNearBottom()) {
+            loadNextVideo();
+        }
+    }, 200));
 
-            document.addEventListener('DOMContentLoaded', () => {
-                loadInitialVideos(initialLoadCount);
-                initializeIntersectionObserver();
+    async function loadInitialVideos(count) {
+        loading = true;
+        loadingIndicator.style.display = 'block';
+
+        try {
+            for (let i = 0; i < count; i++) {
+                const videoUrl = await fetchNewVideo();
+                if (videoUrl) {
+                    await showVideo(videoUrl);
+                    currentVideoIndex++;
+                }
+            }
+        } catch (error) {
+            console.error('初始加载视频失败:', error);
+            showError('无法加载视频。');
+        }
+
+        loading = false;
+        loadingIndicator.style.display = 'none';
+    }
+
+    async function loadNextVideo() {
+        if (loading) return;
+        loading = true;
+        loadingIndicator.style.display = 'block';
+
+        try {
+            const videoUrl = await fetchNewVideo();
+
+            // 如果已经加载过该视频，则跳过
+            if (loadedVideos.has(videoUrl)) {
+                loading = false;
+                loadingIndicator.style.display = 'none';
+                return;
+            }
+
+            // 将视频 URL 缓存
+            loadedVideos.add(videoUrl);
+
+            await showVideo(videoUrl);
+            currentVideoIndex++;
+
+            // 控制屏幕上的最大视频数量
+            if (videoContainer.querySelectorAll('video').length > maxVideosOnScreen) {
+                clearOldestVideo();
+            }
+        } catch (error) {
+            console.error('获取视频失败:', error);
+            showError('无法加载视频。');
+        }
+
+        loading = false;
+        loadingIndicator.style.display = 'none';
+    }
+
+    async function fetchNewVideo() {
+        const maxRetries = 5; // 增加最大重试次数为 5
+        let attempts = 0;
+
+        while (attempts < maxRetries) {
+            try {
+                // 随机选择一个接口
+                const randomApi = apiUrls[Math.floor(Math.random() * apiUrls.length)];
+                const response = await fetch(randomApi.url, {
+                    method: 'GET',
+                    redirect: 'follow',
+                });
+                let videoUrl;
+                if (randomApi.key === 'direct') {
+                    // 对于直接返回视频地址的接口，直接获取重定向后的最终 URL
+                    videoUrl = response.url;
+                } else {
+                    // 对于返回 JSON 的接口，解析指定字段获取视频地址
+                    const result = await response.json();
+                    videoUrl = result[randomApi.key];
+                    console.log("已加载" + videoUrl);
+                }
+
+                if (isValidUrl(videoUrl)) {
+                    return videoUrl;
+                } else {
+                    console.error('无效的视频 URL');
+                }
+            } catch (error) {
+                console.error(`接口请求失败: 第${attempts + 1}次重试`, error);
+            }
+            attempts++;
+        }
+
+        throw new Error('所有接口请求失败');
+    }
+
+    function isValidUrl(url) {
+        return typeof url === 'string' && url.startsWith('http');
+    }
+
+    function showError(message) {
+        loadingIndicator.textContent = message;
+    }
+
+    async function showVideo(videoUrl) {
+        return new Promise((resolve, reject) => {
+            let videoElement = document.createElement('video');
+            videoElement.src = videoUrl;
+            videoElement.controls = true;
+            videoElement.autoplay = false;
+            videoElement.playsInline = true;
+            videoElement.preload = 'auto';  // 设置为 'auto' 来启用缓存
+            videoElement.load();  // 预加载视频
+
+            videoContainer.appendChild(videoElement);
+
+            videoElement.addEventListener('loadedmetadata', resolve);
+            videoElement.addEventListener('error', (e) => {
+                console.error('视频元素加载错误:', e);
+                reject(new Error('视频元素加载错误'));
             });
+        });
+    }
 
-            window.addEventListener('scroll', debounce(() => {
-                if (!loading && isNearBottom()) {
+    function clearOldestVideo() {
+        const firstVideo = videoContainer.querySelector('video');
+        if (firstVideo) {
+            firstVideo.pause();
+            videoContainer.removeChild(firstVideo);
+        }
+    }
+
+    function debounce(func, delay) {
+        let timeout;
+        return function (...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    function isNearBottom() {
+        return window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 200;
+    }
+
+    function initializeIntersectionObserver() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
                     loadNextVideo();
                 }
-            }, 200));
+            });
+        }, {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.25
+        });
 
-            async function loadInitialVideos(count) {
-                loading = true;
-                loadingIndicator.style.display = 'block';
+        observer.observe(document.querySelector('#loading'));
+    }
+})();
 
-                try {
-                    for (let i = 0; i < count; i++) {
-                        const videoUrl = await fetchNewVideo();
-                        if (videoUrl) {
-                            await showVideo(videoUrl);
-                            currentVideoIndex++;
-                        }
-                    }
-                } catch (error) {
-                    console.error('初始加载视频失败:', error);
-                    showError('无法加载视频。');
-                }
-
-                loading = false;
-                loadingIndicator.style.display = 'none';
-            }
-
-            async function loadNextVideo() {
-                if (loading) return;
-                loading = true;
-                loadingIndicator.style.display = 'block';
-
-                try {
-                    const videoUrl = await fetchNewVideo();
-                    if (videoUrl) {
-                        await showVideo(videoUrl);
-                        currentVideoIndex++;
-
-                        if (videoContainer.querySelectorAll('video').length > maxVideosOnScreen) {
-                            clearOldestVideo();
-                        }
-                    }
-                } catch (error) {
-                    console.error('获取视频失败:', error);
-                    showError('无法加载视频。');
-                }
-
-                loading = false;
-                loadingIndicator.style.display = 'none';
-            }
-
-            async function fetchNewVideo() {
-                const maxRetries = 3; // 最大重试次数
-                let attempts = 0;
-
-                while (attempts < maxRetries) {
-                    try {
-                        // 随机选择一个接口
-                        const randomApi = apiUrls[Math.floor(Math.random() * apiUrls.length)];
-                        const response = await fetch(randomApi.url, {
-                            method: 'GET',
-                            redirect: 'follow',
-                        });
-                        let videoUrl;
-                        if (randomApi.key === 'direct') {
-                            // 对于直接返回视频地址的接口，直接获取重定向后的最终 URL
-                            videoUrl = response.url;
-                        } else {
-                            // 对于返回 JSON 的接口，解析指定字段获取视频地址
-                            const result = await response.json();
-                            videoUrl = result[randomApi.key];
-                            console.log("已加载" + videoUrl)
-                        }
-                        return videoUrl;
-                    } catch (error) {
-                        console.error('接口请求失败:', error);
-                    }
-                    attempts++;
-                }
-
-                throw new Error('所有接口请求失败');
-            }
-
-            // URL 验证函数
-            function isValidUrl(url) {
-                try {
-                    const parsedUrl = new URL(url);
-                    return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
-                } catch (_) {
-                    return false;
-                }
-            }
-            async function showVideo(videoUrl) {
-                return new Promise((resolve, reject) => {
-                    let videoElement = document.createElement('video');
-                    videoElement.src = videoUrl;
-                    videoElement.controls = true;
-                    videoElement.autoplay = false;
-                    videoElement.playsInline = true;
-                    videoElement.preload = 'metadata';
-
-                    videoContainer.appendChild(videoElement);
-
-                    videoElement.addEventListener('loadedmetadata', resolve);
-                    videoElement.addEventListener('error', (e) => {
-                        console.error('视频元素加载错误:', e);
-                        reject(new Error('视频元素加载错误'));
-                    });
-                });
-            }
-
-            function clearOldestVideo() {
-                const firstVideo = videoContainer.querySelector('video');
-                if (firstVideo) {
-                    firstVideo.pause();
-                    videoContainer.removeChild(firstVideo);
-                }
-            }
-
-            function initializeIntersectionObserver() {
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        const video = entry.target;
-                        if (entry.isIntersecting) {
-                            video.play().catch(error => {
-                                console.error('视频播放失败:', error);
-                            });
-                            video.classList.add('current');
-                        } else {
-                            video.pause();
-                            video.classList.remove('current');
-                        }
-                    });
-                }, { threshold: 0.5 });
-
-                const config = { childList: true, subtree: true };
-                const containerObserver = new MutationObserver((mutationsList) => {
-                    for (let mutation of mutationsList) {
-                        if (mutation.type === 'childList') {
-                            mutation.addedNodes.forEach(node => {
-                                if (node.tagName === 'VIDEO') {
-                                    observer.observe(node);
-                                }
-                            });
-                        }
-                    }
-                });
-
-                containerObserver.observe(videoContainer, config);
-            }
-
-            function debounce(func, delay) {
-                let debounceTimer;
-                return function () {
-                    const context = this;
-                    const args = arguments;
-                    clearTimeout(debounceTimer);
-                    debounceTimer = setTimeout(() => func.apply(context, args), delay);
-                };
-            }
-
-            function showError(message) {
-                const errorMsg = document.createElement('div');
-                errorMsg.className = 'error-message';
-                errorMsg.textContent = message;
-                videoContainer.appendChild(errorMsg);
-
-                setTimeout(() => {
-                    if (errorMsg.parentNode) {
-                        errorMsg.parentNode.removeChild(errorMsg);
-                    }
-                }, 3000);
-            }
-
-            function isNearBottom() {
-                const scrollY = window.scrollY;
-                const windowHeight = window.innerHeight;
-                const documentHeight = document.body.offsetHeight;
-                return scrollY + windowHeight >= documentHeight - 100;
-            }
-        })();
     </script>
 </body>
 
