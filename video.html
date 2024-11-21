@@ -93,7 +93,9 @@
                 { url: 'http://api.yujn.cn/api/xjj.php?type=video', key: 'direct' },
                 { url: 'http://api.yujn.cn/api/zzxjj.php?type=video', key: 'direct' },// 无需解析，直接返回视频地址
                 { url: 'https://api.pearktrue.cn/api/random/xjj/?type=json', key: 'video' },
-                { url: 'https://rapid-sunset-f444.2991742315.workers.dev/?url=http://api.yujn.cn/api/kuaimao.php?type=json', key: 'video' }// JSON中 video 字段为视频地址
+                { url: 'https://rapid-sunset-f444.2991742315.workers.dev/?url=http://api.yujn.cn/api/kuaimao.php?type=json', key: 'video' },
+                { url: ' http://api.yujn.cn/api/COS.php?type=video', key: 'direct' }
+                // JSON中 video 字段为视频地址
             ];
 
             document.addEventListener('DOMContentLoaded', () => {
@@ -174,13 +176,7 @@
                             videoUrl = result[randomApi.key];
                             console.log("已加载" + videoUrl)
                         }
-
-                        // 检查并返回有效的 URL
-                        if (isValidUrl(videoUrl)) {
-                            return videoUrl;
-                        } else {
-                            console.warn(`无效的视频 URL：${videoUrl}`);
-                        }
+                        return videoUrl;
                     } catch (error) {
                         console.error('接口请求失败:', error);
                     }
