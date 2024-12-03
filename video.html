@@ -1,27 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>冷月的小视频</title>
-    <link rel="apple-touch-icon" sizes="57x57" href="logoicon/apple-icon-57x57.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="logoicon/apple-icon-60x60.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="logoicon/apple-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="logoicon/apple-icon-76x76.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="logoicon/apple-icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="logoicon/apple-icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="logoicon/apple-icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="logoicon/apple-icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="logoicon/apple-icon-180x180.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="logoicon/android-icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="logoicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="logoicon/favicon-96x96.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="logoicon/favicon-16x16.png">
-    <link rel="manifest" href="logoicon/manifest.json">
-    <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
-    <meta name="theme-color" content="#ffffff">
+    <!-- 图标链接省略 -->
     <style>
         /* 全局样式 */
         body {
@@ -30,7 +13,6 @@
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
         }
-
         /* 视频容器样式 */
         .video-container {
             display: flex;
@@ -39,7 +21,6 @@
             padding: 10px;
             min-height: 100vh;
         }
-
         /* 固定视频竖屏比例样式 */
         video {
             width: 100%;
@@ -52,15 +33,12 @@
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             object-fit: cover;
-            /* 保持内容填充视频框 */
             transition: transform 0.3s ease;
         }
-
         /* 当前播放视频的样式 */
         video.current {
             transform: scale(1.05);
         }
-
         /* 加载指示器样式 */
         .loading {
             text-align: center;
@@ -70,230 +48,244 @@
         }
     </style>
 </head>
-
 <body>
     <div class="video-container" id="videoContainer">
         <div class="loading" id="loading">正在加载视频...</div>
     </div>
-
     <script>
-(function () {
-    const videoContainer = document.getElementById('videoContainer');
-    const loadingIndicator = document.getElementById('loading');
-    let currentVideoIndex = 0;
-    const initialLoadCount = 10;
-    const maxVideosOnScreen = 15;
-    let loading = false;
-    const loadedVideos = new Set();  // 用来缓存已加载的视频URL
+    (function () {
+        const videoContainer = document.getElementById('videoContainer');
+        const loadingIndicator = document.getElementById('loading');
+        const initialLoadCount = 10;
+        const maxVideosOnScreen = 15;
+        let loading = false;
+        const loadedVideos = new Set();  // 用来缓存已加载的视频URL
 
-    // 定义多个视频接口的 URL 列表
-    const apiUrls = [
-        { url: 'https://v2.api-m.com/api/meinv', key: 'data' },
-        { url: 'https://api.lolimi.cn/API/xjj/xjj.php', key: 'direct' },
-        { url: 'http://api.yujn.cn/api/xjj.php?type=json', key: 'data' },
-        { url: 'http://api.yujn.cn/api/zzxjj.php?type=json', key: 'data' },
-        { url: 'https://api.pearktrue.cn/api/random/xjj/?type=json', key: 'video' },
-        { url: 'https://rapid-sunset-f444.2991742315.workers.dev/?url=http://api.yujn.cn/api/kuaimao.php?type=json', key: 'video' },
-        { url: 'http://api.yujn.cn/api/COS.php?type=json', key: 'data' },
-        { url: 'http://api.yujn.cn/api/qingchun.php?type=json', key: 'data' },
-        { url: 'http://api.yujn.cn/api/nvgao.php?type=json', key: 'data' },
-        { url: 'http://api.yujn.cn/api/ksbianzhuang.php?type=json', key: 'data' },
-        { url: 'http://api.yujn.cn/api/luoli.php?type=json', key: 'data' },
-        { url: 'http://api.yujn.cn/api/tianmei.php?type=json', key: 'data' },
-        { url: 'http://api.yujn.cn/api/jksp.php?type=json', key: 'data' },
-        { url: 'http://api.yujn.cn/api/yuzu.php?type=json', key: 'data' },
-        { url: 'http://api.yujn.cn/api/rewu.php?type=json', key: 'data' },
-        { url: 'http://api.yujn.cn/api/ksxjjsp.php?', key: 'direct' }
-    ];
+        // 定义多个视频接口的 URL 列表
+        const apiUrls = [
+            { url: 'https://v2.api-m.com/api/meinv', key: 'data' },
+            { url: 'https://api.lolimi.cn/API/xjj/xjj.php', key: 'direct' },
+            { url: 'http://api.yujn.cn/api/xjj.php?type=json', key: 'data' },
+            { url: 'http://api.yujn.cn/api/zzxjj.php?type=json', key: 'data' },
+            { url: 'https://api.pearktrue.cn/api/random/xjj/?type=json', key: 'video' },
+            { url: 'https://rapid-sunset-f444.2991742315.workers.dev/?url=http://api.yujn.cn/api/kuaimao.php?type=json', key: 'video' },
+            { url: 'http://api.yujn.cn/api/COS.php?type=json', key: 'data' },
+            { url: 'http://api.yujn.cn/api/qingchun.php?type=json', key: 'data' },
+            { url: 'http://api.yujn.cn/api/nvgao.php?type=json', key: 'data' },
+            { url: 'http://api.yujn.cn/api/ksbianzhuang.php?type=json', key: 'data' },
+            { url: 'http://api.yujn.cn/api/luoli.php?type=json', key: 'data' },
+            { url: 'http://api.yujn.cn/api/tianmei.php?type=json', key: 'data' },
+            { url: 'http://api.yujn.cn/api/jksp.php?type=json', key: 'data' },
+            { url: 'http://api.yujn.cn/api/yuzu.php?type=json', key: 'data' },
+            { url: 'http://api.yujn.cn/api/rewu.php?type=json', key: 'data' },
+            { url: 'http://api.yujn.cn/api/ksxjjsp.php?', key: 'direct' }
+        ];
 
-    document.addEventListener('DOMContentLoaded', () => {
-        loadInitialVideos(initialLoadCount);
-        initializeIntersectionObserver();
-    });
+        // 限制最大并发加载数量
+        const MAX_CONCURRENT_LOADS = 5;
+        let currentConcurrentLoads = 0;
+        const loadQueue = [];
 
-    window.addEventListener('scroll', debounce(() => {
-        if (!loading && isNearBottom()) {
-            loadNextVideo();
-        }
-    }, 200));
+        document.addEventListener('DOMContentLoaded', () => {
+            loadInitialVideos(initialLoadCount);
+            initializeIntersectionObserver();
+        });
 
-    async function loadInitialVideos(count) {
-        loading = true;
-        loadingIndicator.style.display = 'block';
-
-        try {
-            for (let i = 0; i < count; i++) {
-                const videoUrl = await fetchNewVideo();
-                if (videoUrl) {
-                    await showVideo(videoUrl);
-                    currentVideoIndex++;
-                }
+        window.addEventListener('scroll', debounce(() => {
+            if (!loading && isNearBottom()) {
+                loadNextVideos(3); // 每次加载3个视频
             }
-        } catch (error) {
-            console.error('初始加载视频失败:', error);
-            showError('无法加载视频。');
-        }
+        }, 200));
 
-        loading = false;
-        loadingIndicator.style.display = 'none';
-    }
-
-    async function loadNextVideo() {
-        if (loading) return;
-        loading = true;
-        loadingIndicator.style.display = 'block';
-
-        try {
-            const videoUrl = await fetchNewVideo();
-
-            // 如果已经加载过该视频，则跳过
-            if (loadedVideos.has(videoUrl)) {
-                loading = false;
-                loadingIndicator.style.display = 'none';
-                return;
-            }
-
-            // 将视频 URL 缓存
-            loadedVideos.add(videoUrl);
-
-            await showVideo(videoUrl);
-            currentVideoIndex++;
-
-            // 控制屏幕上的最大视频数量
-            if (videoContainer.querySelectorAll('video').length > maxVideosOnScreen) {
-                clearOldestVideo();
-            }
-        } catch (error) {
-            console.error('获取视频失败:', error);
-            showError('无法加载视频。');
-        }
-
-        loading = false;
-        loadingIndicator.style.display = 'none';
-    }
-
-    async function fetchNewVideo() {
-        const maxRetries = 5;
-        let attempts = 0;
-
-        while (attempts < maxRetries) {
+        async function loadInitialVideos(count) {
+            loading = true;
+            loadingIndicator.style.display = 'block';
             try {
-                // 随机选择一个接口
-                const randomApi = apiUrls[Math.floor(Math.random() * apiUrls.length)];
-                const response = await fetch(randomApi.url, {
-                    method: 'GET',
-                    redirect: 'follow',
-                });
-                let videoUrl;
-                if (randomApi.key === 'direct') {
-                    videoUrl = response.url;
-                } else {
-                    const result = await response.json();
-                    videoUrl = result[randomApi.key];
-                    console.log("已加载" + videoUrl);
+                const loadPromises = [];
+                for (let i = 0; i < count; i++) {
+                    loadPromises.push(addVideo());
                 }
+                await Promise.all(loadPromises);
+            } catch (error) {
+                console.error('初始加载视频失败:', error);
+                showError('无法加载视频。');
+            }
+            loading = false;
+            loadingIndicator.style.display = 'none';
+        }
 
-                if (isValidUrl(videoUrl)) {
-                    return videoUrl;
-                } else {
-                    console.error('无效的视频 URL');
+        async function loadNextVideos(count) {
+            loading = true;
+            loadingIndicator.style.display = 'block';
+            try {
+                const loadPromises = [];
+                for (let i = 0; i < count; i++) {
+                    loadPromises.push(addVideo());
+                }
+                await Promise.all(loadPromises);
+            } catch (error) {
+                console.error('加载更多视频失败:', error);
+                showError('无法加载更多视频。');
+            }
+            loading = false;
+            loadingIndicator.style.display = 'none';
+        }
+
+        async function addVideo() {
+            if (currentConcurrentLoads >= MAX_CONCURRENT_LOADS) {
+                // 如果达到并发限制，将加载任务添加到队列
+                return new Promise((resolve, reject) => {
+                    loadQueue.push({ resolve, reject });
+                }).then(() => addVideo());
+            }
+
+            currentConcurrentLoads++;
+            try {
+                const videoUrl = await fetchNewVideo();
+                if (videoUrl && !loadedVideos.has(videoUrl)) {
+                    loadedVideos.add(videoUrl);
+                    await showVideo(videoUrl);
+                    // 控制屏幕上的最大视频数量
+                    if (videoContainer.querySelectorAll('video').length > maxVideosOnScreen) {
+                        clearOldestVideo();
+                    }
                 }
             } catch (error) {
-                console.error(`接口请求失败: 第${attempts + 1}次重试`, error);
-            }
-            attempts++;
-        }
-
-        throw new Error('所有接口请求失败');
-    }
-
-    function isValidUrl(url) {
-        return typeof url === 'string' && url.startsWith('http');
-    }
-
-    function showError(message) {
-        loadingIndicator.textContent = message;
-    }
-
-    async function showVideo(videoUrl) {
-        return new Promise((resolve, reject) => {
-            let videoElement = document.createElement('video');
-            videoElement.src = videoUrl;
-            videoElement.controls = true;
-            videoElement.autoplay = false;
-            videoElement.playsInline = true;
-            videoElement.preload = 'auto';  // 设置为 'auto' 来启用缓存
-            videoElement.load();  // 预加载视频
-
-            videoContainer.appendChild(videoElement);
-
-            videoElement.addEventListener('loadedmetadata', resolve);
-            videoElement.addEventListener('error', (e) => {
-                console.error('视频元素加载错误:', e);
-                reject(new Error('视频元素加载错误'));
-            });
-        });
-    }
-
-    function clearOldestVideo() {
-        const firstVideo = videoContainer.querySelector('video');
-        if (firstVideo) {
-            firstVideo.pause();
-            videoContainer.removeChild(firstVideo);
-        }
-    }
-
-    function debounce(func, delay) {
-        let timeout;
-        return function (...args) {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), delay);
-        };
-    }
-
-    function isNearBottom() {
-        return window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 200;
-    }
-
-    // 增加 IntersectionObserver 的配置，确保更好触发
-    function initializeIntersectionObserver() {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                const video = entry.target;
-                if (entry.isIntersecting) {
-                    video.play().catch(error => {
-                        console.error('视频播放失败:', error);
-                    });
-                    video.classList.add('current');
-                } else {
-                    video.pause();
-                    video.classList.remove('current');
-                }
-            });
-        }, {
-            rootMargin: '100px 0px', // 增加触发范围，当视频接近视口时提前触发加载
-            threshold: 0.5
-        });
-
-        const config = { childList: true, subtree: true };
-        const containerObserver = new MutationObserver((mutationsList) => {
-            for (let mutation of mutationsList) {
-                if (mutation.type === 'childList') {
-                    mutation.addedNodes.forEach(node => {
-                        if (node.tagName === 'VIDEO') {
-                            observer.observe(node);
-                        }
-                    });
+                console.error('添加视频失败:', error);
+            } finally {
+                currentConcurrentLoads--;
+                if (loadQueue.length > 0) {
+                    const nextLoad = loadQueue.shift();
+                    nextLoad.resolve();
                 }
             }
-        });
+        }
 
-        containerObserver.observe(videoContainer, config);
-    }
-})();
+        async function fetchNewVideo() {
+            const maxRetries = 5;
+            let attempts = 0;
+            while (attempts < maxRetries) {
+                try {
+                    // 随机选择一个接口
+                    const randomApi = apiUrls[Math.floor(Math.random() * apiUrls.length)];
+                    const response = await fetch(randomApi.url, {
+                        method: 'GET',
+                        redirect: 'follow',
+                    });
 
+                    let videoUrl;
+                    if (randomApi.key === 'direct') {
+                        videoUrl = response.url;
+                    } else {
+                        const result = await response.json();
+                        videoUrl = result[randomApi.key];
+                    }
 
+                    console.log(`API: ${randomApi.url}, 视频URL: ${videoUrl}`);
+
+                    if (isValidUrl(videoUrl)) {
+                        return videoUrl;
+                    } else {
+                        console.error('无效的视频 URL:', videoUrl);
+                    }
+                } catch (error) {
+                    console.error(`接口请求失败: 第${attempts + 1}次重试`, error);
+                }
+                attempts++;
+            }
+            throw new Error('所有接口请求失败');
+        }
+
+        function isValidUrl(url) {
+            return typeof url === 'string' && url.startsWith('http');
+        }
+
+        function showError(message) {
+            loadingIndicator.textContent = message;
+        }
+
+        async function showVideo(videoUrl) {
+            return new Promise((resolve, reject) => {
+                let videoElement = document.createElement('video');
+                videoElement.src = videoUrl;
+                videoElement.controls = true;
+                videoElement.autoplay = false;
+                videoElement.playsInline = true;
+                videoElement.preload = 'auto';  // 设置为 'auto' 来启用缓存
+                videoElement.load();  // 预加载视频
+                videoContainer.appendChild(videoElement);
+
+                // 等待视频元数据加载完成
+                videoElement.addEventListener('loadedmetadata', () => {
+                    console.log('视频元数据加载完成:', videoUrl);
+                    resolve();
+                });
+
+                // 监听视频加载错误
+                videoElement.addEventListener('error', (e) => {
+                    console.error('视频元素加载错误:', e);
+                    videoContainer.removeChild(videoElement);
+                    reject(new Error('视频元素加载错误'));
+                });
+            });
+        }
+
+        function clearOldestVideo() {
+            const firstVideo = videoContainer.querySelector('video');
+            if (firstVideo) {
+                firstVideo.pause();
+                videoContainer.removeChild(firstVideo);
+                console.log('移除最早的视频');
+            }
+        }
+
+        function debounce(func, delay) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
+        function isNearBottom() {
+            return window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 200;
+        }
+
+        // 增加 IntersectionObserver 的配置，确保更好触发
+        function initializeIntersectionObserver() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const video = entry.target;
+                    if (entry.isIntersecting) {
+                        video.play().catch(error => {
+                            console.error('视频播放失败:', error);
+                        });
+                        video.classList.add('current');
+                    } else {
+                        video.pause();
+                        video.classList.remove('current');
+                    }
+                });
+            }, {
+                rootMargin: '100px 0px', // 增加触发范围，当视频接近视口时提前触发加载
+                threshold: 0.5
+            });
+
+            const config = { childList: true, subtree: true };
+            const containerObserver = new MutationObserver((mutationsList) => {
+                for (let mutation of mutationsList) {
+                    if (mutation.type === 'childList') {
+                        mutation.addedNodes.forEach(node => {
+                            if (node.tagName === 'VIDEO') {
+                                observer.observe(node);
+                            }
+                        });
+                    }
+                }
+            });
+            containerObserver.observe(videoContainer, config);
+        }
+    })();
     </script>
 </body>
-
 </html>
