@@ -3,68 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>今日课程</title>
+    <title>课程表</title> <!-- 修改 title 为更通用的 "课程表" -->
     <style>
-        /* 在这里添加 CSS 样式 */
         body {
-            font-family: sans-serif;
+            font-family: 'Arial', sans-serif;
             margin: 20px;
+            background-color: #f4f7f9;
+            color: #333;
         }
-
+        .header-container {
+            display: flex;
+            flex-direction: column; /* 修改为垂直排列标题和日期 */
+            justify-content: center; /* 水平居中 */
+            align-items: center; /* 垂直居中 */
+            margin-bottom: 20px;
+        }
         h1 {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 5px; /* 标题和日期之间增加间距 */
+            color: #2c3e50;
         }
-
+        #date-display { /* 日期显示元素样式 */
+            text-align: center;
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 15px; /* 日期和按钮之间增加间距 */
+        }
+        .nav-button-container { /* 按钮容器 */
+            display: flex;
+            justify-content: center; /* 按钮水平居中 */
+            gap: 15px; /* 按钮之间间距 */
+        }
+        .nav-button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #3498db;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 0.9em;
+        }
+        .nav-button:hover {
+            background-color: #2980b9;
+        }
         .section {
             margin-bottom: 20px;
-            border: 1px solid #ddd;
-            padding: 10px;
-            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-
         .section-title {
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
+            color: #34495e;
         }
         .section-title .time{
             margin-left: 15px;
             font-size: 0.9em;
-            color: #666;
+            color: #777;
         }
-
         .course {
-            margin-bottom: 5px;
-            padding: 8px;
-            background-color: #f9f9f9;
-            border-radius: 4px;
+            margin-bottom: 10px;
+            padding: 12px;
+            background-color: #f0f0f0;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
         }
-
         .no-course {
-            color: #999;
+            color: #777;
+            font-style: italic;
         }
         .course-name{
-            font-size: 1.1em;
-            font-weight: 500;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
         }
         .teacher, .classroom, .other-info{
-            margin-left: 8px;
-            font-size: 0.9em;
+            margin-left: 0;
+            font-size: 0.95em;
+            color: #555;
+        }
+        .classroom {
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        #schedule-container p {
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <h1>今日课程</h1>
+    <div class="header-container">
+        <h1>课程表</h1> <!-- 修改标题为更通用的 "课程表" -->
+        <p id="date-display"></p> <!-- 添加日期显示元素 -->
+    </div>
+    <div class="nav-button-container"> <!-- 按钮容器 -->
+        <button id="yesterdayBtn" class="nav-button">昨天课表</button>
+        <button id="tomorrowBtn" class="nav-button">明天课表</button>
+    </div>
 
     <div id="schedule-container">
         <!-- 课程信息将在这里动态生成 -->
     </div>
 
     <script>
-        // 在这里添加 JavaScript 代码
-        const sectionTimes = {  // 每节课的时间
+        const sectionTimes = {
             "第一大节": "8:30 - 10:00",
             "第二大节": "10:20 - 11:50",
             "第三大节": "14:20 - 15:50",
@@ -72,79 +122,117 @@
             "第五大节": "17:40 - 18:40",
             "第六大节": "19:00 - 20:30",
         };
-        const sections = ["第一大节","第二大节","第三大节","第四大节","第五大节","第六大节"]
+        const sections = ["第一大节","第二大节","第三大节","第四大节","第五大节","第六大节"];
+        const yesterdayBtn = document.getElementById('yesterdayBtn');
+        const tomorrowBtn = document.getElementById('tomorrowBtn');
+        const dateDisplay = document.getElementById('date-display'); // 获取日期显示元素
 
-        // 获取当前日期的函数
-        function getCurrentDate() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
+        let currentDate = new Date(); // 使用 Date 对象跟踪当前日期
+
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
         }
 
-        // 获取并显示课程数据
-        async function fetchAndDisplaySchedule() {
-            const currentDate = getCurrentDate();
-            // const apiUrl = `/api/schedule?date=${currentDate}`; // 或者使用您想要的任何固定日期进行测试
-            const apiUrl = `https://kb.lyhc.top/api/schedule?date=${currentDate}`;
-            try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) {
-                    throw new Error(`HTTP 错误! 状态: ${response.status}`);
-                }
-                const scheduleData = await response.json();
-
-                const scheduleContainer = document.getElementById('schedule-container');
-                scheduleContainer.innerHTML = ''; // 清空容器
-
-                // 遍历所有节次
-                sections.forEach(sectionName => {
-                    const sectionDiv = document.createElement('div');
-                    sectionDiv.classList.add('section');
-
-                    const sectionTitle = document.createElement('div');
-                    sectionTitle.classList.add('section-title');
-                    sectionTitle.textContent = sectionName;
-
-                    // 添加上课时间
-                    const timeSpan = document.createElement('span');
-                    timeSpan.classList.add("time")
-                    timeSpan.textContent = sectionTimes[sectionName] || '';
-                    sectionTitle.appendChild(timeSpan);
-
-                    sectionDiv.appendChild(sectionTitle);
-
-                    if (scheduleData[sectionName] && scheduleData[sectionName].length > 0) {
-                        // 如果该节次有课程，则显示课程信息
-                        scheduleData[sectionName].forEach(course => {
-                            const courseDiv = document.createElement('div');
-                            courseDiv.classList.add('course');
-                            courseDiv.innerHTML = `
-                                <span class="course-name">${course.course_name}</span>
-                                <span class="teacher">教师: ${course.teacher_name}</span>
-                                <span class="classroom">教室: ${course.classroom}</span>
-                                <span class="other-info">${course.other_info.join(', ')}</span>
-                            `;
-                            sectionDiv.appendChild(courseDiv);
-                        });
-                    } else {
-                        // 如果该节次没有课程，则显示提示信息
-                        const noCourseDiv = document.createElement('div');
-                        noCourseDiv.classList.add('no-course');
-                        noCourseDiv.textContent = '本节无课';
-                        sectionDiv.appendChild(noCourseDiv);
-                    }
-
-                    scheduleContainer.appendChild(sectionDiv);
-                });
-            } catch (error) {
-                console.error('获取课程数据时出错:', error);
-                scheduleContainer.innerHTML = '<p>无法加载课程数据。</p>';
-            }
+        function getFormattedDateForDisplay(date) { // 新增函数，用于显示更友好的日期格式
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const weekdayNames = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+            const weekday = weekdayNames[date.getDay()];
+            return `${year}-${month}-${day} ${weekday}`; // 例如： 2025-03-05 星期三
         }
-        // 页面加载完成后，获取并显示课程数据
-        document.addEventListener('DOMContentLoaded', fetchAndDisplaySchedule);
+
+
+        function fetchAndDisplaySchedule(date) {
+            const formattedDate = formatDate(date); // 使用 formatDate 获取 YYYY-MM-DD 格式日期
+            const apiUrl = `https://kb.lyhc.top/api/schedule?date=${formattedDate}&timestamp=${Date.now()}`;
+            const scheduleContainer = document.getElementById('schedule-container');
+            scheduleContainer.innerHTML = '<p>加载课程数据中...</p>';
+
+            const dayOfWeek = date.getDay(); // 使用传入的 date 参数获取星期几
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                scheduleContainer.innerHTML = '<p style="text-align:center; font-size:1.2em; color:#555; padding:20px;">休息啦，今天不上课 🎉</p>';
+                return;
+            }
+
+            fetch(apiUrl)
+                .then(response => { /* ... (fetch 成功处理代码，与之前相同) ... */
+                    if (!response.ok) {
+                        throw new Error(`HTTP 错误! 状态: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(scheduleData => { /* ... (数据展示代码，与之前相同) ... */
+                    scheduleContainer.innerHTML = '';
+                    if (Object.keys(scheduleData).length === 0) {
+                        scheduleContainer.innerHTML = '<p style="text-align:center; color:#777; padding:20px;">今天没有课程数据。</p>';
+                        return;
+                    }
+                    sections.forEach(sectionName => { /* ... (节次和课程展示代码，与之前相同) ... */
+                        const sectionDiv = document.createElement('div');
+                        sectionDiv.classList.add('section');
+                        const sectionTitle = document.createElement('div');
+                        sectionTitle.classList.add('section-title');
+                        sectionTitle.textContent = sectionName;
+                        const timeSpan = document.createElement('span');
+                        timeSpan.classList.add("time")
+                        timeSpan.textContent = sectionTimes[sectionName] || '';
+                        sectionTitle.appendChild(timeSpan);
+                        sectionDiv.appendChild(sectionTitle);
+                        if (scheduleData[sectionName] && scheduleData[sectionName].length > 0) {
+                            scheduleData[sectionName].forEach(course => {
+                                const courseDiv = document.createElement('div');
+                                courseDiv.classList.add('course');
+                                courseDiv.innerHTML = `
+                                    <span class="course-name">${course.course_name}</span>
+                                    <span class="classroom"><b>教室: <span style="color:#e74c3c;">${course.classroom}</span></b></span>
+                                    <span class="teacher">教师: ${course.teacher_name}</span>
+                                    <span class="other-info">${course.other_info.join(', ')}</span>
+                                `;
+                                sectionDiv.appendChild(courseDiv);
+                            });
+                        } else {
+                            const noCourseDiv = document.createElement('div');
+                            noCourseDiv.classList.add('no-course');
+                            noCourseDiv.textContent = '本节无课';
+                            sectionDiv.appendChild(noCourseDiv);
+                        }
+                        scheduleContainer.appendChild(sectionDiv);
+                    });
+                })
+                .catch(error => { /* ... (错误处理代码，与之前相同) ... */
+                    console.error('获取课程数据时出错:', error);
+                    scheduleContainer.innerHTML = '<p style="color:red;">无法加载课程数据，请检查网络连接或稍后重试。</p>';
+                });
+        }
+
+        function loadTodaySchedule() {
+            currentDate = new Date(); // 更新 currentDate 为今天
+            const formattedDisplayDate = getFormattedDateForDisplay(currentDate); // 获取用于显示的日期格式
+            dateDisplay.textContent = formattedDisplayDate; // 设置日期显示元素内容
+            fetchAndDisplaySchedule(currentDate); // 传递 Date 对象给 fetchAndDisplaySchedule
+        }
+
+
+        yesterdayBtn.addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() - 1); // currentDate 减 1 天
+            const formattedDisplayDate = getFormattedDateForDisplay(currentDate);
+            dateDisplay.textContent = formattedDisplayDate; // 更新日期显示
+            fetchAndDisplaySchedule(currentDate); // 传递更新后的 currentDate
+        });
+
+        tomorrowBtn.addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() + 1); // currentDate 加 1 天
+            const formattedDisplayDate = getFormattedDateForDisplay(currentDate);
+            dateDisplay.textContent = formattedDisplayDate; // 更新日期显示
+            fetchAndDisplaySchedule(currentDate); // 传递更新后的 currentDate
+        });
+
+
+        document.addEventListener('DOMContentLoaded', loadTodaySchedule);
     </script>
 </body>
 </html>
