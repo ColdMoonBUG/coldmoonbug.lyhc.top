@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今日课程</title>
+    <style>
+        /* 在这里添加 CSS 样式 */
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .section-title .time{
+            margin-left: 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .course {
+            margin-bottom: 5px;
+            padding: 8px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .no-course {
+            color: #999;
+        }
+        .course-name{
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+        .teacher, .classroom, .other-info{
+            margin-left: 8px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>今日课程</h1>
+
+    <div id="schedule-container">
+        <!-- 课程信息将在这里动态生成 -->
+    </div>
+
+    <script>
+        // 在这里添加 JavaScript 代码
+        const sectionTimes = {  // 每节课的时间
+            "第一大节": "8:30 - 10:00",
+            "第二大节": "10:20 - 11:50",
+            "第三大节": "14:20 - 15:50",
+            "第四大节": "16:00 - 17:30",
+            "第五大节": "17:40 - 18:40",
+            "第六大节": "19:00 - 20:30",
+        };
+        const sections = ["第一大节","第二大节","第三大节","第四大节","第五大节","第六大节"]
+
+        // 获取当前日期的函数
+        function getCurrentDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // 获取并显示课程数据
+        async function fetchAndDisplaySchedule() {
+            const currentDate = getCurrentDate();
+            // const apiUrl = `/api/schedule?date=${currentDate}`; // 或者使用您想要的任何固定日期进行测试
+            const apiUrl = `https://kb.lyhc.top/api/schedule?date=${currentDate}`;
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP 错误! 状态: ${response.status}`);
+                }
+                const scheduleData = await response.json();
+
+                const scheduleContainer = document.getElementById('schedule-container');
+                scheduleContainer.innerHTML = ''; // 清空容器
+
+                // 遍历所有节次
+                sections.forEach(sectionName => {
+                    const sectionDiv = document.createElement('div');
+                    sectionDiv.classList.add('section');
+
+                    const sectionTitle = document.createElement('div');
+                    sectionTitle.classList.add('section-title');
+                    sectionTitle.textContent = sectionName;
+
+                    // 添加上课时间
+                    const timeSpan = document.createElement('span');
+                    timeSpan.classList.add("time")
+                    timeSpan.textContent = sectionTimes[sectionName] || '';
+                    sectionTitle.appendChild(timeSpan);
+
+                    sectionDiv.appendChild(sectionTitle);
+
+                    if (scheduleData[sectionName] && scheduleData[sectionName].length > 0) {
+                        // 如果该节次有课程，则显示课程信息
+                        scheduleData[sectionName].forEach(course => {
+                            const courseDiv = document.createElement('div');
+                            courseDiv.classList.add('course');
+                            courseDiv.innerHTML = `
+                                <span class="course-name">${course.course_name}</span>
+                                <span class="teacher">教师: ${course.teacher_name}</span>
+                                <span class="classroom">教室: ${course.classroom}</span>
+                                <span class="other-info">${course.other_info.join(', ')}</span>
+                            `;
+                            sectionDiv.appendChild(courseDiv);
+                        });
+                    } else {
+                        // 如果该节次没有课程，则显示提示信息
+                        const noCourseDiv = document.createElement('div');
+                        noCourseDiv.classList.add('no-course');
+                        noCourseDiv.textContent = '本节无课';
+                        sectionDiv.appendChild(noCourseDiv);
+                    }
+
+                    scheduleContainer.appendChild(sectionDiv);
+                });
+            } catch (error) {
+                console.error('获取课程数据时出错:', error);
+                scheduleContainer.innerHTML = '<p>无法加载课程数据。</p>';
+            }
+        }
+        // 页面加载完成后，获取并显示课程数据
+        document.addEventListener('DOMContentLoaded', fetchAndDisplaySchedule);
+    </script>
+</body>
+</html>
