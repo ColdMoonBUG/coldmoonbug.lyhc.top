@@ -1,12 +1,12 @@
 // js/gallery.js
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. 定义分类及标签
+  // 1. 分类及标签
   const categories = {
     group1: [
-      { num: 1,  label: "二次方程及因式分解" },
-      { num: 2,  label: "指数、对数与数列" },
-      { num: 3,  label: "数列求和及三角函数" },
-      { num: 4,  label: "奇偶函数" }
+      { num: 1, label: "二次方程及因式分解" },
+      { num: 2, label: "指数、对数与数列" },
+      { num: 3, label: "数列求和及三角函数" },
+      { num: 4, label: "奇偶函数" }
     ],
     group2: [
       { num: 5,  label: "等价及基础极限公式" },
@@ -39,26 +39,26 @@ document.addEventListener('DOMContentLoaded', () => {
     ]
   };
 
-  // 2. 读取 cat & page
+  // 2. 读取 URL 参数
   const params = new URLSearchParams(window.location.search);
-  const cat    = params.get('cat')  || 'group1';
-  const page   = parseInt(params.get('page'),10)
-                 || categories[cat][0].num;
+  const cat    = params.get("cat")  || "group1";
+  const page   = parseInt(params.get("page"), 10)
+                   || categories[cat][0].num;
 
-  // 3. 构造当前分类页码列表 & 索引
+  // 3. 构建当前分类页码 & 索引
   const list = categories[cat];
   const nums = list.map(p => p.num);
   let currentIndex = nums.indexOf(page);
   if (currentIndex < 0) currentIndex = 0;
 
-  // 4. 动态填充下拉菜单（用 label 而非数字）
+  // 4. 填充下拉菜单
   for (let i=1; i<=6; i++){
     const menuEl = document.getElementById(`menu${i}`);
     if (!menuEl) continue;
     const key = `group${i}`;
-    categories[key].forEach(p=>{
-      const a = document.createElement('a');
-      a.className   = 'dropdown-item';
+    categories[key].forEach(p => {
+      const a = document.createElement("a");
+      a.className   = "dropdown-item";
       a.href        = `gallery.html?cat=${key}&page=${p.num}`;
       a.textContent = p.label;
       menuEl.appendChild(a);
@@ -66,66 +66,68 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 5. 获取 DOM
-  const wrap    = document.getElementById('canvas-wrap');
-  const thumbs  = document.getElementById('thumbs');
-  const prevBtn = document.getElementById('prev-btn');
-  const nextBtn = document.getElementById('next-btn');
-  const loading = document.getElementById('loading');
+  const wrap    = document.getElementById("canvas-wrap");
+  const thumbs  = document.getElementById("thumbs");
+  const prevBtn = document.getElementById("prev-btn");
+  const nextBtn = document.getElementById("next-btn");
+  const loading = document.getElementById("loading");
 
-  // 6. 渲染函数：保持“fit-height”顶部对齐
+  // 6. 渲染函数：fit-height 顶部对齐，水平居中
   function showByIndex(idx){
-    if(idx<0||idx>=nums.length) return;
+    if (idx<0||idx>=nums.length) return;
     currentIndex = idx;
     const num = nums[idx];
-    wrap.innerHTML = '';
+
+    wrap.innerHTML = "";
     wrap.appendChild(loading);
     wrap.appendChild(prevBtn);
     wrap.appendChild(nextBtn);
-    loading.classList.add('show');
+    loading.classList.add("show");
 
     const img = new Image();
     img.src = `./formulaimg/${num}.png`;
-    img.style.position = 'absolute';
+    img.style.position = "absolute";
 
-    img.onload = ()=>{
-      loading.classList.remove('show');
+    img.onload = () => {
+      loading.classList.remove("show");
       wrap.appendChild(img);
       const W = wrap.clientWidth, H = wrap.clientHeight;
       const w = img.naturalWidth, h = img.naturalHeight;
-      // fit-height
       const scale = H / h;
       const offsetX = (W - w * scale) / 2;
       const offsetY = 0;
-      panzoom(img,{
-        maxZoom:5, minZoom:0, bounds:false,
-        initialZoom:scale,
-        initialX:offsetX,
-        initialY:offsetY
+      panzoom(img, {
+        maxZoom:     5,
+        minZoom:     0,
+        bounds:      false,
+        initialZoom: scale,
+        initialX:    offsetX,
+        initialY:    offsetY
       });
-      document.querySelectorAll('.thumb').forEach((b,i)=>{
-        b.classList.toggle('active', i===currentIndex);
+      document.querySelectorAll(".thumb").forEach((b,i)=>{
+        b.classList.toggle("active", i===currentIndex);
       });
     };
-    img.onerror = ()=>{
+    img.onerror = () => {
       wrap.innerHTML = `<p style="color:red;text-align:center;">
         无法加载第 ${num} 张
       </p>`;
     };
   }
 
-  // 7. 绑定翻页
-  prevBtn.onclick = ()=>showByIndex(currentIndex-1);
-  nextBtn.onclick = ()=>showByIndex(currentIndex+1);
+  // 7. 翻页绑定
+  prevBtn.onclick = () => showByIndex(currentIndex-1);
+  nextBtn.onclick = () => showByIndex(currentIndex+1);
 
   // 8. 底部序号
   list.forEach((p,i)=>{
-    const btn = document.createElement('div');
-    btn.className = 'thumb';
+    const btn = document.createElement("div");
+    btn.className   = "thumb";
     btn.textContent = p.num;
-    btn.onclick = ()=>showByIndex(i);
+    btn.onclick     = () => showByIndex(i);
     thumbs.appendChild(btn);
   });
 
-  // 9. 默认渲染
+  // 9. 首次渲染
   showByIndex(currentIndex);
 });

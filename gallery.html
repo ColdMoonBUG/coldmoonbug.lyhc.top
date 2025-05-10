@@ -1,27 +1,38 @@
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>公式图库</title>
-  <link
-    href="css/bootstrap.min.css"
-    rel="stylesheet"
-  />
+  <!-- Bootstrap 5 CSS -->
+  <link href="css/bootstrap.min.css" rel="stylesheet" />
   <style>
     :root {
-      --primary-color: #007bff; /* Consistent Blue */
-      --primary-light: #5dade2; /* Lighter blue for hover/active */
-      --primary-dark: #0056b3;  /* Darker blue for base navbar */
-      --secondary-color: #28a745; /* Consistent Green */
+      --primary-color: #007bff;
+      /* 主题蓝 */
+      --primary-light: #5dade2;
+      /* 用于 hover/active 的浅蓝色 */
+      --primary-dark: #0056b3;
+      /* 用于导航栏背景的深蓝色 */
+      --secondary-color: #28a745;
+      /* 辅助绿，用于激活的缩略图 */
       --bg-main: #e9ecef;
+      /* 页面主背景色 */
       --bg-canvas: #343a40;
+      /* 画布区域背景色 */
       --card-bg: #ffffff;
+      /* 卡片/下拉菜单背景色 */
       --text-light: #f8f9fa;
+      /* 用于深色背景上的文字 */
       --text-dark: #212529;
+      /* 用于浅色背景上的文字 */
       --border-color: #ced4da;
+      /* 边框颜色 */
       --navbar-height: 60px;
+      /* 导航栏高度 */
     }
+
     body {
       background: var(--bg-main);
       color: var(--text-dark);
@@ -29,74 +40,232 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
+      /* 确保body占满整个视口高度 */
       font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
+      /* Google Font 或备用 */
       overflow: hidden;
+      /* 防止在某些情况下出现不必要的滚动条 */
     }
 
-    /* ===== Navbar Styling (Consistent Blue Theme) ===== */
+    /* ===== Navbar 整体样式 ===== */
     .navbar.fixed-top {
-      background: var(--primary-dark); /* Use consistent variable */
-      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+      background: var(--primary-dark);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
       height: var(--navbar-height);
       transition: background 0.3s ease;
+      z-index: 1030;
+      /* 确保在最上层 */
     }
+
     .navbar.fixed-top:hover {
       background: var(--primary-color);
+      /* 导航栏悬浮时变色 */
     }
+
     .navbar-brand {
       font-weight: 500;
       font-size: 1.25rem;
       color: var(--text-light) !important;
+      /* 品牌文字颜色 */
+      transition: opacity 0.2s ease;
     }
+
+    .navbar-brand:hover {
+      opacity: 0.85;
+    }
+
+    /* Navbar Toggler (汉堡包按钮) */
+    .navbar-toggler {
+      border-color: rgba(255, 255, 255, 0.25);
+      transition: box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+
+    .navbar-toggler:focus {
+      box-shadow: 0 0 0 0.25rem rgba(var(--primary-light), 0.5);
+      /* Bootstrap 默认的 focus ring */
+    }
+
+    .navbar-toggler:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .navbar-toggler-icon {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+      /* 图标颜色更亮 */
+    }
+
+    /* Navbar 链接 (一级菜单项) */
     .navbar-nav .nav-link {
-      color: rgba(255,255,255,0.85);
+      color: rgba(255, 255, 255, 0.85);
       transition: color 0.2s ease, background-color 0.2s ease;
-      padding: 0.5rem 0.8rem;
-      border-radius: 4px;
+      padding: 0.6rem 0.9rem;
+      /* 增加可点击区域 */
+      border-radius: 5px;
+      /* 轻微圆角 */
       font-weight: 500;
+      margin: 0 0.2rem;
+      /* 导航项之间的间距 */
     }
+
     .navbar-nav .nav-link:hover,
     .navbar-nav .nav-link:focus,
     .navbar-nav .nav-link.active {
+      /* 桌面端激活/悬浮状态 */
       color: var(--text-light);
-      background-color: rgba(255,255,255,0.2);
+      background-color: rgba(255, 255, 255, 0.15);
+      /* 背景色稍明显 */
     }
-     .navbar-toggler {
-        border-color: rgba(255,255,255,0.25);
-    }
-    .navbar-toggler-icon {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-    }
-    .nav-item.dropdown:hover > .dropdown-menu {
-      display: block;
-      margin-top: 0;
-      animation: fadeInDropdown 0.2s ease-out forwards;
-    }
+
+    /* 下拉菜单 (二级菜单) */
     .dropdown-menu {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      border-radius: 0 0 6px 6px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+      /* 阴影更柔和 */
+      border-radius: 6px;
+      /* 统一圆角 */
+      margin-top: 0.125rem;
+      /* 与导航栏稍微有点间距 */
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+      animation: fadeInDropdown 0.25s ease-out forwards;
     }
+
     .dropdown-item {
-      color: var(--text-dark);
-      transition: background 0.2s ease, color 0.2s ease;
-      padding: 0.5rem 1rem;
+      color: var(--text-dark) !important;
+      /* 确保深色文字 */
+      transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+      padding: 0.65rem 1.1rem;
+      /* 增加内边距 */
+      font-weight: 400;
+      border-radius: 4px;
+      /* 给每个item也加点圆角 */
+      margin: 0.1rem 0.25rem;
+      /* item之间的间距 */
+      width: calc(100% - 0.5rem);
+      /* 宽度适应，减去左右margin */
     }
+
     .dropdown-item:hover,
     .dropdown-item:focus {
       background: var(--primary-light);
-      color: var(--text-light);
+      color: var(--text-light) !important;
+      transform: translateX(3px);
+      /* 悬浮时轻微右移 */
     }
-     .dropdown-item.active, .dropdown-item:active { /* Ensure active items are styled */
-        color: #fff;
-        text-decoration: none;
-        background-color: var(--primary-color);
+
+    .dropdown-item.active,
+    .dropdown-item:active {
+      /* :active 用于点击时的反馈 */
+      color: var(--text-light) !important;
+      background-color: var(--primary-color) !important;
+      transform: translateX(0);
+      /* 点击时恢复原位或不同效果 */
     }
+
     @keyframes fadeInDropdown {
-        from { opacity: 0; transform: translateY(-5px); }
-        to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.98);
+      }
+
+      /* 动画更细致 */
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
+
+    /* --- 移动端导航栏展开后的样式优化 --- */
+    @media (max-width: 991.98px) {
+
+      /* Bootstrap的lg断点以下 (navbar-expand-lg) */
+      .navbar-collapse {
+        background-color: var(--card-bg);
+        /* 移动端展开菜单的背景色 (浅色) */
+        border-top: 1px solid var(--border-color);
+        box-shadow: 0 8px 10px rgba(0, 0, 0, 0.1);
+        padding: 0.5rem 0;
+        /* 给展开的菜单一些上下内边距 */
+        margin-top: 0;
+        /* 确保与导航栏紧贴 */
+        max-height: calc(100vh - var(--navbar-height) - 20px);
+        /* 限制最大高度并允许滚动 */
+        overflow-y: auto;
+        transition: background-color 0.3s ease;
+      }
+
+      .navbar-collapse .navbar-nav .nav-item {
+        border-bottom: 1px solid var(--bs-border-color-translucent, rgba(0, 0, 0, 0.075));
+        /* 更细的分隔线 */
+      }
+
+      .navbar-collapse .navbar-nav .nav-item:last-child {
+        border-bottom: none;
+      }
+
+      /* 移动端展开时，一级菜单项的样式 */
+      .navbar-collapse .navbar-nav .nav-link {
+        color: var(--text-dark) !important;
+        /* 文字颜色改为深色 */
+        padding: 0.85rem 1.2rem;
+        /* 增加可点击区域 */
+        border-radius: 0;
+        font-weight: 500;
+        /* 保持字重 */
+      }
+
+      .navbar-collapse .navbar-nav .nav-link:hover,
+      .navbar-collapse .navbar-nav .nav-link:focus,
+      .navbar-collapse .navbar-nav .nav-link.active {
+        background-color: var(--primary-light) !important;
+        color: var(--text-light) !important;
+      }
+
+      /* 移动端展开时，二级菜单(dropdown-menu)的样式 */
+      .navbar-collapse .dropdown-menu {
+        background-color: #f8f9fa;
+        /* 二级菜单背景可以稍有区别 */
+        box-shadow: none;
+        border: none;
+        padding-left: 1.5rem;
+        /* 二级菜单项增加缩进 */
+        margin-left: 0.5rem;
+        /* 整体二级菜单相对一级菜单缩进 */
+        margin-right: 0.5rem;
+        border-radius: 4px;
+        /* 给二级菜单容器一点圆角 */
+      }
+
+      .navbar-collapse .dropdown-menu .dropdown-item {
+        padding: 0.7rem 1rem;
+        color: var(--text-dark) !important;
+      }
+
+      .navbar-collapse .dropdown-menu .dropdown-item:hover,
+      .navbar-collapse .dropdown-menu .dropdown-item:focus,
+      .navbar-collapse .dropdown-menu .dropdown-item.active {
+        background-color: var(--primary-color) !important;
+        color: var(--text-light) !important;
+      }
+    }
+
+    /* 桌面端二级菜单悬浮展开的逻辑 */
+    @media (min-width: 992px) {
+      .navbar-nav .nav-item.dropdown:hover>.dropdown-menu {
+        /* 更精确的选择器 */
+        display: block !important;
+        /* 强制显示 */
+        /* animation: fadeInDropdown 0.2s ease-out forwards; /* 已在 .dropdown-menu 定义 */
+      }
+
+      /* 可选: 如果希望桌面端一级菜单在悬浮时也有背景变化 */
+      /* .navbar-nav .nav-item:hover > .nav-link {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: var(--text-light);
+    } */
+    }
+
 
     /* ===== 画布容器 ===== */
     #canvas-wrap {
@@ -105,14 +274,23 @@
       overflow: hidden;
       background: var(--bg-canvas);
     }
-    #canvas-wrap canvas {
+
+    #canvas-wrap canvas,
+    #canvas-wrap img {
+      /* 如果你还用img作为后备 */
+      /* position: absolute; */
+      /* Panzoom会处理定位, 如果不用panzoom, 这个可能需要 */
       display: block;
+      /* 确保是块级元素 */
       transform-origin: 0 0;
       cursor: grab;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      /* JS会处理opacity和过渡 */
     }
-    #canvas-wrap canvas:active {
-        cursor: grabbing;
+
+    #canvas-wrap canvas:active,
+    #canvas-wrap img:active {
+      cursor: grabbing;
     }
 
     /* ===== 翻页按钮 ===== */
@@ -124,7 +302,7 @@
       height: 44px;
       background: rgba(255, 255, 255, 0.15);
       color: var(--text-light);
-      border: 1px solid rgba(255,255,255,0.2);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 50%;
       font-size: 20px;
       cursor: pointer;
@@ -133,20 +311,28 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
+
     .nav-btn:hover {
       background: rgba(255, 255, 255, 0.3);
-      border-color: rgba(255,255,255,0.4);
+      border-color: rgba(255, 255, 255, 0.4);
       transform: translateY(-50%) scale(1.12);
-      box-shadow: 0 3px 7px rgba(0,0,0,0.3);
+      box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
     }
+
     .nav-btn:active {
       background: rgba(255, 255, 255, 0.4);
       transform: translateY(-50%) scale(1.08);
     }
-    #prev-btn { left: 12px; }
-    #next-btn { right: 12px; }
+
+    #prev-btn {
+      left: 12px;
+    }
+
+    #next-btn {
+      right: 12px;
+    }
 
     /* ===== 底部序号区 ===== */
     #thumbs {
@@ -155,22 +341,31 @@
       overflow-x: auto;
       white-space: nowrap;
       border-top: 1px solid var(--border-color);
-      box-shadow: 0 -1px 4px rgba(0,0,0,0.08);
+      box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.08);
       scrollbar-width: thin;
       scrollbar-color: var(--primary-light) var(--bg-main);
     }
-    #thumbs::-webkit-scrollbar { height: 8px; }
-    #thumbs::-webkit-scrollbar-track { background: var(--bg-main); }
-    #thumbs::-webkit-scrollbar-thumb {
-        background-color: var(--primary-light);
-        border-radius: 10px;
-        border: 2px solid var(--bg-main);
+
+    #thumbs::-webkit-scrollbar {
+      height: 8px;
     }
+
+    #thumbs::-webkit-scrollbar-track {
+      background: var(--bg-main);
+    }
+
+    #thumbs::-webkit-scrollbar-thumb {
+      background-color: var(--primary-light);
+      border-radius: 10px;
+      border: 2px solid var(--bg-main);
+    }
+
     .thumb {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 40px; height: 40px;
+      width: 40px;
+      height: 40px;
       margin: 0 .25em;
       background: var(--primary-color);
       color: var(--text-light);
@@ -181,11 +376,13 @@
       transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
       user-select: none;
     }
+
     .thumb:hover {
       transform: scale(1.1);
       background-color: var(--primary-light);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
     }
+
     .thumb.active {
       background: var(--secondary-color);
       color: var(--text-light);
@@ -193,103 +390,150 @@
       transform: scale(1.05);
       box-shadow: 0 0 0 2.5px var(--card-bg), 0 0 0 4.5px var(--secondary-color);
     }
+
     .thumb:active {
-        transform: scale(1.02);
-        background-color: var(--primary-dark);
+      transform: scale(1.02);
+      background-color: var(--primary-dark);
     }
 
     /* ===== 加载提示 ===== */
     #loading {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-color: rgba(52, 58, 64, 0.85); /* --bg-canvas with alpha, updated to match var */
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(52, 58, 64, 0.85);
+      /* --bg-canvas with alpha */
       color: var(--text-light);
       font-size: 1.1rem;
       z-index: 20;
-      text-align: center;
       display: flex;
+      /* Controlled by JS, but default to flex for centering */
       flex-direction: column;
       align-items: center;
       justify-content: center;
       opacity: 0;
+      /* JS will add .show class */
       pointer-events: none;
+      /* JS will add .show class */
       transition: opacity 0.3s ease;
     }
+
     #loading.show {
-        opacity: 1;
-        pointer-events: auto;
+      /* Class to show loading */
+      opacity: 1;
+      pointer-events: auto;
     }
+
     .spinner {
       border: 5px solid rgba(255, 255, 255, 0.2);
       border-left-color: var(--secondary-color);
+      /* Spinner color */
       border-radius: 50%;
       width: 45px;
       height: 45px;
       animation: spin 0.7s linear infinite;
       margin-bottom: 12px;
     }
+
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
-    /* ===== 手机端适配 ===== */
+    /* ===== 手机端适配 (页面其他元素) ===== */
     @media (max-width: 768px) {
-        body { padding-top: calc(var(--navbar-height) - 5px); }
-        .navbar-brand { font-size: 1.1rem; }
-        .nav-btn { width: 38px; height: 38px; font-size: 18px; }
-        #prev-btn { left: 8px; }
-        #next-btn { right: 8px; }
-        .thumb { width: 36px; height: 36px; font-size: 0.85em;}
+      body {
+        padding-top: calc(var(--navbar-height)-5px);
+        /* Navbar might be slightly shorter */
+      }
+
+      .navbar-brand {
+        font-size: 1.1rem;
+      }
+
+      .nav-btn {
+        /* 翻页按钮 */
+        width: 38px;
+        height: 38px;
+        font-size: 18px;
+      }
+
+      #prev-btn {
+        left: 8px;
+      }
+
+      #next-btn {
+        right: 8px;
+      }
+
+      .thumb {
+        /* 底部缩略图 */
+        width: 36px;
+        height: 36px;
+        font-size: 0.85em;
+      }
     }
+
     @media (max-width: 576px) {
-      .thumb { width: 34px; height: 34px; margin:0 .15em; }
-      #loading p { font-size: 1rem; }
-      .navbar-nav .nav-link { padding: 0.4rem 0.6rem; }
+      .thumb {
+        width: 34px;
+        height: 34px;
+        margin: 0 .15em;
+      }
+
+      #loading p {
+        /* 加载提示文字 */
+        font-size: 1rem;
+      }
+
+      /* 移动端导航项内边距在 @media (max-width: 991.98px) 中已统一调整 */
     }
   </style>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="css/fontsgoogleapis.css" rel="stylesheet">
 </head>
+
 <body>
 
   <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container-fluid">
       <a class="navbar-brand" href="FormulaMenu.html">数学公式库</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-              data-bs-target="#navbarMain" aria-controls="navbarMain"
-              aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain"
+        aria-controls="navbarMain" aria-expanded="false" aria-label="切换导航">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarMain">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="nav1" role="button"
-               data-bs-toggle="dropdown" aria-expanded="false">初高中衔接</a>
+            <a class="nav-link dropdown-toggle" href="#" id="nav1" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">初高中衔接</a>
             <ul class="dropdown-menu" aria-labelledby="nav1" id="menu1"></ul>
           </li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="nav2" role="button"
-               data-bs-toggle="dropdown" aria-expanded="false">极限与微分</a>
+            <a class="nav-link dropdown-toggle" href="#" id="nav2" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">极限与微分</a>
             <ul class="dropdown-menu" aria-labelledby="nav2" id="menu2"></ul>
           </li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="nav3" role="button"
-               data-bs-toggle="dropdown" aria-expanded="false">积分学</a>
+            <a class="nav-link dropdown-toggle" href="#" id="nav3" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">积分学</a>
             <ul class="dropdown-menu" aria-labelledby="nav3" id="menu3"></ul>
           </li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="nav4" role="button"
-               data-bs-toggle="dropdown" aria-expanded="false">微分方程与几何</a>
+            <a class="nav-link dropdown-toggle" href="#" id="nav4" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">微分方程与几何</a>
             <ul class="dropdown-menu" aria-labelledby="nav4" id="menu4"></ul>
           </li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="nav5" role="button"
-               data-bs-toggle="dropdown" aria-expanded="false">多元与级数</a>
+            <a class="nav-link dropdown-toggle" href="#" id="nav5" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">多元与级数</a>
             <ul class="dropdown-menu" aria-labelledby="nav5" id="menu5"></ul>
           </li>
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="nav6" role="button"
-               data-bs-toggle="dropdown" aria-expanded="false">概率与统计</a>
+            <a class="nav-link dropdown-toggle" href="#" id="nav6" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">概率与统计</a>
             <ul class="dropdown-menu" aria-labelledby="nav6" id="menu6"></ul>
           </li>
         </ul>
@@ -298,7 +542,7 @@
   </nav>
 
   <div id="canvas-wrap">
-    <div id="loading">
+    <div id="loading" class="show">
       <div class="spinner"></div>
       <p>图片加载中…</p>
     </div>
@@ -308,8 +552,12 @@
 
   <div id="thumbs"></div>
 
+  <!-- panzoom -->
   <script src="js/panzoom.min.js"></script>
-  <script src="js/bundle.min.js"></script>
+  <!-- 官方 Bootstrap Bundle（含 Popper） -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- 主脚本 -->
   <script src="js/gallery.js"></script>
 </body>
+
 </html>
