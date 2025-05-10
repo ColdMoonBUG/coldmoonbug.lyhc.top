@@ -5,169 +5,383 @@
   <title>数学公式学习导航</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body { padding-top: 70px; background: #f8f9fa; }
-    .category-card { transition: transform .2s; }
-    .category-card:hover { transform: translateY(-5px); }
-    .big-title { padding: 1em 0; background: #343a40; color: #fff; margin-bottom: 1em; border-radius: 4px; }
+    :root {
+      --primary-color: #007bff; /* Consistent Blue */
+      --primary-light: #5dade2; /* Lighter blue for hover/active */
+      --primary-dark: #0056b3;  /* Darker blue for base navbar */
+      --secondary-color: #6c757d;
+      --light-bg: #f8f9fa;
+      --dark-text: #212529;
+      --text-light: #f8f9fa; /* For text on dark backgrounds */
+      --card-bg: #ffffff;
+      --card-border: #dee2e6;
+      --card-hover-border: var(--primary-color);
+      --card-shadow: 0 2px 4px rgba(0,0,0,0.075);
+      --card-hover-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      --navbar-height: 60px;
+    }
+
+    body {
+      padding-top: var(--navbar-height);
+      background-color: var(--light-bg);
+      font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+      color: var(--dark-text);
+    }
+
+    /* ===== Navbar Styling (Consistent Blue Theme) ===== */
+    .navbar.fixed-top {
+      background: var(--primary-dark);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+      height: var(--navbar-height);
+      transition: background 0.3s ease;
+    }
+    .navbar.fixed-top:hover {
+      background: var(--primary-color); /* Slightly lighter blue on hover */
+    }
+    .navbar-brand {
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        color: var(--text-light) !important;
+        font-size: 1.25rem;
+    }
+    .navbar-nav .nav-link {
+      color: rgba(255,255,255,0.85);
+      transition: color 0.2s ease, background-color 0.2s ease;
+      padding: 0.5rem 0.8rem;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link:focus,
+    .navbar-nav .nav-link.active {
+      color: var(--text-light);
+      background-color: rgba(255,255,255,0.2);
+    }
+    .navbar-toggler {
+        border-color: rgba(255,255,255,0.25);
+    }
+    .navbar-toggler-icon {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.85%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+    .nav-item.dropdown:hover > .dropdown-menu {
+      display: block;
+      margin-top: 0;
+      animation: fadeInDropdown 0.2s ease-out forwards;
+    }
+    .dropdown-menu {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      border-radius: 0 0 6px 6px;
+    }
+    .dropdown-item {
+      color: var(--text-dark);
+      transition: background 0.2s ease, color 0.2s ease;
+      padding: 0.5rem 1rem;
+    }
+    .dropdown-item:hover,
+    .dropdown-item:focus {
+      background: var(--primary-light);
+      color: var(--text-light);
+    }
+    .dropdown-item.active, .dropdown-item:active {
+        color: #fff;
+        text-decoration: none;
+        background-color: var(--primary-color);
+    }
+    @keyframes fadeInDropdown {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+
+    /* ===== Page Content Styling (Existing styles from previous version) ===== */
+    .big-title {
+      padding: 1em 0.5em;
+      background: linear-gradient(135deg, var(--primary-color), #0056b3);
+      color: #fff;
+      margin-top: 2.5rem;
+      margin-bottom: 2em;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 91, 179, 0.3);
+      text-align: center;
+      font-weight: 500;
+    }
+    .category-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      box-shadow: var(--card-shadow);
+      transition: transform 0.25s cubic-bezier(0.25, 0.8, 0.25, 1),
+                  box-shadow 0.25s cubic-bezier(0.25, 0.8, 0.25, 1),
+                  border-color 0.25s ease-in-out;
+      overflow: hidden;
+    }
+    .category-card:hover {
+      transform: translateY(-10px) scale(1.04);
+      box-shadow: var(--card-hover-shadow);
+      border-color: var(--card-hover-border);
+    }
+    .category-card:active {
+      transform: translateY(-3px) scale(0.99);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+    }
+    .category-card .card-body {
+        color: var(--dark-text);
+        padding: 1.25rem;
+        font-weight: 500;
+        transition: color 0.2s ease-in-out;
+    }
+    a.text-decoration-none:hover .category-card .card-body {
+        color: var(--primary-color);
+    }
+    a.text-decoration-none .card-body{
+        text-align: center;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 992px) {
+        .big-title { font-size: 1.6rem; }
+    }
+    @media (max-width: 768px) {
+        body { padding-top: calc(var(--navbar-height) - 5px); }
+        .big-title { font-size: 1.4rem; padding: 0.8em 0.5em; margin-top: 2rem; margin-bottom: 1.5em; }
+        .category-card .card-body { font-size: 0.9rem; padding: 1rem; }
+    }
+    @media (max-width: 576px) {
+        .big-title { font-size: 1.25rem; border-radius: 8px; }
+        .category-card { border-radius: 8px; }
+        .category-card .card-body { font-size: 0.85rem; padding: 0.75rem; }
+        .row.gy-3 > [class*="col-"], .row.gy-4 > [class*="col-"] { margin-bottom: 1rem !important; }
+        .navbar-nav .nav-link { padding: 0.4rem 0.6rem; }
+    }
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <!-- 顶部导航 -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-    <div class="container-fluid">
+  <nav class="navbar navbar-expand-lg fixed-top"> <div class="container-fluid">
       <a class="navbar-brand" href="#">数学公式库</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+              data-bs-target="#navbarMain" aria-controls="navbarMain"
+              aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarMain">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="menuDataNav1" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">初高中衔接</a>
+            <ul class="dropdown-menu" aria-labelledby="menuDataNav1" id="menuDataDropdown1"></ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="menuDataNav2" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">极限与微分</a>
+            <ul class="dropdown-menu" aria-labelledby="menuDataNav2" id="menuDataDropdown2"></ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="menuDataNav3" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">积分学</a>
+            <ul class="dropdown-menu" aria-labelledby="menuDataNav3" id="menuDataDropdown3"></ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="menuDataNav4" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">微分方程与几何</a>
+            <ul class="dropdown-menu" aria-labelledby="menuDataNav4" id="menuDataDropdown4"></ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="menuDataNav5" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">多元与级数</a>
+            <ul class="dropdown-menu" aria-labelledby="menuDataNav5" id="menuDataDropdown5"></ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="menuDataNav6" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">概率与统计</a>
+            <ul class="dropdown-menu" aria-labelledby="menuDataNav6" id="menuDataDropdown6"></ul>
+          </li>
+        </ul>
+      </div>
     </div>
   </nav>
 
-  <div class="container">
+  <div class="container mt-4 mb-5">
 
-    <!-- 第一类：初高中衔接公式 -->
-    <h3 class="big-title text-center">初高中衔接公式</h3>
-    <div class="row gy-3">
-      <div class="col-md-3">
-        <a href="gallery.html?start=1&end=1" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">二次方程及因式分解</div></div>
+    <h3 class="big-title">初高中衔接公式</h3>
+    <div class="row gy-4">
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <a href="gallery.html?cat=group1&page=1" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">二次方程及因式分解</div></div>
         </a>
       </div>
-      <div class="col-md-3">
-        <a href="gallery.html?start=2&end=2" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">指数、对数与数列</div></div>
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <a href="gallery.html?cat=group1&page=2" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">指数、对数与数列</div></div>
         </a>
       </div>
-      <div class="col-md-3">
-        <a href="gallery.html?start=3&end=3" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">数列求和及三角函数</div></div>
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <a href="gallery.html?cat=group1&page=3" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">数列求和及三角函数</div></div>
         </a>
       </div>
-      <div class="col-md-3">
-        <a href="gallery.html?start=4&end=4" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">奇偶函数</div></div>
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <a href="gallery.html?cat=group1&page=4" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">奇偶函数</div></div>
         </a>
       </div>
     </div>
 
-    <!-- 第二类：极限与微分基础 -->
-    <h3 class="big-title text-center">极限与微分基础</h3>
-    <div class="row gy-3">
-      <div class="col-md-2">
-        <a href="gallery.html?start=5&end=5" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">等价及基础极限公式</div></div>
+    <h3 class="big-title">极限与微分基础</h3>
+    <div class="row gy-4">
+      <div class="col-lg-2 col-md-4 col-sm-6">
+        <a href="gallery.html?cat=group2&page=5" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">等价及基础极限公式</div></div>
         </a>
       </div>
-      <div class="col-md-2">
-        <a href="gallery.html?start=6&end=6" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">导数基础</div></div>
+      <div class="col-lg-2 col-md-4 col-sm-6">
+        <a href="gallery.html?cat=group2&page=6" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">导数基础</div></div>
         </a>
       </div>
-      <div class="col-md-2">
-        <a href="gallery.html?start=7&end=7" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">常用导数公式</div></div>
+      <div class="col-lg-2 col-md-4 col-sm-6">
+        <a href="gallery.html?cat=group2&page=7" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">常用导数公式</div></div>
         </a>
       </div>
-      <div class="col-md-3">
-        <a href="gallery.html?start=8&end=8" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">零点定理、Rolle 与 Lagrange 中值定理</div></div>
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <a href="gallery.html?cat=group2&page=8" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">零点定理 & 中值定理</div></div>
         </a>
       </div>
-      <div class="col-md-3">
-        <a href="gallery.html?start=9&end=9" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">不定积分基础</div></div>
-        </a>
-      </div>
-    </div>
-
-    <!-- 第三类：不定积分与定积分 -->
-    <h3 class="big-title text-center">不定积分与定积分</h3>
-    <div class="row gy-3">
-      <div class="col-md-4">
-        <a href="gallery.html?start=10&end=10" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">不定积分公式</div></div>
-        </a>
-      </div>
-      <div class="col-md-4">
-        <a href="gallery.html?start=11&end=11" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">三角代换及定积分基础</div></div>
-        </a>
-      </div>
-      <div class="col-md-4">
-        <a href="gallery.html?start=12&end=12" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">变限积分求导 & 牛顿-莱布尼兹公式</div></div>
+      <div class="col-lg-3 col-md-6 col-sm-6">
+        <a href="gallery.html?cat=group2&page=9" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">不定积分基础</div></div>
         </a>
       </div>
     </div>
 
-    <!-- 第四类：微分方程与向量解析几何 -->
-    <h3 class="big-title text-center">微分方程与向量解析几何</h3>
-    <div class="row gy-3">
-      <div class="col-md-4">
-        <a href="gallery.html?start=13&end=13" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">微分方程基础</div></div>
+    <h3 class="big-title">不定积分与定积分</h3>
+    <div class="row gy-4">
+      <div class="col-lg-4 col-md-6 col-sm-12">
+        <a href="gallery.html?cat=group3&page=10" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">不定积分公式</div></div>
         </a>
       </div>
-      <div class="col-md-4">
-        <a href="gallery.html?start=14&end=14" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">向量积、数量积 & 平面方程</div></div>
+      <div class="col-lg-4 col-md-6 col-sm-12">
+        <a href="gallery.html?cat=group3&page=11" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">三角代换及定积分基础</div></div>
         </a>
       </div>
-      <div class="col-md-4">
-        <a href="gallery.html?start=15&end=15" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">空间直线方程</div></div>
-        </a>
-      </div>
-    </div>
-
-    <!-- 第五类：多元微积分与无穷级数 -->
-    <h3 class="big-title text-center">多元微积分与无穷级数</h3>
-    <div class="row gy-3">
-      <div class="col-md-4">
-        <a href="gallery.html?start=16&end=16" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">多元微分基础</div></div>
-        </a>
-      </div>
-      <div class="col-md-4">
-        <a href="gallery.html?start=17&end=17" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">多元函数极值 & 多元积分</div></div>
-        </a>
-      </div>
-      <div class="col-md-4">
-        <a href="gallery.html?start=18&end=18" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">无穷级数 & 幂级数展开</div></div>
+      <div class="col-lg-4 col-md-12 col-sm-12">
+        <a href="gallery.html?cat=group3&page=12" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">变限积分求导 & 牛顿-莱布尼兹公式</div></div>
         </a>
       </div>
     </div>
 
-    <!-- 第六类：概率论与统计基础 -->
-    <h3 class="big-title text-center">概率论与统计基础</h3>
-    <div class="row gy-3">
-      <div class="col-md-4">
-        <a href="gallery.html?start=19&end=19" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">线性代数及概率论公式</div></div>
+    <h3 class="big-title">微分方程与向量解析几何</h3>
+    <div class="row gy-4">
+      <div class="col-lg-4 col-md-6 col-sm-12">
+        <a href="gallery.html?cat=group4&page=13" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">微分方程基础</div></div>
         </a>
       </div>
-      <div class="col-md-4">
-        <a href="gallery.html?start=20&end=20" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">随机变量的数字特征</div></div>
+      <div class="col-lg-4 col-md-6 col-sm-12">
+        <a href="gallery.html?cat=group4&page=14" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">向量积、数量积 & 平面方程</div></div>
         </a>
       </div>
-      <div class="col-md-4">
-        <a href="gallery.html?start=21&end=21" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">常见分布 & 数学期望与方差</div></div>
+      <div class="col-lg-4 col-md-12 col-sm-12">
+        <a href="gallery.html?cat=group4&page=15" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">空间直线方程</div></div>
         </a>
       </div>
-      <div class="col-md-4">
-        <a href="gallery.html?start=22&end=22" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">正项级数 & 交错级数判定</div></div>
+    </div>
+
+    <h3 class="big-title">多元微积分与无穷级数</h3>
+    <div class="row gy-4">
+      <div class="col-lg-4 col-md-6 col-sm-12">
+        <a href="gallery.html?cat=group5&page=16" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">多元微分基础</div></div>
         </a>
       </div>
-      <div class="col-md-4">
-        <a href="gallery.html?start=23&end=23" class="text-decoration-none">
-          <div class="card category-card"><div class="card-body text-center">幂级数 & 线代基础</div></div>
+      <div class="col-lg-4 col-md-6 col-sm-12">
+        <a href="gallery.html?cat=group5&page=17" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">多元函数极值 & 多元积分</div></div>
+        </a>
+      </div>
+      <div class="col-lg-4 col-md-12 col-sm-12">
+        <a href="gallery.html?cat=group5&page=18" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">无穷级数 & 幂级数展开</div></div>
+        </a>
+      </div>
+    </div>
+
+    <h3 class="big-title">概率论与统计基础</h3>
+    <div class="row gy-4">
+      <div class="col-lg-4 col-md-6 col-sm-6">
+        <a href="gallery.html?cat=group6&page=19" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">线性代数及概率论公式</div></div>
+        </a>
+      </div>
+      <div class="col-lg-4 col-md-6 col-sm-6">
+        <a href="gallery.html?cat=group6&page=20" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">随机变量的数字特征</div></div>
+        </a>
+      </div>
+      <div class="col-lg-4 col-md-6 col-sm-6">
+        <a href="gallery.html?cat=group6&page=21" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">常见分布 & 数学期望与方差</div></div>
+        </a>
+      </div>
+      <div class="col-lg-6 col-md-6 col-sm-6">
+        <a href="gallery.html?cat=group6&page=22" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">正项级数 & 交错级数判定</div></div>
+        </a>
+      </div>
+      <div class="col-lg-6 col-md-12 col-sm-12">
+        <a href="gallery.html?cat=group6&page=23" class="text-decoration-none">
+          <div class="card category-card"><div class="card-body">幂级数 & 线代基础</div></div>
         </a>
       </div>
     </div>
 
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Data structure for categories and pages (same as in gallery.js)
+      const menuCategoriesData = {
+        group1: { title: "初高中衔接公式", pages: [ { num: 1, label: "二次方程及因式分解" }, { num: 2, label: "指数、对数与数列" }, { num: 3, label: "数列求和及三角函数" }, { num: 4, label: "奇偶函数" } ] },
+        group2: { title: "极限与微分基础", pages: [ { num: 5,  label: "等价及基础极限公式" }, { num: 6,  label: "导数基础" }, { num: 7,  label: "常用导数公式" }, { num: 8,  label: "零点定理 & 中值定理" }, { num: 9,  label: "不定积分基础" } ] },
+        group3: { title: "不定积分与定积分", pages: [ { num: 10, label: "不定积分公式" }, { num: 11, label: "三角代换及定积分基础" }, { num: 12, label: "变限积分求导 & 牛顿-莱布尼兹" } ] },
+        group4: { title: "微分方程与向量几何", pages: [ { num: 13, label: "微分方程基础" }, { num: 14, label: "向量积/数量积 & 平面方程" }, { num: 15, label: "空间直线方程" } ] },
+        group5: { title: "多元微积分与无穷级数", pages: [ { num: 16, label: "多元微分基础" }, { num: 17, label: "多元函数极值 & 多元积分" }, { num: 18, label: "无穷级数 & 幂级数展开" } ] },
+        group6: { title: "概率论与统计基础", pages: [ { num: 19, label: "线性代数 & 概率论公式" }, { num: 20, label: "随机变量数字特征" }, { num: 21, label: "常见分布 & 期望方差" }, { num: 22, label: "正项级数 & 交错级数" }, { num: 23, label: "幂级数 & 线代基础" } ] }
+      };
+
+      // Populate dropdown menus
+      for (let i = 1; i <= 6; i++) {
+        const menuDropdown = document.getElementById(`menuDataDropdown${i}`); // Target the specific ul
+        const categoryKey  = `group${i}`;
+        
+        if (menuDropdown && menuCategoriesData[categoryKey]) {
+          // Set the main dropdown link text (optional, if you want to change it from static HTML)
+          // const navLink = document.getElementById(`menuDataNav${i}`);
+          // if (navLink) navLink.textContent = menuCategoriesData[categoryKey].title;
+
+          menuCategoriesData[categoryKey].pages.forEach(page => {
+            const listItem = document.createElement("li");
+            const link = document.createElement("a");
+            link.className = "dropdown-item";
+            // Construct the link to gallery.html with appropriate query parameters
+            link.href = `gallery.html?cat=${categoryKey}&page=${page.num}`;
+            link.textContent = page.label;
+            listItem.appendChild(link);
+            menuDropdown.appendChild(listItem);
+          });
+        }
+      }
+    });
+  </script>
 </body>
 </html>
