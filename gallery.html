@@ -2,73 +2,236 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>公式图库</title>
   <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
   <style>
-    body { padding-top: 70px; background: #f8f9fa; display: flex; flex-direction: column; height: 100vh; }
-    #canvas-wrap { flex: 1; overflow: hidden; position: relative; background: #222; }
-    canvas { display: block; margin: 0; transform-origin: 0 0; cursor: grab; }
+    /* ===== 全局配色 & 字体 ===== */
+    :root {
+      --primary: #4db6ac;
+      --primary-light: #80cbc4;
+      --bg: #f0f4c3;
+      --card: #ffffff;
+      --text: #263238;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding-top: 70px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* ===== 顶部导航 ===== */
+    nav.fixed-top {
+      background: var(--primary);
+      transition: background 0.3s;
+    }
+    nav.fixed-top:hover {
+      background: var(--primary-light);
+    }
+    .navbar-brand {
+      font-weight: bold;
+      font-size: 1.25rem;
+    }
+    .navbar-nav .nav-link {
+      color: var(--card);
+      transition: color 0.2s, filter 0.2s;
+    }
+    .navbar-nav .nav-link:hover {
+      filter: brightness(1.2);
+    }
+    /* 让二级菜单在 hover 时显示 */
+    .nav-item.dropdown:hover > .dropdown-menu {
+      display: block;
+      margin-top: 0;
+    }
+    .dropdown-menu {
+      background: var(--card);
+      border: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .dropdown-item {
+      transition: background 0.2s, color 0.2s;
+    }
+    .dropdown-item:hover {
+      background: var(--primary-light);
+      color: var(--card);
+    }
+
+    /* ===== 画布容器 ===== */
+    #canvas-wrap {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background: #212121;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      transform-origin: 0 0;
+      cursor: grab;
+    }
+
+    /* ===== 翻页按钮 ===== */
     .nav-btn {
-      position: absolute; top: 50%; width: 48px; height: 48px; margin-top: -24px;
-      background: rgba(0,0,0,0.5); color: #fff; border: none; font-size: 28px;
-      cursor: pointer; user-select: none; z-index: 10;
+      position: absolute;
+      top: 50%;
+      width: 48px;
+      height: 48px;
+      margin-top: -24px;
+      background: rgba(255,255,255,0.3);
+      color: var(--text);
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      transition: background 0.2s;
+      z-index: 10;
     }
-    #prev-btn { left: 10px; }
-    #next-btn { right: 10px; }
-    #thumbs { padding: .5em; background: #fff; overflow-x: auto; white-space: nowrap; }
+    .nav-btn:hover {
+      background: rgba(255,255,255,0.6);
+    }
+    #prev-btn { left: 8px; }
+    #next-btn { right: 8px; }
+
+    /* ===== 底部序号区 ===== */
+    #thumbs {
+      padding: .5em;
+      background: var(--card);
+      overflow-x: auto;
+      white-space: nowrap;
+    }
     .thumb {
-      display: inline-block; width: 48px; height: 48px; line-height: 48px; text-align: center;
-      margin: 0 .25em; background: #e9ecef; border-radius: 4px; cursor: pointer;
-      user-select: none; transition: background .2s;
+      display: inline-block;
+      width: 48px; height: 48px;
+      line-height: 48px;
+      text-align: center;
+      margin: 0 .25em;
+      background: var(--primary);
+      color: var(--card);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: transform 0.2s, filter 0.2s;
     }
-    .thumb:hover, .thumb.active { background: #adb5bd; }
+    .thumb:hover {
+      transform: scale(1.1);
+      filter: brightness(1.2);
+    }
+    .thumb.active {
+      background: var(--primary-light);
+      font-weight: bold;
+    }
+
+    /* ===== 加载提示 ===== */
     #loading {
-      position: absolute; top:50%; left:50%; transform: translate(-50%, -50%);
-      color: #fff; font-size: 1.25rem;
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: var(--card);
+      font-size: 1.25rem;
+      z-index: 5;
+    }
+
+    /* ===== 手机端适配 ===== */
+    @media (max-width: 576px) {
+      .nav-btn { width:36px; height:36px; font-size:24px; }
+      .thumb { width:36px; height:36px; line-height:36px; margin:0 .15em; }
+      .dropdown-menu { font-size: .9rem; }
     }
   </style>
 </head>
 <body>
-  <!-- 顶部导航（同 index.html） -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+
+  <!-- 顶部导航：6 个一级菜单，hover 下拉二级 -->
+  <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container-fluid">
-      <a class="navbar-brand" href="index.html">MyFormulas</a>
-      <button class="navbar-toggler" type="button"
-              data-bs-toggle="collapse" data-bs-target="#navbarNav2"
-              aria-controls="navbarNav2" aria-expanded="false"
-              aria-label="Toggle navigation">
+      <a class="navbar-brand" href="index.html">数学公式库</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+              data-bs-target="#navbarMain" aria-controls="navbarMain"
+              aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="navbarNav2">
-        <ul class="navbar-nav">
-          <!-- 同样的下拉菜单 -->
+      <div class="collapse navbar-collapse" id="navbarMain">
+        <ul class="navbar-nav me-auto">
+
+          <!-- 初高中衔接公式 -->
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navA2" role="button"
-               data-bs-toggle="dropdown" aria-expanded="false">A</a>
-            <ul class="dropdown-menu" aria-labelledby="navA2">
-              <li><a class="dropdown-item" href="#">A1</a></li>
-              <li><a class="dropdown-item" href="#">A2</a></li>
-            </ul>
+            <a class="nav-link dropdown-toggle" href="#" id="nav1" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">
+              初高中衔接公式
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="nav1" id="menu1"></ul>
           </li>
-          <!-- B, C, D, E… -->
+
+          <!-- 极限与微分基础 -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="nav2" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">
+              极限与微分基础
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="nav2" id="menu2"></ul>
+          </li>
+
+          <!-- 不定积分与定积分 -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="nav3" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">
+              不定积分与定积分
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="nav3" id="menu3"></ul>
+          </li>
+
+          <!-- 微分方程与向量几何 -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="nav4" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">
+              微分方程与向量几何
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="nav4" id="menu4"></ul>
+          </li>
+
+          <!-- 多元微积分与无穷级数 -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="nav5" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">
+              多元微积分与无穷级数
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="nav5" id="menu5"></ul>
+          </li>
+
+          <!-- 概率论与统计基础 -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="nav6" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">
+              概率论与统计基础
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="nav6" id="menu6"></ul>
+          </li>
+
         </ul>
       </div>
     </div>
   </nav>
 
+  <!-- 画布区域 -->
   <div id="canvas-wrap">
     <div id="loading">正在预加载图片…</div>
     <button id="prev-btn" class="nav-btn">&#9664;</button>
     <button id="next-btn" class="nav-btn">&#9654;</button>
   </div>
-  <div id="thumbs" class="mt-2"></div>
 
-  <!-- panzoom -->
+  <!-- 底部缩略序号 -->
+  <div id="thumbs"></div>
+
+  <!-- 脚本 -->
   <script src="js/panzoom.min.js"></script>
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- 自定义 Gallery 脚本 -->
+  <script src="js/bundle.min.js"></script>
   <script src="js/gallery.js"></script>
 </body>
 </html>
