@@ -1,27 +1,11 @@
-<!-- 该页面均是由ChatGPT生成的，如有侵权，请联系我删除。 -->
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>疯狂星期四随机文案</title>
-    <link rel="apple-touch-icon" sizes="57x57" href="logoicon/apple-icon-57x57.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="logoicon/apple-icon-60x60.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="logoicon/apple-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="logoicon/apple-icon-76x76.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="logoicon/apple-icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="logoicon/apple-icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="logoicon/apple-icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="logoicon/apple-icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="logoicon/apple-icon-180x180.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="logoicon/android-icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="logoicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="logoicon/favicon-96x96.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="logoicon/favicon-16x16.png">
-    <link rel="manifest" href="logoicon/manifest.json">
-    <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
-    <meta name="theme-color" content="#ffffff">
+    <script src="/js/favicon-loader.js"></script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -34,12 +18,12 @@
         }
 
         .container {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.85);
             padding: 20px;
             border-radius: 15px;
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
             text-align: center;
-            width: 300px;
+            width: 320px;
             position: relative;
             transition: all 0.4s ease-in-out;
         }
@@ -50,6 +34,34 @@
             color: #333;
             opacity: 0;
             transition: opacity 0.6s ease-in-out;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            border-radius: 10px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-break: strict;
+            line-height: 1.6;
+            text-align: justify;
+        }
+
+        .text-display::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .text-display::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: 10px;
+        }
+
+        .text-display::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #87cefa, #6495ed);
+            border-radius: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .text-display::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #6495ed, #4169e1);
         }
 
         .buttons {
@@ -72,7 +84,6 @@
             transform: scale(1.05);
         }
 
-        /* 提示信息样式 */
         .toast {
             position: absolute;
             bottom: 10px;
@@ -93,61 +104,67 @@
         }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <div id="text" class="text-display">加载中...</div>
-    <div class="buttons">
-        <button id="copyBtn">复制文本</button>
-        <button id="newTextBtn">再来一条</button>
+    <div class="container">
+        <div id="text" class="text-display">加载中...</div>
+        <div class="buttons">
+            <button id="copyBtn">复制文本</button>
+            <button id="newTextBtn">再来一条</button>
+        </div>
+        <div id="toast" class="toast">复制成功！</div>
     </div>
-    <div id="toast" class="toast">复制成功！</div> <!-- 提示信息 -->
-</div>
 
-<script>
-    function fetchText() {
-        const textDisplay = document.getElementById('text');
-        textDisplay.style.opacity = 0; // 文本淡出
-        fetch('https://vme.im/api?format=text')
-            .then(response => response.text())
-            .then(data => {
-                textDisplay.textContent = data;
-                setTimeout(() => {
-                    textDisplay.style.opacity = 1; // 文本淡入
-                }, 100); // 添加一点延迟，显得更流畅
-            })
-            .catch(error => {
-                textDisplay.textContent = '获取文本失败，请重试';
-                textDisplay.style.opacity = 1;
-                console.error('Error fetching the text:', error);
-            });
-    }
+    <script>
+        function fetchText() {
+            const textDisplay = document.getElementById('text');
+            textDisplay.style.opacity = 0;
 
-    function showToast(message) {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.classList.add('show');
+            fetch('https://vme.im/api/random?format=text')
+                .then(response => response.text())
+                .then(data => {
+                    // 使用中文标点断句换行
+                    const formatted = data
+                        .split(/(?<=[。！？；])/g)
+                        .map(s => s.trim())
+                        .join('\n');
+                    textDisplay.textContent = formatted;
+                    setTimeout(() => {
+                        textDisplay.style.opacity = 1;
+                    }, 100);
+                })
+                .catch(error => {
+                    textDisplay.textContent = '获取文本失败，请重试';
+                    textDisplay.style.opacity = 1;
+                    console.error('Error fetching the text:', error);
+                });
+        }
 
-        // 3秒后自动消失
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 3000);
-    }
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
 
-    document.getElementById('copyBtn').addEventListener('click', () => {
-        const textToCopy = document.getElementById('text').textContent;
-        navigator.clipboard.writeText(textToCopy)
-            .then(() => showToast('复制成功！'))
-            .catch(() => showToast('复制失败！'));
-    });
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
 
-    document.getElementById('newTextBtn').addEventListener('click', () => {
-        fetchText();
-    });
+        document.getElementById('copyBtn').addEventListener('click', () => {
+            const textToCopy = document.getElementById('text').textContent;
+            navigator.clipboard.writeText(textToCopy)
+                .then(() => showToast('复制成功！'))
+                .catch(() => showToast('复制失败！'));
+        });
 
-    // 初始加载文本
-    fetchText();
-</script>
+        document.getElementById('newTextBtn').addEventListener('click', () => {
+            fetchText();
+        });
+
+        fetchText(); // 初始加载
+    </script>
 
 </body>
+
 </html>
