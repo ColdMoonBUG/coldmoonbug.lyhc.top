@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>在线播放站</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-pf+5G0aK3qG+0vce3+acYufjC1yQK0mVHt1Gv8aD2Qc6oWvnI1P4nfpdd1L4dE3XQqQhKcxvH+o4dZ+eYgotog==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    /* Reset & Global */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { display: flex; height: 100vh; font-family: 'Roboto', sans-serif; background: #f0f2f5; }
+    a { text-decoration: none; color: inherit; }
+
+    /* Sidebar */
+    #sidebar { width: 280px; background: #ffffff; border-right: 1px solid #ddd; overflow-y: auto; box-shadow: 2px 0 8px rgba(0,0,0,0.05); }
+    #sidebar h2 { padding: 20px; font-size: 1.3rem; font-weight: 700; color: #333; border-bottom: 1px solid #e6e6e6; }
+    .chapter { border-bottom: 1px solid #e6e6e6; }
+    .title { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; font-size: 1rem; color: #2c3e50; cursor: pointer; transition: background 0.2s; }
+    .title:hover { background: #f7f9fa; }
+    .title .fa-chevron-down { transition: transform 0.3s; color: #888; }
+    .list { display: none; background: #fafafa; }
+    .list li { padding: 10px 40px; list-style: none; cursor: pointer; transition: background 0.2s; font-size: 0.95rem; color: #34495e; }
+    .list li:hover { background: #eef4f7; }
+    .list li i { margin-right: 8px; color: #3498db; }
+
+    /* Main Area */
+    #main { flex: 1; display: flex; flex-direction: column; }
+    #video-container { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    video { max-width: 100%; max-height: 100%; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+    #controls { padding: 10px 20px; background: #ffffff; display: flex; align-items: center; border-top: 1px solid #e6e6e6; box-shadow: 0 -2px 6px rgba(0,0,0,0.05); }
+    #controls label { margin-right: 8px; font-weight: 500; color: #555; }
+    #controls select, #controls input[type="range"] { margin-right: 20px; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; background: #fafafa; }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      #sidebar { width: 100%; height: auto; border-right: none; box-shadow: none; }
+      #main { flex: 1; }
+      #controls { flex-wrap: wrap; justify-content: center; }
+      #controls select, #controls input { margin-bottom: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <h2>课程章节</h2>
+  </div>
+  <div id="main">
+    <div id="video-container">
+      <video id="player" controls>
+        <source id="video-source" src="" type="video/mp4">
+        您的浏览器不支持 video 标签。
+      </video>
+    </div>
+    <div id="controls">
+      <label for="speed">播放速度</label>
+      <select id="speed">
+        <option value="0.5">0.5x</option>
+        <option value="1" selected>1x</option>
+        <option value="1.5">1.5x</option>
+        <option value="2">2x</option>
+      </select>
+      <label for="volume">音量</label>
+      <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
+    </div>
+  </div>
+  <script>
+    (async function() {
+      const sidebar = document.getElementById('sidebar');
+      const player = document.getElementById('player');
+      const videoSource = document.getElementById('video-source');
+      const speedSelect = document.getElementById('speed');
+      const volumeRange = document.getElementById('volume');
+
+      speedSelect.addEventListener('change', () => player.playbackRate = +speedSelect.value);
+      volumeRange.addEventListener('input', () => player.volume = +volumeRange.value);
+
+      try {
+        const res = await fetch('https://course.wenyanzsb.com/customerSection/getCustomerSectionList?customerId=2359&courseId=80', {
+          headers: {
+            'Content-Type': 'application/json',
+            'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyVHlwZSI6MiwiZXhwIjoxNzQ3MDM3NDEyLCJ1c2VySWQiOjIzNTksImlhdCI6MTc0NjQzMjYxMn0.hsahpaxkpVf_1GB0I0qMN52GfVBnWzqSHigXGub40Xw',
+            'Charset': 'utf-8',
+            'Referer': 'https://servicewechat.com/wx92277bcd1df0f2a2/28/page-frame.html',
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 15; 23013RK75C Build/AQ3A.240912.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/134.0.6998.136 Mobile Safari/537.36 XWEB/1340095 MMWEBSDK/20241202 MMWEBID/4930 MicroMessenger/8.0.56.2800(0x2800385E) WeChat/arm64 Weixin Android Tablet NetType/WIFI Language/zh_CN ABI/arm64 MiniProgramEnv/android',
+            'Accept-Encoding': 'gzip, deflate, br'
+          }
+        });
+        if (!res.ok) throw new Error('状态码 ' + res.status);
+        const json = await res.json();
+        if (json.code !== 1001) throw new Error(json.msg);
+
+        json.body[0].children.forEach(chapter => {
+          const chap = document.createElement('div'); chap.className = 'chapter';
+          const title = document.createElement('div'); title.className = 'title';
+          title.innerHTML = `<span>${chapter.categoryName}</span><i class="fa fa-chevron-down"></i>`;
+          sidebar.appendChild(chap); chap.appendChild(title);
+
+          const ul = document.createElement('ul'); ul.className = 'list'; chap.appendChild(ul);
+          chapter.sectionList.forEach(sec => {
+            const li = document.createElement('li'); li.innerHTML = `<i class="fa fa-play-circle"></i> ${sec.sectionName}`;
+            li.onclick = () => {
+              document.querySelectorAll('.list li').forEach(el => el.classList.remove('active'));
+              document.querySelectorAll('.title').forEach(el => el.classList.remove('active'));
+              title.classList.add('active'); li.classList.add('active');
+              videoSource.src = sec.sectionVideo;
+              player.load(); player.play();
+            };
+            ul.appendChild(li);
+          });
+
+          title.onclick = () => {
+            const icon = title.querySelector('.fa-chevron-down');
+            const list = chap.querySelector('.list');
+            if (list.style.display === 'block') {
+              list.style.display = 'none'; icon.style.transform = 'rotate(0deg)';
+            } else {
+              list.style.display = 'block'; icon.style.transform = 'rotate(180deg)';
+            }
+          };
+        });
+      } catch (err) {
+        const errEl = document.createElement('p'); errEl.style.color = 'red'; errEl.style.padding = '16px';
+        errEl.textContent = '加载失败: ' + err.message; sidebar.appendChild(errEl);
+        console.error(err);
+      }
+    })();
+  </script>
+</body>
+</html>
