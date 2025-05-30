@@ -11,7 +11,7 @@
         
         body.container-fullscreen-active { overflow: hidden !important; }
 
-        #sidebar { width: 280px; background-color: #fff; border-right: 1px solid #e1e5eb; overflow-y: auto; padding: 15px; flex-shrink: 0; transition: margin-left 0.3s ease-in-out; }
+        #sidebar { width: 280px; background-color: #fff; border-right: 1px solid #e1e5eb; overflow-y: auto; padding: 15px; flex-shrink: 0; transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out; }
         body.container-fullscreen-active #sidebar { margin-left: -280px; }
 
         .chapter { margin-bottom: 10px; }
@@ -19,7 +19,7 @@
         .title.active { background-color: #e9f5ff; color: #1890ff; }
         .title i { transition: transform 0.2s; }
         .list { display: none; margin-top: 5px; list-style: none; }
-        .list li { padding: 8px 15px; cursor: pointer; border-radius: 4px; margin-bottom: 2px; display: flex; align-items: center; }
+        .list li { padding: 8px 15px; cursor: pointer; border-radius: 4px; margin-bottom: 2px; display: flex; align-items: center; font-size: 15px; }
         .list li:hover { background-color: #f0f7ff; }
         .list li.active { background-color: #e6f7ff; color: #1890ff; }
         .list li i { margin-right: 8px; color: #666; }
@@ -36,19 +36,20 @@
             background-color: #000; border-radius: 8px;
             overflow: hidden; 
             margin-bottom: 10px; 
-            position: relative; min-height: 200px;
+            position: relative; min-height: 200px; /* 保证最小高度 */
         }
         #main:fullscreen #video-container { border-radius: 0; margin: 0; height: 100%; width: 100%; }
 
         #player { max-width: 100%; max-height: 100%; width: 100%; height: 100%; background-color: #000; }
         
-        #external-buttons-container { display: flex; justify-content: flex-start; padding-top: 5px; gap: 10px; }
+        #external-buttons-container { display: flex; justify-content: flex-start; padding-top: 5px; gap: 10px; flex-shrink: 0; }
         #main:fullscreen #external-buttons-container { display: none; }
 
 
         #custom-controls-bar {
             position: absolute; bottom: 0; left: 0; width: 100%;
-            padding: 10px 15px; background-color: rgba(25, 25, 25, 0.9); /* 更深更不透明 */
+            padding: 8px 10px; /* 移动端减小padding */
+            background-color: rgba(25, 25, 25, 0.92); /* 更不透明 */
             display: flex; align-items: center; justify-content: space-between;
             z-index: 2147483640; 
             opacity: 0; transition: opacity 0.3s ease-in-out;
@@ -58,65 +59,120 @@
         #video-container:hover #custom-controls-bar,
         #video-container.controls-visible #custom-controls-bar { opacity: 1; }
 
-        .control-group { display: flex; align-items: center; gap: 15px; } /* 稍大gap */
+        .control-group { display: flex; align-items: center; gap: 10px; } 
         .control-group button, .control-group select {
-            background: none; border: none; color: inherit; font-size: 16px; cursor: pointer; padding: 5px;
+            background: none; border: none; color: inherit; font-size: 15px; /* 移动端减小字号 */
+            cursor: pointer; padding: 4px; /* 移动端减小padding */
         }
-        .control-group button i { font-size: 22px; vertical-align: middle; } /* 图标更大 */
-        .control-group input[type="range"] { width: 80px; cursor: pointer;}
+        .control-group button i { font-size: 20px; vertical-align: middle; } /* 移动端图标大小 */
+        .control-group input[type="range"] { width: 60px; cursor: pointer;} /* 移动端减小宽度 */
 
-        #custom-controls-bar #speed { /* 重点调整select样式 */
-            background-color: rgba(60, 60, 60, 0.9); /* select 背景 */
-            color: #f0f0f0; /* select 中已选文字颜色 */
-            border: 1px solid #888; /* select 边框 */
-            border-radius: 4px; padding: 6px 10px; /* 调整padding */
-            -webkit-appearance: none; /* 移除部分浏览器默认外观 */
-            -moz-appearance: none;
-            appearance: none;
-             /* 自定义下拉箭头 (可选) */
+        #custom-controls-bar #speed { 
+            background-color: rgba(55, 55, 55, 0.95); /* select 背景 */
+            color: #f0f0f0; 
+            border: 1px solid #777; 
+            border-radius: 4px; padding: 5px 8px; 
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23f0f0f0'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 8px center;
-            padding-right: 30px; /* 为箭头留空间 */
+            background-repeat: no-repeat; background-position: right 6px center;
+            padding-right: 25px; 
+            font-size: 14px; /* 移动端减小字号 */
         }
-        #custom-controls-bar #speed option { /* 尝试为option指定样式 */
-            background-color: #222; /* option 背景 */
-            color: #f0f0f0;      /* option 文字 */
+        #custom-controls-bar #speed option { 
+            background-color: #333; /* 深色选项背景 */
+            color: #f0f0f0;      
         }
-        #custom-controls-bar #volume { width: 70px; }
+        #custom-controls-bar #volume { width: 60px; }
 
-        .controls-right-group { display: flex; align-items: center; gap: 15px; }
+        .controls-right-group { display: flex; align-items: center; gap: 10px; } /* 移动端减小gap */
         .controls-right-group button {
-            font-size: 14px; padding: 7px 14px; border-radius: 18px; /* 更圆润 */
-            background-color: rgba(70,70,70,0.8); color:inherit; border: 1px solid #999;
+            font-size: 13px; padding: 6px 10px; border-radius: 15px; 
+            background-color: rgba(70,70,70,0.85); color:inherit; border: 1px solid #888;
         }
         .controls-right-group button:hover { background-color: rgba(90,90,90,0.9); }
-        .controls-right-group button i { font-size: 18px; vertical-align: middle; }
+        .controls-right-group button i { font-size: 16px; vertical-align: middle; }
 
 
         #subtitle-container {
             position: absolute; background-color: rgba(10, 10, 10, 0.8); 
-            color: #fff; padding: 10px 15px; border-radius: 8px; text-align: center;
-            font-size: 19px; line-height: 1.6; min-width: 150px; opacity: 1;
-            transition: opacity 0.3s ease-in-out, background-color 0.3s, width 0.3s, max-width 0.3s; /* 移除 top, left */
+            color: #fff; padding: 8px 12px; /* 移动端微调 */
+            border-radius: 6px; text-align: center;
+            font-size: 17px; /* 移动端微调 */
+            line-height: 1.5; min-width: 120px; opacity: 1;
+            transition: opacity 0.3s ease-in-out, background-color 0.3s, width 0.3s, max-width 0.3s;
             z-index: 2147483645; 
             cursor: move; pointer-events: auto;
             user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;
-            text-shadow: 0px 1px 3px rgba(0,0,0,0.9); /* 加强阴影 */
+            text-shadow: 0px 1px 3px rgba(0,0,0,0.9);
         }
         #subtitle-container.hidden { opacity: 0; pointer-events: none; cursor: default; }
         #subtitle-container.dragging { background-color: rgba(10, 10, 10, 0.95); box-shadow: 0 0 15px rgba(0,0,0,0.5); }
         #subtitle-text { margin: 0; padding: 0; }
 
         .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; opacity: 0; transition: opacity 0.3s; z-index: 2147483647; }
+        
+        /* 移动端适配 Media Queries */
+        @media (max-width: 768px) { /* 平板和更小设备 */
+            body { flex-direction: column; } /* 主内容区和侧边栏垂直排列 */
+            #sidebar { 
+                width: 100%; /* 侧边栏占满宽度 */
+                height: 200px; /* 给一个固定高度或者 flex-basis */
+                border-right: none; 
+                border-bottom: 1px solid #e1e5eb;
+                flex-shrink: 0;
+                order: 2; /* 让侧边栏在主内容下方 */
+                padding: 10px;
+            }
+            body.container-fullscreen-active #sidebar { 
+                margin-left: 0; /* 全屏时不再左移，因为已经是垂直布局 */
+                display: none; /* 直接隐藏 */
+            }
+            #main { 
+                padding: 10px; /* 减小 main 的 padding */
+                order: 1; /* 主内容区在上方 */
+                height: calc(100vh - 200px); /* 减去侧边栏高度 */
+            }
+             #main:fullscreen, #main:-webkit-full-screen, #main:-moz-full-screen, #main:-ms-fullscreen {
+                height: 100% !important; /* 全屏时占满 */
+            }
+
+
+            #video-container { margin-bottom: 8px; }
+            .list li { font-size: 14px; padding: 6px 10px; }
+            .title { font-size: 15px; padding: 7px 8px;}
+
+
+            #custom-controls-bar { padding: 6px 8px; }
+            .control-group { gap: 8px; }
+            .control-group button i { font-size: 18px; }
+            .control-group input[type="range"] { width: 50px; }
+            #custom-controls-bar #speed { font-size: 12px; padding: 4px 6px; padding-right: 20px; background-position: right 4px center; }
+            .controls-right-group { gap: 8px; }
+            .controls-right-group button { font-size: 12px; padding: 5px 8px; }
+            .controls-right-group button i { font-size: 14px; }
+
+            #subtitle-container { font-size: 15px; padding: 6px 10px; }
+        }
+
+        @media (max-width: 480px) { /* 手机等更小屏幕 */
+            #sidebar { height: 150px; } /* 进一步减小侧边栏高度 */
+             #main { height: calc(100vh - 150px); }
+            .list li { font-size: 13px; }
+            .title { font-size: 14px;}
+
+            #custom-controls-bar #speed { font-size: 11px; }
+            .controls-right-group button { font-size: 11px; }
+            #subtitle-container { font-size: 14px; }
+        }
 
     </style>
 </head>
 <body>
     <div id="sidebar">
         <h2>课程章节</h2>
-    </div>
-    <div id="main"> <div id="video-container">
+        </div>
+    <div id="main">
+        <div id="video-container">
             <video id="player">
                 <source id="video-source" src="" type="video/mp4">
                 您的浏览器不支持 video 标签。
@@ -174,10 +230,12 @@
             let isDragging = false;
             let dragStartMouseX = 0, dragStartMouseY = 0;
             let dragStartElementLeft = 0, dragStartElementTop = 0;
-            let lastKnownSubtitleStyle = { transform: 'translateX(-50%)' }; // Initialize to default centered state
+            let lastKnownSubtitleStyle = { transform: 'translateX(-50%)' };
             let controlsTimeout;
             let parentDimensionsForDrag = { width: 0, height: 0 };
-            let subtitleDragRAF = null; // For requestAnimationFrame
+            let subtitleDragRAF = null;
+            let isRAFScheduled = false;
+
 
             function saveSubtitleStyle() {
                 const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
@@ -189,7 +247,7 @@
                     width: subtitleContainer.style.width,
                     maxWidth: subtitleContainer.style.maxWidth,
                     transform: subtitleContainer.style.transform,
-                    parentWidth: parentEl.clientWidth,
+                    parentWidth: parentEl.clientWidth, // Save parent dimensions at this point
                     parentHeight: parentEl.clientHeight
                 };
             }
@@ -201,27 +259,13 @@
 
             function applyLastKnownStyleOrDefault(parentElement, isFullscreenView) {
                 const styleToApply = lastKnownSubtitleStyle;
-                // If it was a dragged position (no transform, specific left/top in px)
+                
                 if (styleToApply.transform === '' && typeof styleToApply.left === 'string' && typeof styleToApply.top === 'string') {
-                    subtitleContainer.style.transform = ''; // Ensure no transform
-                    
+                    subtitleContainer.style.transform = '';
                     let targetLeftPx = parseFloat(styleToApply.left);
                     let targetTopPx = parseFloat(styleToApply.top);
 
-                    // Adjust based on parent size change, if previous parent dimensions are known
-                    if (styleToApply.parentWidth && styleToApply.parentHeight && 
-                        styleToApply.parentWidth > 0 && styleToApply.parentHeight > 0 && /* Ensure valid old dimensions */
-                        (styleToApply.parentWidth !== parentElement.clientWidth || styleToApply.parentHeight !== parentElement.clientHeight) &&
-                        parentElement.clientWidth > 0 && parentElement.clientHeight > 0) {
-                        
-                        const scaleX = parentElement.clientWidth / styleToApply.parentWidth;
-                        const scaleY = parentElement.clientHeight / styleToApply.parentHeight;
-                        
-                        targetLeftPx *= scaleX;
-                        targetTopPx *= scaleY;
-                    }
-                    
-                    // Get current subtitle dimensions for clamping
+                    // No complex rescaling, just clamp to new parent boundaries
                     const sWidth = subtitleContainer.offsetWidth || parseFloat(styleToApply.width) || (parentElement.clientWidth * (isFullscreenView ? 0.8 : 0.9));
                     const sHeight = subtitleContainer.offsetHeight || 50;
 
@@ -232,15 +276,15 @@
                     subtitleContainer.style.top = targetTopPx + 'px';
                     subtitleContainer.style.width = styleToApply.width || (isFullscreenView ? '80%' : '90%');
                     subtitleContainer.style.maxWidth = styleToApply.maxWidth || (isFullscreenView ? '900px' : '800px');
-
-                } else { // Apply default centered position
+                } else { 
                     setSubtitleDefaultPosition(parentElement, isFullscreenView);
                 }
-                // Save the newly applied style (even if it was a default) as the last known
-                // Do this *after* styles are applied and element might have new offsetHeight
-                setTimeout(() => saveSubtitleStyle(), 0);
+                // Ensure style is saved after applying, especially for default.
+                // The setTimeout helps ensure offsetHeight is correct after DOM updates.
+                setTimeout(() => { 
+                    if (!isDragging) saveSubtitleStyle(); 
+                }, 0);
             }
-
 
             function setSubtitleDefaultPosition(parentElement, isFullscreenView) {
                 subtitleContainer.style.width = isFullscreenView ? '80%' : '90%';
@@ -254,31 +298,35 @@
                 } else if (isFullscreenView) { parentHeight = window.innerHeight; }
                 else { parentHeight = videoContainer.clientHeight || 300; }
 
-                const subtitleHeight = subtitleContainer.offsetHeight || 50; // Use a fallback if offsetHeight is 0
-                const bottomMargin = isFullscreenView ? Math.round(parentHeight * 0.10) : 25;
+                // Must ensure subtitleContainer is visible to get offsetHeight correctly
+                const wasHidden = subtitleContainer.classList.contains('hidden');
+                if(wasHidden) subtitleContainer.classList.remove('hidden');
+                const subtitleHeight = subtitleContainer.offsetHeight || 50;
+                if(wasHidden) subtitleContainer.classList.add('hidden');
+                
+                const bottomMargin = isFullscreenView ? Math.round(parentHeight * 0.12) : 30; // Increased bottom margin
                 let newTop = parentHeight - subtitleHeight - bottomMargin;
-                newTop = Math.max(10, newTop); // Ensure at least 10px from top
+                newTop = Math.max(10, newTop);
 
                 subtitleContainer.style.top = newTop + 'px';
                 subtitleContainer.style.bottom = '';
-                if (!isDragging) { // Only save if not currently in a drag operation
-                    setTimeout(() => saveSubtitleStyle(), 0); // Save after styles are applied
+                if (!isDragging) {
+                    setTimeout(() => saveSubtitleStyle(), 0); 
                 }
             }
             
-            // Initial setup after a slight delay for DOM
             setTimeout(() => {
                  setSubtitleDefaultPosition(videoContainer, false);
                  updateSubtitleVisibility();
-            }, 150);
+            }, 200); // Slightly longer delay for initial
 
 
             function updateSubtitleVisibility() {
                 if (subtitlesEnabled) {
-                    subtitleToggleButtonCustom.textContent = '字幕关';
+                    subtitleToggleButtonCustom.textContent = '字幕开'; // Or use icons
                     subtitleContainer.classList.remove('hidden');
                 } else {
-                    subtitleToggleButtonCustom.textContent = '字幕开';
+                    subtitleToggleButtonCustom.textContent = '字幕关';
                     subtitleContainer.classList.add('hidden');
                     subtitleTextElement.textContent = '';
                 }
@@ -294,7 +342,8 @@
             containerFullscreenButton.addEventListener('click', () => {
                 if (!document.fullscreenElement) {
                     mainElement.requestFullscreen().catch(err => {
-                        console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                        console.error(`全屏请求失败: ${err.message} (${err.name})`);
+                        showToast('全屏模式切换失败', 'error');
                     });
                 } else {
                     if (document.exitFullscreen) document.exitFullscreen();
@@ -310,15 +359,15 @@
                 setTimeout(() => {
                     const parentForSubtitles = isFullscreen ? mainElement : videoContainer;
                     applyLastKnownStyleOrDefault(parentForSubtitles, isFullscreen);
-                }, 120); // Slightly increased delay
+                }, 150); // Delay for layout reflow
             }
             ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(event => {
                 document.addEventListener(event, handleRealFullscreenChange);
             });
 
-            // --- Subtitle Dragging with requestAnimationFrame ---
-            subtitleContainer.addEventListener('mousedown', (e) => {
-                if (e.button !== 0 || !subtitlesEnabled || subtitleContainer.classList.contains('hidden')) return;
+            // --- Subtitle Dragging (Mouse & Touch) ---
+            function onDragStart(clientX, clientY) {
+                if (!subtitlesEnabled || subtitleContainer.classList.contains('hidden')) return false;
                 isDragging = true;
                 subtitleContainer.classList.add('dragging');
                 
@@ -341,28 +390,15 @@
 
                 dragStartElementLeft = currentLeft;
                 dragStartElementTop = currentTop;
-                dragStartMouseX = e.clientX;
-                dragStartMouseY = e.clientY;
-                e.preventDefault();
-            });
-
-            let newDragX = 0;
-            let newDragY = 0;
-            let isRAFScheduled = false;
-
-            function updateSubtitlePositionOnDrag() {
-                if (!isDragging) {
-                    isRAFScheduled = false;
-                    return;
-                }
-                applySubtitlePosition(newDragX, newDragY);
-                isRAFScheduled = false; // Reset for next potential mousemove
+                dragStartMouseX = clientX;
+                dragStartMouseY = clientY;
+                return true; // Indicate drag started
             }
-            
-            document.addEventListener('mousemove', (e) => {
+
+            function onDragMove(clientX, clientY) {
                 if (!isDragging) return;
-                const dx = e.clientX - dragStartMouseX;
-                const dy = e.clientY - dragStartMouseY;
+                const dx = clientX - dragStartMouseX;
+                const dy = clientY - dragStartMouseY;
                 let rawNewLeft = dragStartElementLeft + dx;
                 let rawNewTop = dragStartElementTop + dy;
 
@@ -373,22 +409,51 @@
 
                 if (!isRAFScheduled) {
                     isRAFScheduled = true;
-                    requestAnimationFrame(updateSubtitlePositionOnDrag);
+                    subtitleDragRAF = requestAnimationFrame(updateSubtitlePositionOnDrag);
                 }
-            });
+            }
 
-            document.addEventListener('mouseup', () => {
+            function onDragEnd() {
                 if (isDragging) {
                     isDragging = false;
                     subtitleContainer.classList.remove('dragging');
-                     if (isRAFScheduled) { // If a RAF was scheduled but mouseup came first
-                        cancelAnimationFrame(subtitleDragRAF); // Make sure subtitleDragRAF is the id from requestAnimationFrame
-                        updateSubtitlePositionOnDrag(); // Apply final position
+                     if (isRAFScheduled && subtitleDragRAF) {
+                        cancelAnimationFrame(subtitleDragRAF);
+                        applySubtitlePosition(newDragX, newDragY); // Apply final position
                         isRAFScheduled = false;
                     }
                     saveSubtitleStyle();
                 }
+            }
+
+            function updateSubtitlePositionOnDrag() {
+                if (!isDragging && !isRAFScheduled) return; // Check isRAFScheduled in case mouseup occurred
+                applySubtitlePosition(newDragX, newDragY);
+                isRAFScheduled = false;
+            }
+            
+            subtitleContainer.addEventListener('mousedown', (e) => {
+                if (e.button === 0) { // Only left mouse button
+                    if(onDragStart(e.clientX, e.clientY)) e.preventDefault();
+                }
             });
+            document.addEventListener('mousemove', (e) => { onDragMove(e.clientX, e.clientY); });
+            document.addEventListener('mouseup', onDragEnd);
+
+            subtitleContainer.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) { // Single touch
+                     if(onDragStart(e.touches[0].clientX, e.touches[0].clientY)) e.preventDefault();
+                }
+            }, { passive: false }); // passive: false to allow preventDefault
+            document.addEventListener('touchmove', (e) => {
+                if (isDragging && e.touches.length === 1) {
+                    onDragMove(e.touches[0].clientX, e.touches[0].clientY);
+                    e.preventDefault(); // Prevent page scroll while dragging subtitle
+                }
+            }, { passive: false });
+            document.addEventListener('touchend', onDragEnd);
+            document.addEventListener('touchcancel', onDragEnd);
+
 
             player.controls = false;
             playPauseBtn.addEventListener('click', () => { if (player.paused || player.ended) player.play(); else player.pause(); });
@@ -396,14 +461,15 @@
             player.addEventListener('play', () => { playIcon.classList.remove('fa-play'); playIcon.classList.add('fa-pause'); showControls(); });
             player.addEventListener('pause', () => { playIcon.classList.remove('fa-pause'); playIcon.classList.add('fa-play'); showControls(); clearTimeout(controlsTimeout); });
             player.addEventListener('volumechange', () => { volumeRange.value = player.volume; });
-            player.addEventListener('loadedmetadata', () => { showControls(); });
+            player.addEventListener('loadedmetadata', () => { showControls(); setSubtitleDefaultPosition(videoContainer, false); }); // Also set position here
+
             speedSelect.addEventListener('change', function() { player.playbackRate = parseFloat(this.value); showToast(`播放速度: ${this.value}x`, 'info'); });
             volumeRange.addEventListener('input', function() { player.volume = parseFloat(this.value); });
 
             function showControls() {
                 customControlsBar.style.opacity = '1'; videoContainer.classList.add('controls-visible');
                 clearTimeout(controlsTimeout);
-                if (!player.paused) { controlsTimeout = setTimeout(hideControls, 800); }
+                if (!player.paused) { controlsTimeout = setTimeout(hideControls, 1500); } // Shortened auto-hide to 1.5s
             }
             function hideControls() { customControlsBar.style.opacity = '0'; videoContainer.classList.remove('controls-visible'); }
             videoContainer.addEventListener('mouseenter', showControls);
@@ -413,121 +479,15 @@
             customControlsBar.addEventListener('mouseleave', () => { if (!player.paused) showControls(); });
 
             document.addEventListener('keydown', function(e) { if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); if (player.paused || player.ended) player.play(); else player.pause(); } });
-            player.addEventListener('ended', function() { subtitleTextElement.textContent = ''; playIcon.classList.remove('fa-pause');playIcon.classList.add('fa-play'); const currentItem = document.querySelector('.list li.active'); if (!currentItem) return; const nextItem = currentItem.nextElementSibling; if (nextItem && nextItem.tagName === 'LI') { setTimeout(() => { nextItem.click(); showToast('自动播放下一节', 'success'); }, 1000); } else { const currentChapterList = currentItem.closest('.list'); const currentChapterDiv = currentChapterList ? currentChapterList.closest('.chapter') : null; let nextChapterTitle = currentChapterDiv ? currentChapterDiv.nextElementSibling : null; while(nextChapterTitle && !nextChapterTitle.classList.contains('chapter')) { nextChapterTitle = nextChapterTitle.nextElementSibling; } if (nextChapterTitle && nextChapterTitle.classList.contains('chapter')) { const firstSectionInNextChapter = nextChapterTitle.querySelector('.list li'); if (firstSectionInNextChapter) { setTimeout(() => { firstSectionInNextChapter.click(); showToast('自动播放下一章第一节', 'success');}, 1000); } else { showToast('课程已全部完成', 'success'); } } else { showToast('课程已全部完成', 'success'); } } });
-            function showToast(message, type) { toast.textContent = message; toast.style.opacity = 1; setTimeout(() => toast.style.opacity = 0, 2000); }
-
-            function groupWordsToSentences(words) {
-                const sentences = []; if (!words || words.length === 0) return sentences;
-                const TIME_GAP_THRESHOLD_MS = 700; const PREFERRED_MAX_CHARS = 18; const HARD_MAX_CHARS = PREFERRED_MAX_CHARS + 12;
-                const MIN_DURATION_MS_PER_SEGMENT = 800; const MAX_DURATION_MS_PER_SEGMENT = 7000;
-                let currentSegmentText = ""; let segmentStartTimeMs = words[0].BeginTime; let currentSegmentLastWordEndTimeMs = words[0].BeginTime;
-                for (let i = 0; i < words.length; i++) {
-                    const wordObj = words[i]; const wordText = wordObj.Word; const wordStartTimeMs = wordObj.BeginTime; const wordEndTimeMs = wordObj.EndTime;
-                    const nextWordObj = (i + 1 < words.length) ? words[i + 1] : null;
-                    if (currentSegmentText.length > 0 && (wordStartTimeMs - currentSegmentLastWordEndTimeMs > TIME_GAP_THRESHOLD_MS)) {
-                        if (currentSegmentLastWordEndTimeMs - segmentStartTimeMs >= MIN_DURATION_MS_PER_SEGMENT) { sentences.push({ text: currentSegmentText.trim(), start: segmentStartTimeMs / 1000.0, end: currentSegmentLastWordEndTimeMs / 1000.0 }); }
-                        currentSegmentText = wordText; segmentStartTimeMs = wordStartTimeMs;
-                    } else {
-                        if (currentSegmentText.length === 0) { segmentStartTimeMs = wordStartTimeMs; } currentSegmentText += wordText;
-                    }
-                    currentSegmentLastWordEndTimeMs = wordEndTimeMs;
-                    const isLastWordOfAll = (i === words.length - 1); const timeGapAfterCurrentWordMs = nextWordObj ? (nextWordObj.BeginTime - wordEndTimeMs) : Infinity;
-                    let shouldBreak = false;
-                    if (isLastWordOfAll) { shouldBreak = true; }
-                    else if (timeGapAfterCurrentWordMs > TIME_GAP_THRESHOLD_MS) { shouldBreak = true; }
-                    else if (currentSegmentText.length >= PREFERRED_MAX_CHARS) {
-                        if (currentSegmentText.length >= HARD_MAX_CHARS) { shouldBreak = true; }
-                        else if (nextWordObj && (timeGapAfterCurrentWordMs < 150) && (currentSegmentText.length + nextWordObj.Word.length <= HARD_MAX_CHARS + 5)) { shouldBreak = false; } else { shouldBreak = true; }
-                    } else if ((currentSegmentLastWordEndTimeMs - segmentStartTimeMs > MAX_DURATION_MS_PER_SEGMENT) && currentSegmentText.length > 0) { shouldBreak = true; }
-                    if (shouldBreak && currentSegmentText.length > 0) {
-                        if (currentSegmentLastWordEndTimeMs - segmentStartTimeMs >= MIN_DURATION_MS_PER_SEGMENT || isLastWordOfAll ) { sentences.push({ text: currentSegmentText.trim(), start: segmentStartTimeMs / 1000.0, end: currentSegmentLastWordEndTimeMs / 1000.0 }); }
-                        currentSegmentText = ""; if (nextWordObj) { segmentStartTimeMs = nextWordObj.BeginTime; }
-                    }
-                } return sentences;
-            }
-            async function fetchAndProcessSubtitles(sectionId) {
-                currentSubtitles = []; subtitleTextElement.textContent = ''; currentSubtitleIndex = 0; if (!sectionId) { if (subtitlesEnabled) subtitleTextElement.textContent = '无字幕信息'; return; }
-                const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyVHlwZSI6MiwiZXhwIjoxNzQ3MDM3NDEyLCJ1c2VySWQiOjIzNTksImlhdCI6MTc0NjQzMjYxMn0.hsahpaxkpVf_1GB0I0qMN52GfVBnWzqSHigXGub40Xw';
-                const subtitleUrl = `https://course.wenyanzsb.com/section/get?sectionId=${sectionId}`;
-                try {
-                    const res = await fetch(subtitleUrl, { headers: { 'Content-Type': 'application/json', 'Token': token, 'Charset': 'utf-8', 'Referer': 'https://servicewechat.com/wx92277bcd1df0f2a2/29/page-frame.html', 'User-Agent': 'Mozilla/5.0 (Linux; Android 15; 23013RK75C Build/AQ3A.240912.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/134.0.6998.136 Mobile Safari/537.36 XWEB/1340109 MMWEBSDK/20241202 MMWEBID/4930 MicroMessenger/8.0.56.2800(0x2800385E) WeChat/arm64 Weixin Android Tablet NetType/4G Language/zh_CN ABI/arm64 MiniProgramEnv/android', 'Accept-Encoding': 'gzip, deflate, br' } });
-                    if (!res.ok) throw new Error(`获取字幕失败: 状态码 ${res.status}`); const data = await res.json();
-                    if (data.code === 1001 && data.body && data.body.videoSubtitles) {
-                        const subtitlesJson = JSON.parse(data.body.videoSubtitles);
-                        if (subtitlesJson.Words && Array.isArray(subtitlesJson.Words) && subtitlesJson.Words.length > 0) { currentSubtitles = groupWordsToSentences(subtitlesJson.Words); }
-                        else { if (subtitlesEnabled) subtitleTextElement.textContent = '无有效字幕数据'; }
-                    } else { if (subtitlesEnabled) subtitleTextElement.textContent = '字幕加载失败: ' + (data.msg || '未知错误'); }
-                } catch (err) { if (subtitlesEnabled) subtitleTextElement.textContent = '字幕加载出错'; console.error('请求字幕API时出错:', err); }
-            }
-            function handleTimeUpdate() {
-                if (!subtitlesEnabled || currentSubtitles.length === 0) { if (subtitleTextElement.textContent !== '') subtitleTextElement.textContent = ''; return; }
-                const currentTime = player.currentTime; let foundSubtitle = false; let searchStartIndex = currentSubtitleIndex > 0 ? currentSubtitleIndex -1 : 0;
-                if (currentSubtitles[searchStartIndex] && currentTime < currentSubtitles[searchStartIndex].start && searchStartIndex > 0) searchStartIndex = 0;
-                for (let i = searchStartIndex; i < currentSubtitles.length; i++) {
-                    const subtitle = currentSubtitles[i];
-                    if (currentTime >= subtitle.start && currentTime <= subtitle.end) {
-                        if (subtitleTextElement.textContent !== subtitle.text) { subtitleTextElement.textContent = subtitle.text; }
-                        currentSubtitleIndex = i; foundSubtitle = true; break;
-                    }
-                    if (currentTime > subtitle.end && i === currentSubtitleIndex && subtitleTextElement.textContent === subtitle.text) { subtitleTextElement.textContent = ''; }
-                    if (currentTime < subtitle.start) { if (!foundSubtitle && i > 0 && currentTime > currentSubtitles[i-1].end && subtitleTextElement.textContent !== '') { subtitleTextElement.textContent = ''; } break; }
-                }
-                if (!foundSubtitle && subtitleTextElement.textContent !== '') {
-                    if (currentSubtitles.length > 0) {
-                        if (currentTime > currentSubtitles[currentSubtitles.length - 1].end || currentTime < currentSubtitles[0].start) { subtitleTextElement.textContent = ''; }
-                        else if (currentSubtitles[currentSubtitleIndex] && (currentTime < currentSubtitles[currentSubtitleIndex].start || currentTime > currentSubtitles[currentSubtitleIndex].end)) { subtitleTextElement.textContent = ''; }
-                    } else { subtitleTextElement.textContent = ''; }
-                }
-            }
+            player.addEventListener('ended', function() { /* ... (ended logic as before) ... */ subtitleTextElement.textContent = ''; playIcon.classList.remove('fa-pause');playIcon.classList.add('fa-play'); const currentItem = document.querySelector('.list li.active'); if (!currentItem) return; const nextItem = currentItem.nextElementSibling; if (nextItem && nextItem.tagName === 'LI') { setTimeout(() => { nextItem.click(); showToast('自动播放下一节', 'success'); }, 1000); } else { const currentChapterList = currentItem.closest('.list'); const currentChapterDiv = currentChapterList ? currentChapterList.closest('.chapter') : null; let nextChapterTitle = currentChapterDiv ? currentChapterDiv.nextElementSibling : null; while(nextChapterTitle && !nextChapterTitle.classList.contains('chapter')) { nextChapterTitle = nextChapterTitle.nextElementSibling; } if (nextChapterTitle && nextChapterTitle.classList.contains('chapter')) { const firstSectionInNextChapter = nextChapterTitle.querySelector('.list li'); if (firstSectionInNextChapter) { setTimeout(() => { firstSectionInNextChapter.click(); showToast('自动播放下一章第一节', 'success');}, 1000); } else { showToast('课程已全部完成', 'success'); } } else { showToast('课程已全部完成', 'success'); } } });
+            function showToast(message, type) { /* ... (toast logic as before) ... */ toast.textContent = message; toast.style.opacity = 1; setTimeout(() => toast.style.opacity = 0, 2000); }
+            function groupWordsToSentences(words) { /* ... (groupWords logic as before) ... */ const sentences = []; if (!words || words.length === 0) return sentences; const TIME_GAP_THRESHOLD_MS = 700; const PREFERRED_MAX_CHARS = 18; const HARD_MAX_CHARS = PREFERRED_MAX_CHARS + 12; const MIN_DURATION_MS_PER_SEGMENT = 800; const MAX_DURATION_MS_PER_SEGMENT = 7000; let currentSegmentText = ""; let segmentStartTimeMs = words[0].BeginTime; let currentSegmentLastWordEndTimeMs = words[0].BeginTime; for (let i = 0; i < words.length; i++) { const wordObj = words[i]; const wordText = wordObj.Word; const wordStartTimeMs = wordObj.BeginTime; const wordEndTimeMs = wordObj.EndTime; const nextWordObj = (i + 1 < words.length) ? words[i + 1] : null; if (currentSegmentText.length > 0 && (wordStartTimeMs - currentSegmentLastWordEndTimeMs > TIME_GAP_THRESHOLD_MS)) { if (currentSegmentLastWordEndTimeMs - segmentStartTimeMs >= MIN_DURATION_MS_PER_SEGMENT) { sentences.push({ text: currentSegmentText.trim(), start: segmentStartTimeMs / 1000.0, end: currentSegmentLastWordEndTimeMs / 1000.0 }); } currentSegmentText = wordText; segmentStartTimeMs = wordStartTimeMs; } else { if (currentSegmentText.length === 0) { segmentStartTimeMs = wordStartTimeMs; } currentSegmentText += wordText; } currentSegmentLastWordEndTimeMs = wordEndTimeMs; const isLastWordOfAll = (i === words.length - 1); const timeGapAfterCurrentWordMs = nextWordObj ? (nextWordObj.BeginTime - wordEndTimeMs) : Infinity; let shouldBreak = false; if (isLastWordOfAll) { shouldBreak = true; } else if (timeGapAfterCurrentWordMs > TIME_GAP_THRESHOLD_MS) { shouldBreak = true; } else if (currentSegmentText.length >= PREFERRED_MAX_CHARS) { if (currentSegmentText.length >= HARD_MAX_CHARS) { shouldBreak = true; } else if (nextWordObj && (timeGapAfterCurrentWordMs < 150) && (currentSegmentText.length + nextWordObj.Word.length <= HARD_MAX_CHARS + 5)) { shouldBreak = false; } else { shouldBreak = true; } } else if ((currentSegmentLastWordEndTimeMs - segmentStartTimeMs > MAX_DURATION_MS_PER_SEGMENT) && currentSegmentText.length > 0) { shouldBreak = true; } if (shouldBreak && currentSegmentText.length > 0) { if (currentSegmentLastWordEndTimeMs - segmentStartTimeMs >= MIN_DURATION_MS_PER_SEGMENT || isLastWordOfAll ) { sentences.push({ text: currentSegmentText.trim(), start: segmentStartTimeMs / 1000.0, end: currentSegmentLastWordEndTimeMs / 1000.0 }); } currentSegmentText = ""; if (nextWordObj) { segmentStartTimeMs = nextWordObj.BeginTime; } } } return sentences;}
+            async function fetchAndProcessSubtitles(sectionId) { /* ... (fetch logic as before) ... */ currentSubtitles = []; subtitleTextElement.textContent = ''; currentSubtitleIndex = 0; if (!sectionId) { if (subtitlesEnabled) subtitleTextElement.textContent = '无字幕信息'; return; } const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyVHlwZSI6MiwiZXhwIjoxNzQ3MDM3NDEyLCJ1c2VySWQiOjIzNTksImlhdCI6MTc0NjQzMjYxMn0.hsahpaxkpVf_1GB0I0qMN52GfVBnWzqSHigXGub40Xw'; const subtitleUrl = `https://course.wenyanzsb.com/section/get?sectionId=${sectionId}`; try { const res = await fetch(subtitleUrl, { headers: { 'Content-Type': 'application/json', 'Token': token, 'Charset': 'utf-8', 'Referer': 'https://servicewechat.com/wx92277bcd1df0f2a2/29/page-frame.html', 'User-Agent': 'Mozilla/5.0 (Linux; Android 15; 23013RK75C Build/AQ3A.240912.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/134.0.6998.136 Mobile Safari/537.36 XWEB/1340109 MMWEBSDK/20241202 MMWEBID/4930 MicroMessenger/8.0.56.2800(0x2800385E) WeChat/arm64 Weixin Android Tablet NetType/4G Language/zh_CN ABI/arm64 MiniProgramEnv/android', 'Accept-Encoding': 'gzip, deflate, br' } }); if (!res.ok) throw new Error(`获取字幕失败: 状态码 ${res.status}`); const data = await res.json(); if (data.code === 1001 && data.body && data.body.videoSubtitles) { const subtitlesJson = JSON.parse(data.body.videoSubtitles); if (subtitlesJson.Words && Array.isArray(subtitlesJson.Words) && subtitlesJson.Words.length > 0) { currentSubtitles = groupWordsToSentences(subtitlesJson.Words); } else { if (subtitlesEnabled) subtitleTextElement.textContent = '无有效字幕数据'; } } else { if (subtitlesEnabled) subtitleTextElement.textContent = '字幕加载失败: ' + (data.msg || '未知错误'); } } catch (err) { if (subtitlesEnabled) subtitleTextElement.textContent = '字幕加载出错'; console.error('请求字幕API时出错:', err); } }
+            function handleTimeUpdate() { /* ... (timeupdate logic as before) ... */ if (!subtitlesEnabled || currentSubtitles.length === 0) { if (subtitleTextElement.textContent !== '') subtitleTextElement.textContent = ''; return; } const currentTime = player.currentTime; let foundSubtitle = false; let searchStartIndex = currentSubtitleIndex > 0 ? currentSubtitleIndex -1 : 0; if (currentSubtitles[searchStartIndex] && currentTime < currentSubtitles[searchStartIndex].start && searchStartIndex > 0) searchStartIndex = 0; for (let i = searchStartIndex; i < currentSubtitles.length; i++) { const subtitle = currentSubtitles[i]; if (currentTime >= subtitle.start && currentTime <= subtitle.end) { if (subtitleTextElement.textContent !== subtitle.text) { subtitleTextElement.textContent = subtitle.text; } currentSubtitleIndex = i; foundSubtitle = true; break; } if (currentTime > subtitle.end && i === currentSubtitleIndex && subtitleTextElement.textContent === subtitle.text) { subtitleTextElement.textContent = ''; } if (currentTime < subtitle.start) { if (!foundSubtitle && i > 0 && currentTime > currentSubtitles[i-1].end && subtitleTextElement.textContent !== '') { subtitleTextElement.textContent = ''; } break; } } if (!foundSubtitle && subtitleTextElement.textContent !== '') { if (currentSubtitles.length > 0) { if (currentTime > currentSubtitles[currentSubtitles.length - 1].end || currentTime < currentSubtitles[0].start) { subtitleTextElement.textContent = ''; } else if (currentSubtitles[currentSubtitleIndex] && (currentTime < currentSubtitles[currentSubtitleIndex].start || currentTime > currentSubtitles[currentSubtitleIndex].end)) { subtitleTextElement.textContent = ''; } } else { subtitleTextElement.textContent = ''; } } }
             player.ontimeupdate = handleTimeUpdate;
-            player.onseeking = () => {
-                let low = 0, high = currentSubtitles.length - 1, closestIndex = 0;
-                if (currentSubtitles.length > 0) {
-                    while(low <= high) {
-                        const mid = Math.floor((low + high) / 2); if(!currentSubtitles[mid]){ high = mid -1; continue; }
-                        if (currentSubtitles[mid].start <= player.currentTime) { closestIndex = mid; low = mid + 1; } else { high = mid - 1; }
-                    }
-                }
-                currentSubtitleIndex = closestIndex; if (subtitlesEnabled) { subtitleTextElement.textContent = ''; handleTimeUpdate(); }
-            };
+            player.onseeking = () => { /* ... (seeking logic as before) ... */ let low = 0, high = currentSubtitles.length - 1, closestIndex = 0; if (currentSubtitles.length > 0) { while(low <= high) { const mid = Math.floor((low + high) / 2); if(!currentSubtitles[mid]){ high = mid -1; continue; } if (currentSubtitles[mid].start <= player.currentTime) { closestIndex = mid; low = mid + 1; } else { high = mid - 1; } } } currentSubtitleIndex = closestIndex; if (subtitlesEnabled) { subtitleTextElement.textContent = ''; handleTimeUpdate(); } };
 
-            (async function initCourseList() {
-                 try {
-                    const res = await fetch('https://course.wenyanzsb.com/customerSection/getCustomerSectionList?customerId=2359&courseId=80', { headers: { /* API headers */ 'Content-Type': 'application/json', 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyVHlwZSI6MiwiZXhwIjoxNzQ3MDM3NDEyLCJ1c2VySWQiOjIzNTksImlhdCI6MTc0NjQzMjYxMn0.hsahpaxkpVf_1GB0I0qMN52GfVBnWzqSHigXGub40Xw', 'Charset': 'utf-8', 'Referer': 'https://servicewechat.com/wx92277bcd1df0f2a2/28/page-frame.html', 'User-Agent': 'Mozilla/5.0 (Linux; Android 15; 23013RK75C Build/AQ3A.240912.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/134.0.6998.136 Mobile Safari/537.36 XWEB/1340095 MMWEBSDK/20241202 MMWEBID/4930 MicroMessenger/8.0.56.2800(0x2800385E) WeChat/arm64 Weixin Android Tablet NetType/WIFI Language/zh_CN ABI/arm64 MiniProgramEnv/android', 'Accept-Encoding': 'gzip, deflate, br' } });
-                    if (!res.ok) throw new Error('课程列表加载失败，状态码 ' + res.status); const json = await res.json();
-                    if (json.code !== 1001) throw new Error('课程列表加载失败: ' + json.msg);
-                    if (json.body && Array.isArray(json.body)) {
-                        json.body.forEach(courseGroup => {
-                            if (courseGroup.children && Array.isArray(courseGroup.children)) {
-                                courseGroup.children.forEach(chapter => {
-                                    const chap = document.createElement('div'); chap.className = 'chapter';
-                                    const titleEl = document.createElement('div'); titleEl.className = 'title'; titleEl.innerHTML = `<span>${chapter.categoryName}</span><i class="fas fa-chevron-down"></i>`;
-                                    const ul = document.createElement('ul'); ul.className = 'list';
-                                    sidebar.appendChild(chap); chap.appendChild(titleEl); chap.appendChild(ul);
-                                    if (chapter.sectionList && Array.isArray(chapter.sectionList) && chapter.sectionList.length > 0) {
-                                        chapter.sectionList.forEach(sec => {
-                                            const li = document.createElement('li'); li.innerHTML = `<i class="fas fa-play-circle"></i> ${sec.sectionName}`;
-                                            li.onclick = () => {
-                                                document.querySelectorAll('.list li.active').forEach(el => el.classList.remove('active'));
-                                                document.querySelectorAll('.title.active').forEach(el => el.classList.remove('active'));
-                                                titleEl.classList.add('active'); li.classList.add('active');
-                                                videoSource.src = sec.sectionVideo; player.load(); player.play();
-                                                fetchAndProcessSubtitles(sec.sectionId);
-                                                const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
-                                                applyLastKnownStyleOrDefault(isFullscreen ? mainElement : videoContainer, isFullscreen);
-                                                showToast(`正在播放: ${sec.sectionName}`, 'info');
-                                            };
-                                            ul.appendChild(li);
-                                        });
-                                    } else { const li = document.createElement('li'); li.textContent = '（本章内无小节）'; li.style.fontStyle = 'italic'; li.style.color = '#888'; li.style.cursor = 'default'; ul.appendChild(li); }
-                                    titleEl.onclick = () => { const icon = titleEl.querySelector('i.fa-chevron-down'); ul.style.display = (ul.style.display === 'block' ? 'none' : 'block'); if(icon) icon.style.transform = (ul.style.display === 'block' ? 'rotate(180deg)' : 'rotate(0deg)'); };
-                                });
-                            }
-                        });
-                        const firstVideoItem = sidebar.querySelector('.list li'); if (firstVideoItem) { firstVideoItem.click(); }
-                    }
-                } catch (err) { const errEl = document.createElement('p'); errEl.style.color = 'red'; errEl.style.padding = '16px'; errEl.textContent = '加载课程列表失败: ' + err.message; sidebar.appendChild(errEl); console.error(err); }
-            })();
+            (async function initCourseList() { /* ... (initCourseList logic as before) ... */  try { const res = await fetch('https://course.wenyanzsb.com/customerSection/getCustomerSectionList?customerId=2359&courseId=80', { headers: { 'Content-Type': 'application/json', 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyVHlwZSI6MiwiZXhwIjoxNzQ3MDM3NDEyLCJ1c2VySWQiOjIzNTksImlhdCI6MTc0NjQzMjYxMn0.hsahpaxkpVf_1GB0I0qMN52GfVBnWzqSHigXGub40Xw', 'Charset': 'utf-8', 'Referer': 'https://servicewechat.com/wx92277bcd1df0f2a2/28/page-frame.html', 'User-Agent': 'Mozilla/5.0 (Linux; Android 15; 23013RK75C Build/AQ3A.240912.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/134.0.6998.136 Mobile Safari/537.36 XWEB/1340095 MMWEBSDK/20241202 MMWEBID/4930 MicroMessenger/8.0.56.2800(0x2800385E) WeChat/arm64 Weixin Android Tablet NetType/WIFI Language/zh_CN ABI/arm64 MiniProgramEnv/android', 'Accept-Encoding': 'gzip, deflate, br' } }); if (!res.ok) throw new Error('课程列表加载失败，状态码 ' + res.status); const json = await res.json(); if (json.code !== 1001) throw new Error('课程列表加载失败: ' + json.msg); if (json.body && Array.isArray(json.body)) { json.body.forEach(courseGroup => { if (courseGroup.children && Array.isArray(courseGroup.children)) { courseGroup.children.forEach(chapter => { const chap = document.createElement('div'); chap.className = 'chapter'; const titleEl = document.createElement('div'); titleEl.className = 'title'; titleEl.innerHTML = `<span>${chapter.categoryName}</span><i class="fas fa-chevron-down"></i>`; const ul = document.createElement('ul'); ul.className = 'list'; sidebar.appendChild(chap); chap.appendChild(titleEl); chap.appendChild(ul); if (chapter.sectionList && Array.isArray(chapter.sectionList) && chapter.sectionList.length > 0) { chapter.sectionList.forEach(sec => { const li = document.createElement('li'); li.innerHTML = `<i class="fas fa-play-circle"></i> ${sec.sectionName}`; li.onclick = () => { document.querySelectorAll('.list li.active').forEach(el => el.classList.remove('active')); document.querySelectorAll('.title.active').forEach(el => el.classList.remove('active')); titleEl.classList.add('active'); li.classList.add('active'); videoSource.src = sec.sectionVideo; player.load(); player.play(); fetchAndProcessSubtitles(sec.sectionId); const isFullscreen = !!(document.fullscreenElement); applyLastKnownStyleOrDefault(isFullscreen ? mainElement : videoContainer, isFullscreen); showToast(`正在播放: ${sec.sectionName}`, 'info'); }; ul.appendChild(li); }); } else { const li = document.createElement('li'); li.textContent = '（本章内无小节）'; li.style.fontStyle = 'italic'; li.style.color = '#888'; li.style.cursor = 'default'; ul.appendChild(li); } titleEl.onclick = () => { const icon = titleEl.querySelector('i.fa-chevron-down'); ul.style.display = (ul.style.display === 'block' ? 'none' : 'block'); if(icon) icon.style.transform = (ul.style.display === 'block' ? 'rotate(180deg)' : 'rotate(0deg)'); }; }); } }); const firstVideoItem = sidebar.querySelector('.list li'); if (firstVideoItem && typeof firstVideoItem.click === 'function') { firstVideoItem.click(); } } } catch (err) { const errEl = document.createElement('p'); errEl.style.color = 'red'; errEl.style.padding = '16px'; errEl.textContent = '加载课程列表失败: ' + err.message; sidebar.appendChild(errEl); console.error(err); } })();
         })();
     </script>
 </body>
