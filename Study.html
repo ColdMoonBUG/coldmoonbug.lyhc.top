@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>智能视频学习系统</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="/js/favicon-loader.js"></script>
+    <!-- <script src="/js/favicon-loader.js"></script> -->
     <style>
         /* 您的 Study_Updated.html 中的 CSS - 保持不变 */
         * {
@@ -1390,9 +1390,9 @@
                 if (subtitlesEnabled) { subtitleTextElement.textContent = ''; handleTimeUpdate(); }
             };
 
-            (async function initCourseList() { /* ... (Unchanged course list initialization) ... */
+(async function initCourseList() {
                 try {
-                    const res = await fetch('https://course.wenyanzsb.com/customerSection/getCustomerSectionList?customerId=2359&courseId=80', { headers: { 'Content-Type': 'application/json', 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyVHlwZSI6MiwiZXhwIjoxNzQ3MDM3NDEyLCJ1c2VySWQiOjIzNTksImlhdCI6MTc0NjQzMjYxMn0.hsahpaxkpVf_1GB0I0qMN52GfVBnWzqSHigXGub40Xw', /* ... other headers */ } });
+                    const res = await fetch('https://course.wenyanzsb.com/customerSection/getCustomerSectionList?customerId=2359&courseId=80', { headers: { 'Content-Type': 'application/json', 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyVHlwZSI6MiwiZXhwIjoxNzQ3MDM3NDEyLCJ1c2VySWQiOjIzNTksImlhdCI6MTc0NjQzMjYxMn0.hsahpaxkpVf_1GB0I0qMN52GfVBnWzqSHigXGub40Xw', /* ... other headers ... */ } });
                     if (!res.ok) throw new Error('课程列表加载失败，状态码 ' + res.status);
                     const json = await res.json();
                     if (json.code !== 1001) throw new Error('课程列表加载失败: ' + json.msg);
@@ -1404,10 +1404,39 @@
                                     const titleEl = document.createElement('div'); titleEl.className = 'title'; titleEl.innerHTML = `<span>${chapter.categoryName}</span><i class="fas fa-chevron-down"></i>`;
                                     const ul = document.createElement('ul'); ul.className = 'list';
                                     sidebar.appendChild(chap); chap.appendChild(titleEl); chap.appendChild(ul);
+                                    
+                                    // Bind onclick for chapter title (correct placement)
+                                    titleEl.onclick = () => {
+                                        console.log("Chapter title clicked:", titleEl.querySelector('span').textContent);
+                                        try {
+                                            const icon = titleEl.querySelector('i.fa-chevron-down');
+                                            const ulList = ul; 
+
+                                            if (!ulList || ulList.tagName !== 'UL') {
+                                                console.error("Could not find UL element for chapter:", titleEl.querySelector('span').textContent);
+                                                return;
+                                            }
+                                            const newDisplayState = (ulList.style.display === 'block' ? 'none' : 'block');
+                                            console.log("Setting UL display to:", newDisplayState);
+                                            ulList.style.display = newDisplayState;
+
+                                            if (icon) {
+                                                icon.style.transform = (newDisplayState === 'block' ? 'rotate(180deg)' : 'rotate(0deg)');
+                                            } else {
+                                                console.warn("No icon found for chapter title:", titleEl.querySelector('span').textContent);
+                                            }
+                                        } catch (error) {
+                                            console.error("Error in chapter title onclick:", error);
+                                        }
+                                    };
+
                                     if (chapter.sectionList && Array.isArray(chapter.sectionList) && chapter.sectionList.length > 0) {
                                         chapter.sectionList.forEach(sec => {
                                             const li = document.createElement('li'); li.innerHTML = `<i class="fas fa-play-circle"></i> ${sec.sectionName}`;
                                             li.onclick = () => {
+                                               
+                                                
+
                                                 document.querySelectorAll('.list li.active').forEach(el => el.classList.remove('active'));
                                                 document.querySelectorAll('.title.active').forEach(el => el.classList.remove('active'));
                                                 titleEl.classList.add('active'); li.classList.add('active');
@@ -1429,8 +1458,15 @@
                                             };
                                             ul.appendChild(li);
                                         });
-                                    } else { /* ... */ }
-                                    titleEl.onclick = () => { /* ... */ };
+                                    } else { 
+                                        const li = document.createElement('li');
+                                        li.textContent = '（本章内无小节）';
+                                        li.style.fontStyle = 'italic';
+                                        li.style.color = '#888';
+                                        li.style.cursor = 'default';
+                                        ul.appendChild(li);
+                                    }
+                                    // titleEl.onclick was moved up to be bound soon after titleEl creation
                                 });
                             }
                         });
@@ -1438,9 +1474,17 @@
                         if (firstVideoItem && typeof firstVideoItem.click === 'function') { firstVideoItem.click(); }
                         else { showToast('课程列表为空或无有效视频。', 'info'); }
                     } else { showToast('课程数据格式不正确。', 'error'); }
-                } catch (err) { /* ... */ }
-            })();
-        })();
+                } catch (err) {
+                    const errEl = document.createElement('p');
+                    errEl.style.color = 'red';
+                    errEl.style.padding = '16px';
+                    errEl.textContent = '加载课程列表失败: ' + err.message;
+                    sidebar.appendChild(errEl);
+                    console.error(err);
+                }
+            })(); // End of initCourseList IIFE
+
+        })(); // End of Main IIFE();
     </script>
 </body>
 
