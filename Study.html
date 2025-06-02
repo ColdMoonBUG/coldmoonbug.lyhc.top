@@ -596,6 +596,56 @@
                 padding: 6px 10px;
             }
         }
+
+        /* 新增弹幕相关样式 */
+        #danmaku-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            /* 根据您的控制栏高度调整 bottom，或者留出字幕空间 */
+            /* 假设控制栏高度约 40-50px，字幕区域高度约 50-80px */
+            /* 如果字幕在视频底部，弹幕不应覆盖字幕和控制栏 */
+            /* 简单起见，可以先让弹幕在整个视频区域滚动，后续可调整 bottom 值 */
+            bottom: 50px;
+            /* 示例：为底部控制栏留出空间，可按需调整 */
+            overflow: hidden;
+            pointer-events: none;
+            /* 允许点击穿透到视频播放器 */
+            z-index: 2147483642;
+            /* 应高于播放器，低于最顶层控件（如果需要） */
+        }
+
+        .danmaku-item {
+            position: absolute;
+            white-space: nowrap;
+            color: white;
+            font-size: 18px;
+            /* 可根据喜好调整 */
+            font-weight: bold;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+            padding: 3px 8px;
+            border-radius: 4px;
+            background-color: rgba(0, 0, 0, 0.2);
+            /* 可选：给弹幕一点背景使其更突出 */
+            will-change: transform;
+            /* 性能优化提示 */
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* 响应式调整弹幕字体大小 (可选) */
+        @media (max-width: 768px) {
+            .danmaku-item {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .danmaku-item {
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 
@@ -614,6 +664,7 @@
                 <p id="subtitle-text"></p>
             </div>
             <div id="custom-controls-bar">
+                <div id="danmaku-container"></div>
                 <div class="control-group left-controls">
                     <button id="play-pause-btn" title="播放/暂停"><i class="fas fa-play"></i></button>
                     <i class="fas fa-volume-up" title="音量"></i>
@@ -653,6 +704,7 @@
         let originalSubtitleTransition = ''; // 用于禁用/恢复transition
         let initialMouseOffsetXOnSubtitle = 0;
         let initialMouseOffsetYOnSubtitle = 0;
+
         (async function () {
             const mainElement = document.getElementById('main');
             const sidebar = document.getElementById('sidebar');
@@ -686,55 +738,44 @@
             let controlsTimeout; let parentDimensionsForDrag = { width: 0, height: 0 };
             let subtitleDragRAF = null; let isRAFScheduled = false;
             let newDragX = 0, newDragY = 0;
-            if (speedSelect) { // 确保 speedSelect 元素存在
-                speedSelect.addEventListener('mousedown', function () {
-                    // `this` 在这里指向 speedSelect 元素
-                    // `document.activeElement` 指向当前页面上获得焦点的元素
 
-                    // 如果 speedSelect 已经是当前激活的元素（意味着它可能已经展开）
+            // 新增弹幕相关变量
+            const danmakuContainer = document.getElementById('danmaku-container');
+            let allCourseBarrages = {}; // 存储所有弹幕，按 sectionId 分组
+            let currentVideoBarrages = []; // 当前视频的弹幕列表
+            let activeDanmakuIds = new Set(); // 存储当前屏幕上活动弹幕的ID
+            let lastProcessedDanmakuTime = -1; // 用于弹幕 timeupdate 优化
+            const BARRAGE_API_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyVHlwZSI6MiwiZXhwIjoxNzQ3MDM3NDEyLCJ1c2VySWQiOjIzNTksImlhdCI6MTc0NjQzMjYxMn0.hsahpaxkpVf_1GB0I0qMN52GfVBnWzqSHigXGub40Xw';
+
+
+            if (speedSelect) {
+                speedSelect.addEventListener('mousedown', function () {
                     if (document.activeElement === this) {
-                        // 我们延迟执行 blur() 操作。
-                        // 这是因为 mousedown 事件触发在 click 事件和浏览器默认行为（如打开下拉框）之前。
-                        // 如果我们立即 blur()，可能会与浏览器试图打开它的行为冲突。
-                        // 通过 setTimeout，我们将 blur() 推迟到当前事件处理周期之后，
-                        // 此时如果浏览器没有因为这个 mousedown 重新打开它，blur() 就能生效关闭它。
                         setTimeout(() => {
                             this.blur();
                         }, 0);
                     }
-                    // 如果 speedSelect 不是当前激活元素，那么这个 mousedown 行为通常会导致浏览器使其获得焦点并展开下拉框，
-                    // 我们不需要做额外处理。
                 });
             }
-            // --- Subtitle Positioning and Dragging Functions (Unchanged) ---
-            function saveSubtitleStyle() { /* ... */ }
-            function applySubtitlePosition(newLeft, newTop) { /* ... */ }
-            function applyLastKnownStyleOrDefault(parentElementForSubtitleCalc, isFullscreenView) { /* ... */ }
-            function setSubtitleDefaultPosition(parentElementForSubtitleCalc, isFullscreenView) { /* ... */ }
-            function onDragStart(clientX, clientY) { /* ... */ return true; }
-            function updateSubtitlePositionOnDrag() { /* ... */ }
-            function onDragMove(clientX, clientY) { /* ... */ }
-            function onDragEnd() { /* ... */ }
-            // (For brevity, actual implementation of above functions is omitted here but present in your original file)
+
             function saveSubtitleStyle() {
                 const parentEl = playerWrapper;
                 lastKnownSubtitleStyle = {
-                    left: subtitleContainer.style.left, // 现在会是 'XXXpx'
-                    top: subtitleContainer.style.top,   // 'XXXpx'
+                    left: subtitleContainer.style.left,
+                    top: subtitleContainer.style.top,
                     width: subtitleContainer.style.width,
                     maxWidth: subtitleContainer.style.maxWidth,
-                    transform: subtitleContainer.style.transform, // 现在会是 '' or from dragging
-                    // 保存当时父容器的尺寸，用于后续可能的缩放调整
+                    transform: subtitleContainer.style.transform,
                     parentWidthAtSave: parentEl.clientWidth,
                     parentHeightAtSave: parentEl.clientHeight
                 };
-                // console.log("[SubtitleDebug] saveSubtitleStyle:", JSON.parse(JSON.stringify(lastKnownSubtitleStyle)));
             }
             function applySubtitlePosition(newLeft, newTop) {
                 subtitleContainer.style.left = newLeft + 'px'; subtitleContainer.style.top = newTop + 'px';
             }
+
             function applyLastKnownStyleOrDefault(parentElementForSubtitleCalc, isFullscreenView) {
-                console.log("[SubtitleDebug] applyLastKnownStyleOrDefault called. Fullscreen:", isFullscreenView);
+                // console.log("[SubtitleDebug] applyLastKnownStyleOrDefault called. Fullscreen:", isFullscreenView);
                 const styleToApply = lastKnownSubtitleStyle;
                 const newParentWidth = parentElementForSubtitleCalc.clientWidth;
                 const newParentHeight = parentElementForSubtitleCalc.clientHeight;
@@ -742,57 +783,33 @@
                 if (typeof styleToApply.left === 'string' && styleToApply.left.includes('px') &&
                     typeof styleToApply.top === 'string' && styleToApply.top.includes('px')) {
 
-                    console.log("[SubtitleDebug] Applying last known pixel style.");
+                    // console.log("[SubtitleDebug] Applying last known pixel style.");
                     subtitleContainer.style.transform = styleToApply.transform || '';
-
-                    let targetTopPx = parseFloat(styleToApply.top); // Top的缩放逻辑可以保留
-
-                    // --- 尝试缩放保存的 Top 位置 ---
+                    let targetTopPx = parseFloat(styleToApply.top);
                     if (styleToApply.parentHeightAtSave && styleToApply.parentHeightAtSave > 0 && newParentHeight > 0) {
                         const scaleY = newParentHeight / styleToApply.parentHeightAtSave;
                         targetTopPx *= scaleY;
-                        console.log("[SubtitleDebug] Scaled top:", targetTopPx, "from old:", parseFloat(styleToApply.top), "scaleY:", scaleY);
                     }
-                    // --- Top 缩放结束 ---
-
-                    // 设置字幕的宽度和最大宽度
                     subtitleContainer.style.width = styleToApply.width || (isFullscreenView ? '80%' : '90%');
                     subtitleContainer.style.maxWidth = styleToApply.maxWidth || (isFullscreenView ? '900px' : '800px');
-
-                    // 强制浏览器重新计算布局以获取准确的 offsetWidth
                     void subtitleContainer.offsetWidth;
                     let sWidth = subtitleContainer.offsetWidth;
-
-                    if (sWidth === 0) { // Fallback for width
+                    if (sWidth === 0) {
                         sWidth = newParentWidth * (parseFloat(subtitleContainer.style.width) / 100.0) || newParentWidth * (isFullscreenView ? 0.8 : 0.9);
-                        console.warn("[SubtitleDebug] sWidth was 0, fallback used:", sWidth);
                     }
-                    console.log("[SubtitleDebug] For Left Calc: newParentWidth:", newParentWidth, "sWidth:", sWidth);
-
-                    // --- 重新计算 Left 实现居中 ---
                     let targetLeftPx = (newParentWidth - sWidth) / 2;
-                    console.log("[SubtitleDebug] Recalculated targetLeftPx for centering:", targetLeftPx);
-                    // --- Left 计算结束 ---
-
                     let sHeight = subtitleContainer.offsetHeight || 50;
-
-                    // 边界限制
                     targetLeftPx = Math.round(Math.max(0, Math.min(targetLeftPx, newParentWidth - sWidth)));
                     targetTopPx = Math.round(Math.max(0, Math.min(targetTopPx, newParentHeight - sHeight)));
-                    console.log("[SubtitleDebug] Rounded & Clamped left:", targetLeftPx, "Rounded & Clamped top:", targetTopPx);
-
                     subtitleContainer.style.left = targetLeftPx + 'px';
                     subtitleContainer.style.top = targetTopPx + 'px';
 
                 } else {
-                    console.log("[SubtitleDebug] No valid last known pixel style or style indicates default, calling setSubtitleDefaultPosition.");
                     setSubtitleDefaultPosition(parentElementForSubtitleCalc, isFullscreenView);
                 }
-
-                // ... (后续的 saveSubtitleStyle 调用逻辑不变)
                 if (typeof styleToApply.left === 'string' && styleToApply.left.includes('px') &&
                     typeof styleToApply.top === 'string' && styleToApply.top.includes('px') &&
-                    (styleToApply.transform === '' || !styleToApply.transform)) { // 检查 transform 是否为空或未定义       
+                    (styleToApply.transform === '' || !styleToApply.transform)) {
                     setTimeout(() => {
                         if (!isDragging) {
                             saveSubtitleStyle();
@@ -800,42 +817,29 @@
                     }, 100);
                 }
             }
+
             function setSubtitleDefaultPosition(parentElementForSubtitleCalc, isFullscreenView) {
-                console.log("[SubtitleDebug] setSubtitleDefaultPosition called. Fullscreen:", isFullscreenView);
+                // console.log("[SubtitleDebug] setSubtitleDefaultPosition called. Fullscreen:", isFullscreenView);
                 subtitleContainer.style.width = isFullscreenView ? '80%' : '90%';
                 subtitleContainer.style.maxWidth = isFullscreenView ? '900px' : '800px';
-
-                // --- 水平居中修改 ---
-                subtitleContainer.style.transform = ''; // 确保清除 transform
-
-                // 强制浏览器在获取offsetWidth前完成布局计算
+                subtitleContainer.style.transform = '';
                 void subtitleContainer.offsetWidth;
                 let subtitleActualWidth = subtitleContainer.offsetWidth;
-                const parentActualWidth = parentElementForSubtitleCalc.offsetWidth; // 使用 offsetWidth
-
+                const parentActualWidth = parentElementForSubtitleCalc.offsetWidth;
                 if (subtitleActualWidth === 0) {
-                    // 如果 offsetWidth 仍然为0（例如，字幕内容为空或CSS导致无法计算），则根据样式估算
-                    const widthStyle = subtitleContainer.style.width; // '80%' or '90%'
+                    const widthStyle = subtitleContainer.style.width;
                     if (widthStyle.includes('%')) {
                         subtitleActualWidth = parentActualWidth * (parseFloat(widthStyle) / 100.0);
-                    } else { // 如果是固定像素或其他情况，给一个基于maxWidth或父宽度的合理估算
+                    } else {
                         const maxWidthNum = parseFloat(subtitleContainer.style.maxWidth) || parentActualWidth * 0.8;
                         subtitleActualWidth = Math.min(parentActualWidth * (isFullscreenView ? 0.8 : 0.9), maxWidthNum);
                     }
-                    console.warn("[SubtitleDebug] Subtitle offsetWidth was 0, using estimated/calculated width:", subtitleActualWidth);
                 }
-
                 let calculatedLeft = (parentActualWidth - subtitleActualWidth) / 2;
-                subtitleContainer.style.left = Math.round(calculatedLeft) + 'px'; // 取整
-                console.log("[SubtitleDebug] Horizontal Centering: parentActualWidth:", parentActualWidth, "subtitleActualWidth:", subtitleActualWidth, "new style.left:", subtitleContainer.style.left);
-                // --- 水平居中修改结束 ---
-
+                subtitleContainer.style.left = Math.round(calculatedLeft) + 'px';
                 let parentHeight = 0;
-                // 使用 offsetHeight 获取父容器高度，与子元素 offsetHeight 更具可比性 (如果父元素有边框)
-                // 但如果父元素是 flex item 且没有固定高度，clientHeight 可能更合适表示其内部可用空间
-                // 这里我们继续沿用之前的逻辑，但可以考虑 parentElementForSubtitleCalc.offsetHeight
                 if (parentElementForSubtitleCalc && typeof parentElementForSubtitleCalc.clientHeight === 'number' && parentElementForSubtitleCalc.clientHeight > 0) {
-                    parentHeight = parentElementForSubtitleCalc.clientHeight; // 或者考虑 offsetHeight
+                    parentHeight = parentElementForSubtitleCalc.clientHeight;
                 } else if (isFullscreenView) {
                     parentHeight = mainElement.clientHeight || window.innerHeight;
                 } else {
@@ -843,148 +847,96 @@
                     if (!parentHeight || parentHeight <= 0) {
                         parentHeight = videoContainer.clientHeight - (customControlsBar.offsetHeight || 50);
                     }
-                    if (!parentHeight || parentHeight <= 0) { parentHeight = 300; } // Fallback
+                    if (!parentHeight || parentHeight <= 0) { parentHeight = 300; }
                 }
-                console.log("[SubtitleDebug] Parent height (used for calculation):", parentHeight);
-
                 const wasHidden = subtitleContainer.classList.contains('hidden');
                 let tempOpacity = subtitleContainer.style.opacity;
                 let subtitleHeight = 0;
-
                 if (subtitlesEnabled) {
-                    const originalDisplay = subtitleContainer.style.display; // 保存原始 display
+                    const originalDisplay = subtitleContainer.style.display;
                     if (wasHidden) {
                         subtitleContainer.style.opacity = '0';
-                        // class 'hidden' 可能包含 display:none，直接移除类并设置必要的display
                         subtitleContainer.classList.remove('hidden');
-                        subtitleContainer.style.display = 'block'; // 确保是可计算尺寸的 display 类型
-                        void subtitleContainer.offsetHeight; // 强制 reflow
+                        subtitleContainer.style.display = 'block';
+                        void subtitleContainer.offsetHeight;
                         subtitleHeight = subtitleContainer.offsetHeight;
-                        subtitleContainer.style.display = originalDisplay; // 恢复原始 display
+                        subtitleContainer.style.display = originalDisplay;
                         subtitleContainer.classList.add('hidden');
                         subtitleContainer.style.opacity = tempOpacity;
                     } else {
-                        // 如果元素已经是可见的，确保它是可计算尺寸的 display 类型再获取高度
-                        // （如果其默认 display 不是 block 或 inline-block 等）
-                        // 但通常如果可见，offsetHeight 应该是可用的
                         subtitleHeight = subtitleContainer.offsetHeight;
                     }
                 }
-                subtitleHeight = subtitleHeight || 50; // Fallback if still 0 or subtitles disabled for height calc
-                console.log("[SubtitleDebug] Subtitle offsetHeight:", subtitleHeight);
-
+                subtitleHeight = subtitleHeight || 50;
                 const controlsBarHeight = customControlsBar?.offsetHeight || 40;
-                console.log("[SubtitleDebug] Controls bar offsetHeight:", controlsBarHeight);
-
-                // 尝试将固定间距也设置为相对值
-                const spacingAboveControls = Math.round(parentHeight * 0.015); // 例如父容器高度的1.5%作为间距
-                const bottomMargin = (isFullscreenView ? Math.round(parentHeight * 0.12) : controlsBarHeight + Math.max(5, spacingAboveControls)); // 最小5px间距
-                console.log("[SubtitleDebug] Bottom margin (spacingAboveControls:", spacingAboveControls, "):", bottomMargin);
-
+                const spacingAboveControls = Math.round(parentHeight * 0.015);
+                const bottomMargin = (isFullscreenView ? Math.round(parentHeight * 0.12) : controlsBarHeight + Math.max(5, spacingAboveControls));
                 let newTop = parentHeight - subtitleHeight - bottomMargin;
-                console.log("[SubtitleDebug] Calculated newTop (before clamp):", newTop);
-
-                newTop = Math.max(10, newTop); // 确保不会太靠上 (10px是顶部的最小间距)
-                console.log("[SubtitleDebug] Calculated newTop (after clamp):", newTop);
-
-                subtitleContainer.style.top = Math.round(newTop) + 'px'; // 取整
-                subtitleContainer.style.bottom = ''; // 确保 bottom 样式被清除
-
+                newTop = Math.max(10, newTop);
+                subtitleContainer.style.top = Math.round(newTop) + 'px';
+                subtitleContainer.style.bottom = '';
                 if (!isDragging) {
                     setTimeout(() => saveSubtitleStyle(), 50);
                 }
             }
+
             function onDragStart(clientX, clientY) {
                 if (!subtitlesEnabled || subtitleContainer.classList.contains('hidden')) return false;
                 isDragging = true;
                 subtitleContainer.classList.add('dragging');
-
                 originalSubtitleTransition = subtitleContainer.style.transition;
-                subtitleContainer.style.transition = 'none'; // 禁用过渡
-
+                subtitleContainer.style.transition = 'none';
                 const parent = subtitleContainer.parentElement;
                 if (!parent) {
                     isDragging = false;
-                    subtitleContainer.style.transition = originalSubtitleTransition; // 恢复
+                    subtitleContainer.style.transition = originalSubtitleTransition;
                     return false;
                 }
                 parentDimensionsForDrag = { width: parent.clientWidth, height: parent.clientHeight };
-
-                const subtitleRect = subtitleContainer.getBoundingClientRect(); // 获取字幕当前的屏幕位置和尺寸
-                const parentRect = parent.getBoundingClientRect();     // 获取父容器的屏幕位置和尺寸
-
-                // 1. 计算鼠标按下时，指针在字幕块内部的X, Y偏移量
+                const subtitleRect = subtitleContainer.getBoundingClientRect();
+                const parentRect = parent.getBoundingClientRect();
                 initialMouseOffsetXOnSubtitle = clientX - subtitleRect.left;
                 initialMouseOffsetYOnSubtitle = clientY - subtitleRect.top;
-
-                // 2. 为了拖动，我们需要移除transform，并设置一个绝对的left/top。
-                //    这个left/top值应该是当前字幕可视左上角相对于父容器的偏移。
                 const visualLeftRelativeToParent = subtitleRect.left - parentRect.left;
                 const visualTopRelativeToParent = subtitleRect.top - parentRect.top;
-
-                subtitleContainer.style.transform = ''; // 移除 transform
+                subtitleContainer.style.transform = '';
                 subtitleContainer.style.left = visualLeftRelativeToParent + 'px';
                 subtitleContainer.style.top = visualTopRelativeToParent + 'px';
-
-                // 打印关键值进行调试
-                console.log('[Drag Start] Mouse Click Offset X inside Subtitle:', initialMouseOffsetXOnSubtitle);
-                console.log('[Drag Start] Visual Left relative to Parent (set to style.left):', visualLeftRelativeToParent);
-                console.log('[Drag Start] Subtitle offsetWidth:', subtitleContainer.offsetWidth, 'subtitleRect.width:', subtitleRect.width);
-
-                // dragStartElementLeft, dragStartElementTop, dragStartMouseX, dragStartMouseY 不再是主要驱动拖动的变量
-                // onDragMove 将主要使用 initialMouseOffsetXOnSubtitle 和当前的 clientX/Y
-
                 return true;
             }
+
             function updateSubtitlePositionOnDrag() {
                 if (!isDragging && !isRAFScheduled) return;
                 applySubtitlePosition(newDragX, newDragY); isRAFScheduled = false;
             }
+
             function onDragMove(clientX, clientY) {
                 if (!isDragging) return;
-
                 const parentRect = subtitleContainer.parentElement.getBoundingClientRect();
-
-                // 目标：让字幕块的某个点（即初始鼠标按下的点）始终跟随当前鼠标指针
-                // 新的字幕块左上角屏幕X坐标 = 当前鼠标屏幕X坐标 - 初始时鼠标在字幕块内的X偏移
                 const newTargetScreenX_forSubtitleLeft = clientX - initialMouseOffsetXOnSubtitle;
                 const newTargetScreenY_forSubtitleTop = clientY - initialMouseOffsetYOnSubtitle;
-
-                // 将这个新的屏幕X,Y坐标转换为相对于父容器的left, top样式值
                 let newLeftStyle = newTargetScreenX_forSubtitleLeft - parentRect.left;
                 let newTopStyle = newTargetScreenY_forSubtitleTop - parentRect.top;
-
-                // 应用边界限制 (您已有的逻辑)
-                const sWidth = subtitleContainer.offsetWidth; // 获取实时宽度用于边界判断
+                const sWidth = subtitleContainer.offsetWidth;
                 const sHeight = subtitleContainer.offsetHeight;
-
                 newLeftStyle = Math.max(0, Math.min(newLeftStyle, parentDimensionsForDrag.width - sWidth));
                 newTopStyle = Math.max(0, Math.min(newTopStyle, parentDimensionsForDrag.height - sHeight));
-
-                // 更新 newDragX 和 newDragY 以便 RAF 使用 (您已有的逻辑)
                 newDragX = newLeftStyle;
                 newDragY = newTopStyle;
-
                 if (!isRAFScheduled) {
                     isRAFScheduled = true;
-                    // updateSubtitlePositionOnDrag 会调用 applySubtitlePosition(newDragX, newDragY)
-                    // applySubtitlePosition 负责实际设置 subtitleContainer.style.left 和 top
                     subtitleDragRAF = requestAnimationFrame(updateSubtitlePositionOnDrag);
                 }
             }
+
             function onDragEnd() {
                 if (isDragging) {
                     isDragging = false;
                     subtitleContainer.classList.remove('dragging');
-
-                    // --- BEGIN MODIFICATION ---
-                    // 恢复 transition
                     subtitleContainer.style.transition = originalSubtitleTransition;
-                    // --- END MODIFICATION ---
-
                     if (isRAFScheduled && subtitleDragRAF) {
                         cancelAnimationFrame(subtitleDragRAF);
-                        applySubtitlePosition(newDragX, newDragY); // 确保最后位置应用
+                        applySubtitlePosition(newDragX, newDragY);
                         isRAFScheduled = false;
                     }
                     saveSubtitleStyle();
@@ -1001,14 +953,11 @@
                 }, 200);
             });
             window.addEventListener('resize', () => {
-                // console.log("Window resized/zoomed, recalculating subtitle position.");
                 const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
-                // 当缩放时，我们通常希望应用最后一次的样式（如果拖动过）或默认样式
-                // applyLastKnownStyleOrDefault 内部会根据情况调用 setSubtitleDefaultPosition
                 applyLastKnownStyleOrDefault(playerWrapper, isFullscreen);
             });
 
-            function updateSubtitleVisibility() { /* ... (Unchanged) ... */
+            function updateSubtitleVisibility() {
                 if (subtitlesEnabled) {
                     subtitleToggleButtonCustom.textContent = '字幕开';
                     subtitleContainer.classList.remove('hidden');
@@ -1017,7 +966,7 @@
                     subtitleContainer.classList.add('hidden');
                 }
             }
-            subtitleToggleButtonCustom.addEventListener('click', () => { /* ... (Unchanged) ... */
+            subtitleToggleButtonCustom.addEventListener('click', () => {
                 subtitlesEnabled = !subtitlesEnabled;
                 updateSubtitleVisibility();
                 if (subtitlesEnabled && !player.paused && currentSubtitles.length > 0) {
@@ -1027,18 +976,16 @@
                 }
             });
 
-            containerFullscreenButton.addEventListener('click', () => { /* ... (Unchanged) ... */
+            containerFullscreenButton.addEventListener('click', () => {
                 const fsElement = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
                 if (!fsElement) {
                     if (mainElement.requestFullscreen) mainElement.requestFullscreen().catch(err => showToast(`全屏请求失败: ${err.message}`, 'error'));
                     else if (mainElement.webkitRequestFullscreen) mainElement.webkitRequestFullscreen().catch(err => showToast(`全屏请求失败: ${err.message}`, 'error'));
-                    // ... other browser prefixes
                 } else {
                     if (document.exitFullscreen) document.exitFullscreen();
-                    // ... other browser prefixes
                 }
             });
-            function handleRealFullscreenChange() { /* ... (Unchanged) ... */
+            function handleRealFullscreenChange() {
                 const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
                 document.body.classList.toggle('container-fullscreen-active', isFullscreen);
                 containerFullscreenButton.innerHTML = isFullscreen ? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>';
@@ -1047,12 +994,12 @@
             }
             ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(event => { document.addEventListener(event, handleRealFullscreenChange); });
             subtitleContainer.addEventListener('mousedown', (e) => { if (e.button === 0) { if (onDragStart(e.clientX, e.clientY)) e.preventDefault(); } });
-            document.addEventListener('mousemove', (e) => { onDragMove(e.clientX, e.clientY); }); // This is for subtitle drag
-            document.addEventListener('mouseup', onDragEnd); // This is for subtitle drag
+            document.addEventListener('mousemove', (e) => { onDragMove(e.clientX, e.clientY); });
+            document.addEventListener('mouseup', onDragEnd);
             subtitleContainer.addEventListener('touchstart', (e) => { if (e.touches.length === 1) { if (onDragStart(e.touches[0].clientX, e.touches[0].clientY)) e.preventDefault(); } }, { passive: false });
-            document.addEventListener('touchmove', (e) => { if (isDragging && e.touches.length === 1) { onDragMove(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); } }, { passive: false }); // Subtitle drag
-            document.addEventListener('touchend', onDragEnd); // Subtitle drag
-            document.addEventListener('touchcancel', onDragEnd); // Subtitle drag
+            document.addEventListener('touchmove', (e) => { if (isDragging && e.touches.length === 1) { onDragMove(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); } }, { passive: false });
+            document.addEventListener('touchend', onDragEnd);
+            document.addEventListener('touchcancel', onDragEnd);
 
             player.controls = false;
             playPauseBtn.addEventListener('click', () => { if (player.paused || player.ended) player.play(); else player.pause(); });
@@ -1066,7 +1013,7 @@
             player.addEventListener('play', () => { playIcon.classList.remove('fa-play'); playIcon.classList.add('fa-pause'); showControls(); });
             player.addEventListener('pause', () => { playIcon.classList.remove('fa-pause'); playIcon.classList.add('fa-play'); showControls(true); });
             player.addEventListener('volumechange', () => { volumeRange.value = player.volume; });
-            player.addEventListener('error', (e) => { /* ... (Unchanged error handling) ... */
+            player.addEventListener('error', (e) => {
                 let errorText = "视频加载/播放失败: ";
                 if (player.error) {
                     switch (player.error.code) {
@@ -1127,15 +1074,15 @@
                 }
             }
 
-            videoContainer.addEventListener('mousemove', () => { if (!isDraggingProgress) showControls() }); // Only show if not dragging progress
+            videoContainer.addEventListener('mousemove', () => { if (!isDraggingProgress) showControls() });
             videoContainer.addEventListener('mouseleave', () => { if (!player.paused && !isDraggingProgress && !isDragging) { clearTimeout(controlsTimeout); controlsTimeout = setTimeout(hideControls, 500); } });
             customControlsBar.addEventListener('mouseenter', () => { clearTimeout(controlsTimeout); showControls(true); });
             customControlsBar.addEventListener('mouseleave', () => { if (!player.paused && !isDraggingProgress && !isDragging) showControls(); });
-            document.addEventListener('keydown', function (e) { /* ... (Unchanged keyboard shortcuts) ... */
+            document.addEventListener('keydown', function (e) {
                 if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) { return; }
                 if (e.code === 'Space') { e.preventDefault(); if (player.paused || player.ended) player.play(); else player.pause(); }
             });
-            player.addEventListener('ended', function () { /* ... (Unchanged autoplay next logic) ... */
+            player.addEventListener('ended', function () {
                 subtitleTextElement.textContent = '';
                 playIcon.classList.remove('fa-pause'); playIcon.classList.add('fa-play');
                 const currentItem = document.querySelector('.list li.active'); if (!currentItem) return;
@@ -1175,8 +1122,8 @@
                 } else if (!isFinite(player.duration)) {
                     currentTimeDisplay.textContent = formatTime(player.currentTime);
                 }
-                // Subtitle timeupdate logic (moved to its own listener or integrated if preferred)
-                handleTimeUpdate();
+                handleTimeUpdate(); // 字幕更新
+                handleDanmakuDisplay(); // 弹幕更新
             });
 
             player.addEventListener('progress', () => {
@@ -1187,44 +1134,36 @@
                 }
             });
 
-            // --- MODIFIED: Progress Bar Drag Logic ---
             const handleProgressDragMove = (event) => {
                 if (!isDraggingProgress || !isFinite(player.duration)) return;
                 event.preventDefault();
-
                 const progressBarRect = progressBarContainer.getBoundingClientRect();
                 let clientX = event.clientX;
                 if (event.type.startsWith('touch')) {
                     clientX = event.touches[0].clientX;
                 }
-
                 let newLeft = clientX - progressBarRect.left;
                 let percent = (newLeft / progressBarRect.width) * 100;
                 percent = Math.max(0, Math.min(100, percent));
-
                 progressBarThumb.style.left = `${percent}%`;
                 progressBarCurrent.style.width = `${percent}%`;
                 const newTime = (percent / 100) * player.duration;
                 currentTimeDisplay.textContent = formatTime(newTime);
-
                 if (player.fastSeek) {
                     player.fastSeek(newTime);
                 } else {
                     player.currentTime = newTime;
                 }
-                showControls(true); // Keep controls visible during drag
+                showControls(true);
             };
 
             const handleProgressDragEnd = () => {
                 if (!isDraggingProgress) return;
                 isDraggingProgress = false;
-
                 document.removeEventListener('mousemove', handleProgressDragMove);
                 document.removeEventListener('mouseup', handleProgressDragEnd);
                 document.removeEventListener('touchmove', handleProgressDragMove);
                 document.removeEventListener('touchend', handleProgressDragEnd);
-
-                // Final currentTime is already set during move
                 if (!player.paused) {
                     showControls();
                 }
@@ -1232,21 +1171,16 @@
 
             progressBarContainer.addEventListener('mousedown', (e) => {
                 if (e.button !== 0 || !isFinite(player.duration)) return;
-
-                // Immediately seek to click position
                 const progressBarRect = progressBarContainer.getBoundingClientRect();
                 const clickX = e.clientX - progressBarRect.left;
                 let seekPercent = (clickX / progressBarRect.width) * 100;
                 seekPercent = Math.max(0, Math.min(100, seekPercent));
                 const newTime = (seekPercent / 100) * player.duration;
-
                 progressBarCurrent.style.width = `${seekPercent}%`;
                 progressBarThumb.style.left = `${seekPercent}%`;
                 if (player.fastSeek) { player.fastSeek(newTime); }
                 else { player.currentTime = newTime; }
                 currentTimeDisplay.textContent = formatTime(newTime);
-
-                // Start dragging
                 isDraggingProgress = true;
                 clearTimeout(controlsTimeout);
                 showControls(true);
@@ -1257,19 +1191,16 @@
 
             progressBarContainer.addEventListener('touchstart', (e) => {
                 if (!isFinite(player.duration)) return;
-
                 const progressBarRect = progressBarContainer.getBoundingClientRect();
                 const touchX = e.touches[0].clientX - progressBarRect.left;
                 let seekPercent = (touchX / progressBarRect.width) * 100;
                 seekPercent = Math.max(0, Math.min(100, seekPercent));
                 const newTime = (seekPercent / 100) * player.duration;
-
                 progressBarCurrent.style.width = `${seekPercent}%`;
                 progressBarThumb.style.left = `${seekPercent}%`;
                 if (player.fastSeek) { player.fastSeek(newTime); }
                 else { player.currentTime = newTime; }
                 currentTimeDisplay.textContent = formatTime(newTime);
-
                 isDraggingProgress = true;
                 clearTimeout(controlsTimeout);
                 showControls(true);
@@ -1279,7 +1210,7 @@
             }, { passive: false });
 
 
-            function groupWordsToSentences(words) { /* ... (Unchanged) ... */
+            function groupWordsToSentences(words) {
                 const sentences = []; if (!words || words.length === 0) return sentences;
                 const TIME_GAP_THRESHOLD_MS = 700; const PREFERRED_MAX_CHARS = 18; const HARD_MAX_CHARS = PREFERRED_MAX_CHARS + 12;
                 const MIN_DURATION_MS_PER_SEGMENT = 800; const MAX_DURATION_MS_PER_SEGMENT = 7000;
@@ -1317,7 +1248,7 @@
                     }
                 } return sentences;
             }
-            async function fetchAndProcessSubtitles(sectionId) { /* ... (Unchanged) ... */
+            async function fetchAndProcessSubtitles(sectionId) {
                 currentSubtitles = []; currentSubtitleIndex = 0;
                 if (!sectionId) {
                     if (subtitlesEnabled) subtitleTextElement.textContent = '无字幕信息 (no sectionId)'; else subtitleTextElement.textContent = '';
@@ -1325,10 +1256,10 @@
                 }
                 if (subtitlesEnabled) subtitleTextElement.textContent = '字幕加载中...';
 
-                const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyVHlwZSI6MiwiZXhwIjoxNzQ3MDM3NDEyLCJ1c2VySWQiOjIzNTksImlhdCI6MTc0NjQzMjYxMn0.hsahpaxkpVf_1GB0I0qMN52GfVBnWzqSHigXGub40Xw';
+                const token = BARRAGE_API_TOKEN; // Reuse token
                 const subtitleUrl = `https://course.wenyanzsb.com/section/get?sectionId=${sectionId}`;
                 try {
-                    const res = await fetch(subtitleUrl, { headers: { 'Content-Type': 'application/json', 'Token': token, /* ... other headers */ } });
+                    const res = await fetch(subtitleUrl, { headers: { 'Content-Type': 'application/json', 'Token': token } });
                     if (!res.ok) throw new Error(`获取字幕失败: HTTP ${res.status}`);
                     const data = await res.json();
                     if (data.code === 1001 && data.body && data.body.videoSubtitles) {
@@ -1352,7 +1283,7 @@
                 }
                 if (subtitlesEnabled) handleTimeUpdate(); else subtitleTextElement.textContent = '';
             }
-            function handleTimeUpdate() { /* ... (Unchanged subtitle time update logic) ... */
+            function handleTimeUpdate() {
                 if (!subtitlesEnabled || currentSubtitles.length === 0) {
                     if (subtitleTextElement.textContent !== '') subtitleTextElement.textContent = ''; return;
                 }
@@ -1375,7 +1306,8 @@
                     }
                 }
             }
-            player.onseeking = () => { /* ... (Unchanged subtitle seeking logic) ... */
+            player.onseeking = () => {
+                // 字幕 seeking 逻辑
                 let low = 0, high = currentSubtitles.length - 1, closestIndex = 0;
                 if (currentSubtitles.length > 0) {
                     while (low <= high) {
@@ -1388,15 +1320,217 @@
                 }
                 currentSubtitleIndex = closestIndex;
                 if (subtitlesEnabled) { subtitleTextElement.textContent = ''; handleTimeUpdate(); }
+
+                // 弹幕 seeking 逻辑
+                if (danmakuContainer) {
+                    while (danmakuContainer.firstChild) {
+                        danmakuContainer.removeChild(danmakuContainer.firstChild);
+                    }
+                }
+                activeDanmakuIds.clear();
             };
 
-(async function initCourseList() {
+            player.onseeked = () => { // 新增/修改 onseeked
+                handleTimeUpdate(); // 更新字幕
+                // 重置弹幕处理状态并尝试立即显示当前时间点的弹幕
+                lastProcessedDanmakuTime = player.currentTime - 0.5; // 给一个小的提前量
+                activeDanmakuIds.clear(); // 清空，允许重新显示弹幕
+                if (danmakuContainer) { // 确保再次清空，以防 seeking 时未完全清掉
+                    while (danmakuContainer.firstChild) {
+                        danmakuContainer.removeChild(danmakuContainer.firstChild);
+                    }
+                }
+                handleDanmakuDisplay(); // 立即处理一次弹幕
+            };
+
+
+            /**
+             * 新增：获取并处理所有课程弹幕
+             */
+            async function fetchAndProcessAllBarrages(courseId = '80') {
+                const barrageApiUrl = 'https://course.wenyanzsb.com/barrage/getSectionBarrageList';
                 try {
-                    const res = await fetch('https://course.wenyanzsb.com/customerSection/getCustomerSectionList?customerId=2359&courseId=80', { headers: { 'Content-Type': 'application/json', 'token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyVHlwZSI6MiwiZXhwIjoxNzQ3MDM3NDEyLCJ1c2VySWQiOjIzNTksImlhdCI6MTc0NjQzMjYxMn0.hsahpaxkpVf_1GB0I0qMN52GfVBnWzqSHigXGub40Xw', /* ... other headers ... */ } });
-                    if (!res.ok) throw new Error('课程列表加载失败，状态码 ' + res.status);
-                    const json = await res.json();
+                    const response = await fetch(barrageApiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Token': BARRAGE_API_TOKEN,
+                            'Charset': 'utf-8'
+                        },
+                        body: JSON.stringify({
+                            pageNo: 1,
+                            pageSize: 9999,
+                            courseId: courseId
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`获取弹幕失败: HTTP ${response.status}`);
+                    }
+                    const data = await response.json();
+
+                    if (data.code === 1001 && data.body && Array.isArray(data.body.records)) {
+                        allCourseBarrages = {};
+                        data.body.records.forEach(record => {
+                            try {
+                                const barrageContent = JSON.parse(record.barrageContent);
+                                if (barrageContent && typeof barrageContent.time === 'number' && typeof barrageContent.text === 'string') {
+                                    const barrageItem = {
+                                        id: String(record.barrageId), // 确保ID是字符串，便于Set操作
+                                        sectionId: String(record.sectionId),
+                                        time: Number(barrageContent.time), // 时间 (秒)
+                                        text: barrageContent.text,
+                                    };
+                                    if (!allCourseBarrages[barrageItem.sectionId]) {
+                                        allCourseBarrages[barrageItem.sectionId] = [];
+                                    }
+                                    allCourseBarrages[barrageItem.sectionId].push(barrageItem);
+                                }
+                            } catch (e) {
+                                console.warn('解析弹幕内容失败:', record.barrageContent, e);
+                            }
+                        });
+                        for (const sectionId in allCourseBarrages) {
+                            allCourseBarrages[sectionId].sort((a, b) => a.time - b.time);
+                        }
+                        // console.log('所有弹幕加载并处理完毕。');
+                    } else {
+                        console.error('弹幕数据格式错误或加载失败:', data.msg || '未知错误');
+                    }
+                } catch (err) {
+                    console.error('请求弹幕API时出错:', err);
+                }
+            }
+
+            /**
+             * 新增：创建并播放单个弹幕
+             */
+            function createAndAnimateDanmaku(barrage) {
+                if (!danmakuContainer || player.paused) return; // 如果播放器暂停，则不发射新弹幕
+
+                const danmakuElement = document.createElement('div');
+                danmakuElement.className = 'danmaku-item';
+                danmakuElement.textContent = barrage.text;
+
+                const containerHeight = danmakuContainer.clientHeight;
+                if (containerHeight <= 20) { // 容器太小
+                    activeDanmakuIds.delete(barrage.id); // 从激活集合中移除，允许下次重试
+                    return;
+                }
+
+                // 尝试获取弹幕实际高度，如果失败则使用估算值
+                danmakuContainer.appendChild(danmakuElement); // 先添加到DOM才能获取offsetHeight
+                let danmakuHeight = danmakuElement.offsetHeight;
+                if (!danmakuHeight || danmakuHeight <= 0) {
+                    danmakuHeight = parseFloat(getComputedStyle(danmakuElement).fontSize) * 1.5 || 25;
+                }
+                if (danmakuElement.parentNode === danmakuContainer) { // 添加后立即移除，仅为获取高度
+                    danmakuContainer.removeChild(danmakuElement);
+                }
+
+
+                const maxTopValue = containerHeight - danmakuHeight - 10; // 上下各留5px边距
+                if (maxTopValue <= 0) { // 如果计算出的最大top值不合理
+                    activeDanmakuIds.delete(barrage.id);
+                    return;
+                }
+                const randomTop = Math.floor(Math.random() * maxTopValue) + 5;
+                danmakuElement.style.top = `${randomTop}px`;
+
+                danmakuElement.style.right = '0px';
+                danmakuElement.style.transform = `translateX(100%)`;
+
+                danmakuContainer.appendChild(danmakuElement); // 再次添加
+
+                void danmakuElement.offsetWidth;
+
+                const animationDuration = 6 + Math.random() * 4; // 6-10秒
+                danmakuElement.style.transition = `transform ${animationDuration}s linear`;
+
+                const targetTranslateX = -(danmakuContainer.offsetWidth + danmakuElement.offsetWidth + 30); // 确保完全移出
+                danmakuElement.style.transform = `translateX(${targetTranslateX}px)`;
+
+                const transitionEndHandler = () => {
+                    if (danmakuElement.parentNode === danmakuContainer) {
+                        danmakuContainer.removeChild(danmakuElement);
+                    }
+                    activeDanmakuIds.delete(barrage.id);
+                };
+
+                danmakuElement.addEventListener('transitionend', transitionEndHandler, { once: true });
+
+                setTimeout(() => { // 超时安全移除
+                    if (danmakuElement.parentNode === danmakuContainer) {
+                        danmakuContainer.removeChild(danmakuElement);
+                    }
+                    activeDanmakuIds.delete(barrage.id);
+                }, (animationDuration + 1) * 1000);
+            }
+
+            /**
+             * 新增：处理弹幕显示的主逻辑，由 timeupdate 调用
+             */
+            function handleDanmakuDisplay() {
+                if (!player || player.paused || currentVideoBarrages.length === 0 || !danmakuContainer) {
+                    return;
+                }
+                const currentTime = player.currentTime;
+
+                // 如果时间发生显著变化（seek），重置 lastProcessedDanmakuTime 和 activeDanmakuIds
+                // 注意：更精确的seek处理应在 'seeked' 事件中进行
+                if (Math.abs(currentTime - lastProcessedDanmakuTime) > 1.5) { // 阈值1.5秒
+                    // console.log(`Danmaku time jump detected. Current: ${currentTime}, Last: ${lastProcessedDanmakuTime}`);
+                    lastProcessedDanmakuTime = currentTime - 0.25; // 回溯一点点，以包含当前时间点附近的弹幕
+                    // activeDanmakuIds.clear(); // 在seeked中清空，这里不清，避免播放时小跳动导致弹幕重发
+                }
+
+                let danmakuBufferToDisplay = [];
+
+                for (let i = 0; i < currentVideoBarrages.length; i++) {
+                    const barrage = currentVideoBarrages[i];
+                    // 弹幕时间在 (lastProcessedDanmakuTime, currentTime] 区间内
+                    if (barrage.time > lastProcessedDanmakuTime && barrage.time <= currentTime) {
+                        if (!activeDanmakuIds.has(barrage.id)) {
+                            danmakuBufferToDisplay.push(barrage);
+                            activeDanmakuIds.add(barrage.id); // 先加入，避免并发问题
+                        }
+                    }
+                    // 优化：如果当前弹幕时间已经远超播放时间，后续的肯定也超了（假设已排序）
+                    if (barrage.time > currentTime + 1) { // 1秒的预读窗口
+                        break;
+                    }
+                }
+
+                lastProcessedDanmakuTime = currentTime;
+
+                if (danmakuBufferToDisplay.length > 0) {
+                    danmakuBufferToDisplay.forEach((barrage, index) => {
+                        // 使用 setTimeout 稍微错开弹幕的创建，避免同时渲染过多DOM影响性能
+                        // 对于大量弹幕，这个延时可能需要更智能的管理（如弹幕轨道）
+                        setTimeout(() => {
+                            createAndAnimateDanmaku(barrage);
+                        }, index * (Math.random() * 200 + 50)); // 50-250ms 随机延迟
+                    });
+                }
+            }
+
+
+            // 修改课程列表加载和视频切换逻辑
+            (async function initCourseList() {
+                try {
+                    const courseListRes = await fetch('https://course.wenyanzsb.com/customerSection/getCustomerSectionList?customerId=2359&courseId=80', {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'token': BARRAGE_API_TOKEN
+                        }
+                    });
+                    if (!courseListRes.ok) throw new Error('课程列表加载失败，状态码 ' + courseListRes.status);
+                    const json = await courseListRes.json();
                     if (json.code !== 1001) throw new Error('课程列表加载失败: ' + json.msg);
+
                     if (json.body && Array.isArray(json.body)) {
+                        await fetchAndProcessAllBarrages('80'); // 加载所有弹幕数据
+
                         json.body.forEach(courseGroup => {
                             if (courseGroup.children && Array.isArray(courseGroup.children)) {
                                 courseGroup.children.forEach(chapter => {
@@ -1404,39 +1538,25 @@
                                     const titleEl = document.createElement('div'); titleEl.className = 'title'; titleEl.innerHTML = `<span>${chapter.categoryName}</span><i class="fas fa-chevron-down"></i>`;
                                     const ul = document.createElement('ul'); ul.className = 'list';
                                     sidebar.appendChild(chap); chap.appendChild(titleEl); chap.appendChild(ul);
-                                    
-                                    // Bind onclick for chapter title (correct placement)
+
                                     titleEl.onclick = () => {
-                                        console.log("Chapter title clicked:", titleEl.querySelector('span').textContent);
                                         try {
                                             const icon = titleEl.querySelector('i.fa-chevron-down');
-                                            const ulList = ul; 
-
-                                            if (!ulList || ulList.tagName !== 'UL') {
-                                                console.error("Could not find UL element for chapter:", titleEl.querySelector('span').textContent);
-                                                return;
-                                            }
+                                            const ulList = ul;
+                                            if (!ulList || ulList.tagName !== 'UL') { return; }
                                             const newDisplayState = (ulList.style.display === 'block' ? 'none' : 'block');
-                                            console.log("Setting UL display to:", newDisplayState);
                                             ulList.style.display = newDisplayState;
-
                                             if (icon) {
                                                 icon.style.transform = (newDisplayState === 'block' ? 'rotate(180deg)' : 'rotate(0deg)');
-                                            } else {
-                                                console.warn("No icon found for chapter title:", titleEl.querySelector('span').textContent);
                                             }
-                                        } catch (error) {
-                                            console.error("Error in chapter title onclick:", error);
-                                        }
+                                        } catch (error) { console.error("Error in chapter title onclick:", error); }
                                     };
 
                                     if (chapter.sectionList && Array.isArray(chapter.sectionList) && chapter.sectionList.length > 0) {
                                         chapter.sectionList.forEach(sec => {
-                                            const li = document.createElement('li'); li.innerHTML = `<i class="fas fa-play-circle"></i> ${sec.sectionName}`;
+                                            const li = document.createElement('li');
+                                            li.innerHTML = `<i class="fas fa-play-circle"></i> ${sec.sectionName}`;
                                             li.onclick = () => {
-                                               
-                                                
-
                                                 document.querySelectorAll('.list li.active').forEach(el => el.classList.remove('active'));
                                                 document.querySelectorAll('.title.active').forEach(el => el.classList.remove('active'));
                                                 titleEl.classList.add('active'); li.classList.add('active');
@@ -1444,9 +1564,29 @@
                                                 if (sec.sectionVideo) {
                                                     videoSource.src = sec.sectionVideo;
                                                     player.load();
-                                                    player.play().catch(error => { /* ... */ });
-                                                } else { /* ... */ }
+                                                    player.play().catch(error => {
+                                                        console.error("播放失败:", error);
+                                                        showToast(`视频播放失败: ${sec.sectionName}`, 'error');
+                                                    });
+                                                } else {
+                                                    videoSource.src = "";
+                                                    player.load();
+                                                    showToast(`视频地址无效: ${sec.sectionName}`, 'error');
+                                                }
                                                 fetchAndProcessSubtitles(sec.sectionId);
+
+                                                // 弹幕处理
+                                                if (danmakuContainer) {
+                                                    while (danmakuContainer.firstChild) {
+                                                        danmakuContainer.removeChild(danmakuContainer.firstChild);
+                                                    }
+                                                }
+                                                activeDanmakuIds.clear();
+                                                currentVideoBarrages = allCourseBarrages[String(sec.sectionId)] || []; //确保 sectionId 是字符串
+                                                lastProcessedDanmakuTime = -1; // 重置，以便从头开始
+                                                // console.log(`切换到视频 ID: ${sec.sectionId}, 弹幕数量: ${currentVideoBarrages.length}`);
+                                                handleDanmakuDisplay(); // 尝试立即显示一次
+
                                                 const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
                                                 applyLastKnownStyleOrDefault(playerWrapper, isFullscreen);
                                                 showToast(`正在播放: ${sec.sectionName}`, 'info');
@@ -1458,33 +1598,32 @@
                                             };
                                             ul.appendChild(li);
                                         });
-                                    } else { 
+                                    } else {
                                         const li = document.createElement('li');
                                         li.textContent = '（本章内无小节）';
-                                        li.style.fontStyle = 'italic';
-                                        li.style.color = '#888';
-                                        li.style.cursor = 'default';
+                                        li.style.fontStyle = 'italic'; li.style.color = '#888'; li.style.cursor = 'default';
                                         ul.appendChild(li);
                                     }
-                                    // titleEl.onclick was moved up to be bound soon after titleEl creation
                                 });
                             }
                         });
                         const firstVideoItem = sidebar.querySelector('.list li:not([style*="cursor: default"])');
-                        if (firstVideoItem && typeof firstVideoItem.click === 'function') { firstVideoItem.click(); }
-                        else { showToast('课程列表为空或无有效视频。', 'info'); }
+                        if (firstVideoItem && typeof firstVideoItem.click === 'function') {
+                            firstVideoItem.click();
+                        } else {
+                            showToast('课程列表为空或无有效视频。', 'info');
+                        }
                     } else { showToast('课程数据格式不正确。', 'error'); }
                 } catch (err) {
                     const errEl = document.createElement('p');
-                    errEl.style.color = 'red';
-                    errEl.style.padding = '16px';
+                    errEl.style.color = 'red'; errEl.style.padding = '16px';
                     errEl.textContent = '加载课程列表失败: ' + err.message;
                     sidebar.appendChild(errEl);
                     console.error(err);
                 }
             })(); // End of initCourseList IIFE
 
-        })(); // End of Main IIFE();
+        })(); // End of Main IIFE
     </script>
 </body>
 
