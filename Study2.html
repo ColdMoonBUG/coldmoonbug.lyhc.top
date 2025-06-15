@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>我的课程播放器</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS样式与之前完全相同，此处省略以保持简洁 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            display: flex;
+            height: 100vh;
+            background-color: #f5f7fa;
+            overflow: hidden;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        body.container-fullscreen-active {
+            overflow: hidden !important;
+        }
+
+        #sidebar {
+            width: 280px;
+            background-color: #fff;
+            border-right: 1px solid #e1e5eb;
+            overflow-y: auto;
+            padding: 15px;
+            flex-shrink: 0;
+            transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+        }
+
+        body.container-fullscreen-active #sidebar {
+            margin-left: -280px;
+        }
+
+        .chapter {
+            margin-bottom: 10px;
+        }
+
+        .title {
+            padding: 8px 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .title.active {
+            background-color: #e9f5ff;
+            color: #1890ff;
+        }
+
+        .title i {
+            transition: transform 0.2s;
+        }
+
+        .list {
+            display: none;
+            margin-top: 5px;
+            list-style: none;
+        }
+
+        .list li {
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+        }
+
+        .list li:hover {
+            background-color: #f0f7ff;
+        }
+
+        .list li.active {
+            background-color: #e6f7ff;
+            color: #1890ff;
+        }
+
+        .list li i {
+            margin-right: 8px;
+            color: #666;
+        }
+
+        .list li.active i {
+            color: #1890ff;
+        }
+
+        #main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow: hidden;
+            background-color: #f5f7fa;
+            height: 100%;
+        }
+
+        #main:fullscreen,
+        #main:-webkit-full-screen,
+        #main:-moz-full-screen,
+        #main:-ms-fullscreen {
+            background-color: #000 !important;
+            padding: 0 !important;
+            width: 100%;
+            height: 100%;
+        }
+
+        #video-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            position: relative;
+            min-height: 200px;
+        }
+
+        #main:fullscreen #video-container {
+            border-radius: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        #player-wrapper {
+            flex: 1;
+            width: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #player {
+            max-width: 100%;
+            max-height: 100%;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            object-fit: contain !important;
+        }
+
+        #custom-controls-bar {
+            width: 100%;
+            flex-shrink: 0;
+            padding: 8px 12px;
+            background-color: rgba(25, 25, 25, 0.92);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 2147483640;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            color: #f0f0f0;
+            min-height: 40px;
+        }
+
+        #custom-controls-bar button,
+        #custom-controls-bar select {
+            text-shadow: 0 0 2px rgba(0, 0, 0, 0.7);
+            color: inherit;
+        }
+
+        #video-container:hover #custom-controls-bar,
+        #video-container.controls-visible #custom-controls-bar {
+            opacity: 1;
+        }
+
+        .control-group.left-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-shrink: 0;
+        }
+
+        .control-group.left-controls button,
+        .control-group.left-controls select {
+            background: none;
+            border: none;
+            font-size: 15px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .control-group.left-controls button i {
+            font-size: 20px;
+            vertical-align: middle;
+        }
+
+        .control-group.left-controls input[type="range"] {
+            width: 60px;
+            cursor: pointer;
+        }
+
+        .progress-control-group {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            margin: 0 10px;
+            min-width: 150px;
+        }
+
+        .time-display {
+            font-size: 13px;
+            color: #f0f0f0;
+            text-shadow: 0 0 2px rgba(0, 0, 0, 0.7);
+            padding: 0 8px;
+            white-space: nowrap;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #progress-bar-container {
+            flex-grow: 1;
+            height: 10px;
+            background-color: rgba(80, 80, 80, 0.6);
+            border-radius: 5px;
+            position: relative;
+            cursor: pointer;
+            margin: 0 5px;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #progress-bar-buffer,
+        #progress-bar-current {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            border-radius: 5px;
+            pointer-events: none;
+        }
+
+        #progress-bar-buffer {
+            background-color: rgba(120, 120, 120, 0.7);
+            width: 0%;
+            z-index: 1;
+            transition: width 0.2s ease-out;
+        }
+
+        #progress-bar-current {
+            background-color: #1890ff;
+            width: 0%;
+            z-index: 2;
+        }
+
+        #progress-bar-thumb {
+            position: absolute;
+            top: 50%;
+            left: 0%;
+            width: 14px;
+            height: 14px;
+            background-color: #f0f0f0;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+            pointer-events: none;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
+            transition: transform 0.1s ease-out;
+        }
+
+        #progress-bar-container:hover #progress-bar-thumb {
+            transform: translate(-50%, -50%) scale(1.15);
+        }
+
+        #custom-controls-bar #speed {
+            background-color: rgba(55, 55, 55, 0.95);
+            color: #f0f0f0;
+            border: 1px solid #777;
+            border-radius: 4px;
+            padding: 5px 8px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23f0f0f0'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 6px center;
+            padding-right: 25px;
+            font-size: 14px;
+        }
+
+        #custom-controls-bar #speed option {
+            background-color: #333;
+            color: #f0f0f0;
+        }
+
+        #custom-controls-bar #volume {
+            width: 60px;
+        }
+
+        .controls-right-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .controls-right-group button {
+            font-size: 13px;
+            padding: 6px 10px;
+            border-radius: 15px;
+            background-color: rgba(70, 70, 70, 0.85);
+            border: 1px solid #888;
+            cursor: pointer;
+        }
+
+        .controls-right-group button:hover {
+            background-color: rgba(90, 90, 90, 0.9);
+        }
+
+        .controls-right-group button i {
+            font-size: 16px;
+            vertical-align: middle;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 2147483647;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            #sidebar {
+                width: 100%;
+                height: 180px;
+                order: 2;
+                padding: 10px;
+                border-right: none;
+                border-bottom: 1px solid #e1e5eb;
+            }
+
+            body.container-fullscreen-active #sidebar {
+                display: none;
+            }
+
+            #main {
+                padding: 10px;
+                order: 1;
+                height: calc(100% - 180px);
+            }
+
+            #main:fullscreen,
+            #main:-webkit-full-screen,
+            #main:-moz-full-screen,
+            #main:-ms-fullscreen {
+                height: 100% !important;
+            }
+
+            #video-container {
+                margin-bottom: 8px;
+            }
+
+            .list li {
+                font-size: 14px;
+                padding: 7px 12px;
+            }
+
+            .title {
+                font-size: 15px;
+                padding: 8px 10px;
+            }
+
+            #custom-controls-bar {
+                padding: 6px 8px;
+                min-height: 35px;
+            }
+
+            .control-group.left-controls {
+                gap: 8px;
+            }
+
+            .control-group.left-controls button i {
+                font-size: 18px;
+            }
+
+            .control-group.left-controls input[type="range"] {
+                width: 45px;
+            }
+
+            .progress-control-group {
+                margin: 0 6px;
+            }
+
+            .time-display {
+                font-size: 12px;
+                padding: 0 5px;
+            }
+
+            #progress-bar-container {
+                height: 9px;
+            }
+
+            #progress-bar-thumb {
+                width: 12px;
+                height: 12px;
+            }
+
+            #custom-controls-bar #speed {
+                font-size: 13px;
+                padding: 5px 7px;
+                padding-right: 22px;
+                background-position: right 5px center;
+            }
+
+            .controls-right-group {
+                gap: 8px;
+            }
+
+            .controls-right-group button {
+                font-size: 12px;
+                padding: 6px 9px;
+            }
+
+            .controls-right-group button i {
+                font-size: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #sidebar {
+                height: 140px;
+            }
+
+            #main {
+                height: calc(100% - 140px);
+            }
+
+            .list li {
+                font-size: 13px;
+            }
+
+            .title {
+                font-size: 14px;
+            }
+
+            #custom-controls-bar {
+                padding: 5px 6px;
+                min-height: 30px;
+            }
+
+            .progress-control-group {
+                margin: 0 4px;
+            }
+
+            .time-display {
+                font-size: 11px;
+                padding: 0 4px;
+            }
+
+            #progress-bar-container {
+                height: 8px;
+            }
+
+            #progress-bar-thumb {
+                width: 10px;
+                height: 10px;
+            }
+
+            #custom-controls-bar #speed {
+                font-size: 11px;
+                padding: 4px 6px;
+                padding-right: 20px;
+                background-position: right 4px center;
+            }
+
+            .controls-right-group button {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="sidebar"></div>
+    <div id="main">
+        <div id="video-container">
+            <div id="player-wrapper">
+                <video id="player">您的浏览器不支持 video 标签。</video>
+            </div>
+            <div id="custom-controls-bar">
+                <div class="control-group left-controls"><button id="play-pause-btn" title="播放/暂停"><i
+                            class="fas fa-play"></i></button><i class="fas fa-volume-up" title="音量"></i><input
+                        type="range" id="volume" title="音量" min="0" max="1" step="0.01" value="1"></div>
+                <div class="progress-control-group"><span id="current-time-display" class="time-display">0:00</span>
+                    <div id="progress-bar-container">
+                        <div id="progress-bar-buffer"></div>
+                        <div id="progress-bar-current"></div>
+                        <div id="progress-bar-thumb"></div>
+                    </div><span id="duration-time-display" class="time-display">0:00</span>
+                </div>
+                <div class="controls-right-group"><i class="fas fa-tachometer-alt" title="播放速度"
+                        style="margin-right:-8px;"></i><select id="speed" title="播放速度">
+                        <option value="0.5">0.5x</option>
+                        <option value="0.75">0.75x</option>
+                        <option value="1" selected>1.0x</option>
+                        <option value="1.25">1.25x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2">2.0x</option>
+                    </select><button id="container-fullscreen-btn" title="网页全屏"><i class="fas fa-expand"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const CONFIG = {
+            // 将这里的路径改为你的完整公网域名
+            BASE_API_URL: "https://kb.lyhc.top/api/study", 
+            
+            APP_ID: "appe96hygl77327",
+            TARGET_PRODUCT_ID: "p_66d13a33e4b023c06c863b3e",
+        };
+        let hlsPlayer = null;
+
+        // ==================== 适配新路由的 JS 函数 ====================
+
+        async function fetchChapterList(productId, page = 1, pageSize = 20) {
+            // **关键改动**: 将真实接口路径拼接在 BASE_API_URL 后面
+            const url = `${CONFIG.BASE_API_URL}/xe.course.business.member.single_items.get/2.0.0`;
+            const payload = new URLSearchParams({
+                'bizData[column_id]': productId,
+                'bizData[page_index]': page,
+                'bizData[page_size]': pageSize,
+                'bizData[sort]': 'desc'
+            });
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: payload
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data = await response.json();
+                if (data.code !== 0) throw new Error(`API error: ${data.msg}`);
+                return data.data;
+            } catch (error) {
+                console.error("获取章节列表失败:", error);
+                const sidebar = document.getElementById('sidebar');
+                sidebar.innerHTML = `<p style="color: red; padding: 15px;">获取章节列表失败: ${error.message}。</p>`;
+                return null;
+            }
+        }
+
+        async function fetchPlaybackUrl(resourceId) {
+            // **关键改动**: 将真实接口路径拼接在 BASE_API_URL 后面
+            const url = `${CONFIG.BASE_API_URL}/_alive/v3/get_lookback_list?app_id=${CONFIG.APP_ID}&alive_id=${resourceId}`;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data = await response.json();
+                if (data.code !== 0) throw new Error(`API error: ${data.msg}`);
+                return data.data[0].line_sharpness[0].url;
+            } catch (error) {
+                console.error("获取播放地址失败:", error);
+                showToast(`获取播放地址失败: ${error.message}`, 'error');
+                return null;
+            }
+        }
+
+        // =============================================================
+
+        // IIFE 内部的其他UI控制代码与之前相同，无需改动，此处省略...
+        (function () {
+            const mainElement = document.getElementById('main'); const sidebar = document.getElementById('sidebar'); const player = document.getElementById('player'); const videoContainer = document.getElementById('video-container'); const customControlsBar = document.getElementById('custom-controls-bar'); const playPauseBtn = document.getElementById('play-pause-btn'); const playIcon = playPauseBtn.querySelector('i'); const speedSelect = document.getElementById('speed'); const volumeRange = document.getElementById('volume'); const containerFullscreenButton = document.getElementById('container-fullscreen-btn'); const toast = document.getElementById('toast'); const currentTimeDisplay = document.getElementById('current-time-display'); const durationTimeDisplay = document.getElementById('duration-time-display'); const progressBarContainer = document.getElementById('progress-bar-container'); const progressBarBuffer = document.getElementById('progress-bar-buffer'); const progressBarCurrent = document.getElementById('progress-bar-current'); const progressBarThumb = document.getElementById('progress-bar-thumb');
+            let isDraggingProgress = false; let controlsTimeout;
+            function playVideo(url) { showControls(true); if (Hls.isSupported()) { if (!hlsPlayer) { hlsPlayer = new Hls(); hlsPlayer.attachMedia(player); } hlsPlayer.loadSource(url); hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => { player.play().catch(e => console.error("播放失败:", e)); }); } else if (player.canPlayType('application/vnd.apple.mpegurl')) { player.src = url; player.addEventListener('loadedmetadata', () => { player.play().catch(e => console.error("播放失败:", e)); }); } }
+            playPauseBtn.addEventListener('click', () => { if (player.paused || player.ended) player.play(); else player.pause(); }); videoContainer.addEventListener('click', (e) => { if (e.target === player || e.target.parentElement === player) { if (player.paused || player.ended) player.play(); else player.pause(); } });
+            player.addEventListener('play', () => { playIcon.classList.replace('fa-play', 'fa-pause'); showControls(); }); player.addEventListener('pause', () => { playIcon.classList.replace('fa-pause', 'fa-play'); showControls(true); }); player.addEventListener('volumechange', () => { volumeRange.value = player.volume; }); speedSelect.addEventListener('change', function () { player.playbackRate = parseFloat(this.value); showToast(`播放速度: ${this.value}x`); }); volumeRange.addEventListener('input', function () { player.volume = parseFloat(this.value); }); player.addEventListener('loadedmetadata', () => { durationTimeDisplay.textContent = formatTime(player.duration); });
+            player.addEventListener('timeupdate', () => { if (!isDraggingProgress) { const progressPercent = (player.currentTime / player.duration) * 100; progressBarCurrent.style.width = `${progressPercent}%`; progressBarThumb.style.left = `${progressPercent}%`; currentTimeDisplay.textContent = formatTime(player.currentTime); } });
+            player.addEventListener('progress', () => { if (player.buffered.length > 0) { const bufferedEnd = player.buffered.end(player.buffered.length - 1); const bufferedPercent = (bufferedEnd / player.duration) * 100; progressBarBuffer.style.width = `${bufferedPercent}%`; } });
+            const handleProgressDrag = (e) => { const progressBarRect = progressBarContainer.getBoundingClientRect(); const clientX = e.type.startsWith('touch') ? e.touches[0].clientX : e.clientX; let percent = (clientX - progressBarRect.left) / progressBarRect.width; percent = Math.max(0, Math.min(100, percent * 100)); progressBarCurrent.style.width = `${percent}%`; progressBarThumb.style.left = `${percent}%`; player.currentTime = (percent / 100) * player.duration; currentTimeDisplay.textContent = formatTime(player.currentTime); };
+            const startDrag = (e) => { if (e.button !== 0 && !e.type.startsWith('touch')) return; isDraggingProgress = true; handleProgressDrag(e); document.addEventListener('mousemove', handleProgressDrag); document.addEventListener('mouseup', endDrag); document.addEventListener('touchmove', handleProgressDrag); document.addEventListener('touchend', endDrag); }; const endDrag = () => { isDraggingProgress = false; document.removeEventListener('mousemove', handleProgressDrag); document.removeEventListener('mouseup', endDrag); document.removeEventListener('touchmove', handleProgressDrag); document.removeEventListener('touchend', endDrag); };
+            progressBarContainer.addEventListener('mousedown', startDrag); progressBarContainer.addEventListener('touchstart', startDrag, { passive: false });
+            player.addEventListener('ended', function () { playIcon.classList.replace('fa-pause', 'fa-play'); const currentItem = document.querySelector('.list li.active'); if (!currentItem) return; let nextItem = currentItem.nextElementSibling; if (nextItem && nextItem.tagName === 'LI') { setTimeout(() => { nextItem.click(); showToast('自动播放下一节'); }, 1000); } else { const currentChapter = currentItem.closest('.chapter'); let nextChapter = currentChapter.nextElementSibling; while (nextChapter && !nextChapter.classList.contains('chapter')) { nextChapter = nextChapter.nextElementSibling; } if (nextChapter) { const firstItemInNextChapter = nextChapter.querySelector('.list li'); if (firstItemInNextChapter) { setTimeout(() => { firstItemInNextChapter.click(); showToast('自动播放下一章'); }, 1000); } else { showToast('课程已全部播完'); } } else { showToast('课程已全部播完'); } } });
+            containerFullscreenButton.addEventListener('click', () => { if (!document.fullscreenElement) { mainElement.requestFullscreen().catch(err => showToast(`全屏失败: ${err.message}`, 'error')); } else { document.exitFullscreen(); } }); document.addEventListener('fullscreenchange', () => { const isFullscreen = !!document.fullscreenElement; document.body.classList.toggle('container-fullscreen-active', isFullscreen); containerFullscreenButton.innerHTML = isFullscreen ? '<i class="fas fa-compress"></i>' : '<i class="fas fa-expand"></i>'; });
+            function formatTime(time) { if (isNaN(time)) return "0:00"; const minutes = Math.floor(time / 60); const seconds = Math.floor(time % 60).toString().padStart(2, '0'); return `${minutes}:${seconds}`; }
+            function showToast(message) { toast.textContent = message; toast.style.opacity = 1; setTimeout(() => { toast.style.opacity = 0; }, 2000); }
+            function showControls(persist = false) { clearTimeout(controlsTimeout); customControlsBar.style.opacity = '1'; videoContainer.classList.add('controls-visible'); if (!player.paused && !persist) { controlsTimeout = setTimeout(hideControls, 3000); } } function hideControls() { if (player.paused || isDraggingProgress) return; customControlsBar.style.opacity = '0'; videoContainer.classList.remove('controls-visible'); }
+            videoContainer.addEventListener('mousemove', () => showControls()); videoContainer.addEventListener('mouseleave', () => hideControls());
+            async function init() { sidebar.innerHTML = '<h2><i class="fas fa-book-open"></i> 课程列表</h2>'; showToast("正在加载课程列表...", 'info'); let allChapters = []; let currentPage = 1; let totalChapters = 0; do { const data = await fetchChapterList(CONFIG.TARGET_PRODUCT_ID, currentPage, 20); if (!data || data.list.length === 0) break; allChapters = allChapters.concat(data.list); totalChapters = data.total; currentPage++; } while (allChapters.length < totalChapters); if (allChapters.length > 0) { renderCourseList(allChapters); showToast("课程列表加载完毕"); } else if (!sidebar.innerHTML.includes("失败")) { sidebar.innerHTML += '<p style="padding: 15px; color: #666;">未找到任何章节。</p>'; showToast("未找到任何章节", 'error'); } }
+            function renderCourseList(chapters) { const chap = document.createElement('div'); chap.className = 'chapter'; const titleEl = document.createElement('div'); titleEl.className = 'title'; titleEl.innerHTML = `<span>全部课程 (${chapters.length})</span><i class="fas fa-chevron-down"></i>`; const ul = document.createElement('ul'); ul.className = 'list'; sidebar.appendChild(chap); chap.appendChild(titleEl); chap.appendChild(ul); chapters.forEach(sec => { const li = document.createElement('li'); li.dataset.resourceId = sec.resource_id; li.innerHTML = `<i class="fas fa-play-circle"></i> ${sec.resource_title}`; li.onclick = async () => { showToast(`正在加载: ${sec.resource_title}`, 'info'); const m3u8Url = await fetchPlaybackUrl(sec.resource_id); if (m3u8Url) { document.querySelectorAll('.list li.active').forEach(el => el.classList.remove('active')); document.querySelectorAll('.title.active').forEach(el => el.classList.remove('active')); titleEl.classList.add('active'); li.classList.add('active'); playVideo(m3u8Url); } }; ul.appendChild(li); }); titleEl.click(); const firstVideoItem = ul.querySelector('li'); if (firstVideoItem) { firstVideoItem.click(); } }
+            sidebar.addEventListener('click', function (e) { const title = e.target.closest('.title'); if (title) { const list = title.nextElementSibling; const icon = title.querySelector('i'); const isVisible = list.style.display === 'block'; list.style.display = isVisible ? 'none' : 'block'; icon.style.transform = isVisible ? 'rotate(0deg)' : 'rotate(180deg)'; } });
+            document.addEventListener('DOMContentLoaded', init);
+        })();
+
+        // 修复 aria-hidden 问题的脚本
+        const bodyObserver = new MutationObserver((mutations) => {
+            mutations.forEach(mutation => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'aria-hidden') {
+                    if (document.body.getAttribute('aria-hidden') === 'true') {
+                        document.body.removeAttribute('aria-hidden');
+                        console.log("Forcibly removed aria-hidden from <body> to maintain accessibility.");
+                    }
+                }
+            });
+        });
+        bodyObserver.observe(document.body, { attributes: true });
+    </script>
+</body>
+
+</html>
