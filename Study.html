@@ -677,7 +677,7 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        let originalSubtitleTransition = '';
+      let originalSubtitleTransition = ''; // 用于禁用/恢复transition
         let initialMouseOffsetXOnSubtitle = 0;
         let initialMouseOffsetYOnSubtitle = 0;
 
@@ -1120,6 +1120,26 @@
                 return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
             }
 
+            // ===== 断点续播：保存进度 =====
+            function savePlaybackPosition() {
+                const activeItem = document.querySelector('.list li.active');
+                if (activeItem && player.currentTime > 0 && isFinite(player.duration)) {
+                    const sectionId = activeItem.dataset.sectionId;
+                    if (sectionId) {
+                        const position = {
+                            sectionId: sectionId,
+                            time: player.currentTime
+                        };
+                        localStorage.setItem('videoPlaybackPosition', JSON.stringify(position));
+                    }
+                }
+            }
+
+            // 每5秒保存一次进度
+            setInterval(savePlaybackPosition, 5000);
+            // 页面关闭前也保存一次
+            window.addEventListener('beforeunload', savePlaybackPosition);
+
             player.addEventListener('timeupdate', () => {
                 if (!isDraggingProgress && isFinite(player.duration)) {
                     const currentTime = player.currentTime;
@@ -1536,6 +1556,7 @@
                                         chapter.sectionList.forEach(sec => {
                                             const li = document.createElement('li');
                                             li.innerHTML = `<i class="fas fa-play-circle"></i> ${sec.sectionName}`;
+                                            li.dataset.sectionId = sec.sectionId; // 关键：存储sectionId
                                             li.onclick = () => {
                                                 document.querySelectorAll('.list li.active').forEach(el => el.classList.remove('active'));
                                                 document.querySelectorAll('.title.active').forEach(el => el.classList.remove('active'));
@@ -1544,11 +1565,8 @@
                                                 if (sec.sectionVideo) {
                                                     videoSource.src = sec.sectionVideo;
                                                     player.load();
-                                                    player.play().catch(error => {
-                                                        console.error("播放失败:", error);
-                                                        showToast(`视频播放失败: ${sec.sectionName}`, 'error');
-                                                    });
-                                                } else {
+                                                    player.play().catch(error => {});
+                                                } else { 
                                                     videoSource.src = "";
                                                     player.load();
                                                     showToast(`视频地址无效: ${sec.sectionName}`, 'error');
@@ -1585,11 +1603,35 @@
                                 });
                             }
                         });
-                        const firstVideoItem = sidebar.querySelector('.list li:not([style*="cursor: default"])');
-                        if (firstVideoItem && typeof firstVideoItem.click === 'function') {
-                            firstVideoItem.click();
+                        // ===== 断点续播：读取与应用 =====
+                        const savedPositionJSON = localStorage.getItem('videoPlaybackPosition');
+                        if (savedPositionJSON) {
+                            try {
+                                const savedPosition = JSON.parse(savedPositionJSON);
+                                const targetLi = document.querySelector(`.list li[data-section-id='${savedPosition.sectionId}']`);
+                                if (targetLi && typeof targetLi.click === 'function') {
+                                    targetLi.click(); // 触发点击以加载视频等
+                                    
+                                    const onCanPlay = () => {
+                                        player.currentTime = savedPosition.time;
+                                        showToast(`已为您恢复到上次观看的位置`, 'success');
+                                        player.removeEventListener('canplay', onCanPlay);
+                                    };
+                                    player.addEventListener('canplay', onCanPlay);
+                                } else {
+                                     // 如果找不到保存的视频，则播放第一个
+                                     const firstVideoItem = sidebar.querySelector('.list li:not([style*="cursor: default"])');
+                                     if (firstVideoItem) firstVideoItem.click();
+                                }
+                            } catch(e) {
+                                console.error("解析续播数据失败", e);
+                                const firstVideoItem = sidebar.querySelector('.list li:not([style*="cursor: default"])');
+                                if (firstVideoItem) firstVideoItem.click();
+                            }
                         } else {
-                            showToast('课程列表为空或无有效视频。', 'info');
+                            // 正常播放第一个视频
+                            const firstVideoItem = sidebar.querySelector('.list li:not([style*="cursor: default"])');
+                            if (firstVideoItem) firstVideoItem.click();
                         }
                     } else { showToast('课程数据格式不正确。', 'error'); }
                 } catch (err) {
@@ -1601,6 +1643,10 @@
                 }
             })(); 
         })(); 
+    </script>
+</body>
+
+</html>
     </script>
 </body>
 
