@@ -1,6 +1,3 @@
-<!-- 代码均由ChatGPT生成，如有侵权请联系作者删除
-作者：张敬玉
--->
 <!DOCTYPE html>
 <html lang="zh-CN">
 
@@ -9,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>智能视频学习系统</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/js/crypto-js.min.js"></script>
     <script src="/js/favicon-loader.js"></script>
     <style>
         * {
@@ -271,16 +269,13 @@
         #progress-bar-container {
             flex-grow: 1;
             height: 10px;
-            /* Increased height for easier interaction */
             background-color: rgba(80, 80, 80, 0.6);
             border-radius: 5px;
             position: relative;
             cursor: pointer;
-            /* Indicates the whole bar is interactive */
             margin: 0 5px;
             overflow: hidden;
             -webkit-tap-highlight-color: transparent;
-            /* Remove tap highlight on mobile */
         }
 
         #progress-bar-buffer,
@@ -290,7 +285,6 @@
             left: 0;
             height: 100%;
             border-radius: 5px;
-            /* Matches container */
             pointer-events: none;
         }
 
@@ -318,13 +312,11 @@
             transform: translate(-50%, -50%);
             z-index: 3;
             pointer-events: none;
-            /* Thumb no longer needs direct interaction for drag start */
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.6);
             transition: transform 0.1s ease-out;
         }
 
         #progress-bar-container:hover #progress-bar-thumb {
-            /* Slight scale on container hover */
             transform: translate(-50%, -50%) scale(1.15);
         }
 
@@ -506,7 +498,6 @@
                 height: 9px;
             }
 
-            /* Adjusted for touch */
             #progress-bar-thumb {
                 width: 12px;
                 height: 12px;
@@ -573,7 +564,6 @@
                 height: 8px;
             }
 
-            /* Adjusted for touch */
             #progress-bar-thumb {
                 width: 10px;
                 height: 10px;
@@ -596,23 +586,15 @@
             }
         }
 
-        /* 新增弹幕相关样式 */
         #danmaku-container {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            /* 根据您的控制栏高度调整 bottom，或者留出字幕空间 */
-            /* 假设控制栏高度约 40-50px，字幕区域高度约 50-80px */
-            /* 如果字幕在视频底部，弹幕不应覆盖字幕和控制栏 */
-            /* 简单起见，可以先让弹幕在整个视频区域滚动，后续可调整 bottom 值 */
             bottom: 50px;
-            /* 示例：为底部控制栏留出空间，可按需调整 */
             overflow: hidden;
             pointer-events: none;
-            /* 允许点击穿透到视频播放器 */
             z-index: 2147483642;
-            /* 应高于播放器，低于最顶层控件（如果需要） */
         }
 
         .danmaku-item {
@@ -620,20 +602,16 @@
             white-space: nowrap;
             color: white;
             font-size: 18px;
-            /* 可根据喜好调整 */
             font-weight: bold;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
             padding: 3px 8px;
             border-radius: 4px;
             background-color: rgba(0, 0, 0, 0.2);
-            /* 可选：给弹幕一点背景使其更突出 */
             will-change: transform;
-            /* 性能优化提示 */
             user-select: none;
             -webkit-user-select: none;
         }
 
-        /* 响应式调整弹幕字体大小 (可选) */
         @media (max-width: 768px) {
             .danmaku-item {
                 font-size: 16px;
@@ -658,12 +636,12 @@
                 <video id="player">
                     <source id="video-source" src="" type="video/mp4">您的浏览器不支持 video 标签。
                 </video>
+                <div id="danmaku-container"></div>
             </div>
             <div id="subtitle-container">
                 <p id="subtitle-text"></p>
             </div>
             <div id="custom-controls-bar">
-                <div id="danmaku-container"></div>
                 <div class="control-group left-controls">
                     <button id="play-pause-btn" title="播放/暂停"><i class="fas fa-play"></i></button>
                     <i class="fas fa-volume-up" title="音量"></i>
@@ -705,6 +683,27 @@
         let initialMouseOffsetYOnSubtitle = 0;
 
         (async function () {
+            // --- 新增：解密函数和密钥 ---
+            const decryptionKey = "zx1fwu1VN1rE7f3VC2BqHbaL+B5149Q6yK37G49k0vg=";
+
+            function decryptSectionVideo(encryptedBase64, keyBase64) {
+                try {
+                    const key = CryptoJS.enc.Base64.parse(keyBase64);
+                    const decrypted = CryptoJS.AES.decrypt(encryptedBase64, key, {
+                        mode: CryptoJS.mode.ECB,
+                        padding: CryptoJS.pad.Pkcs7
+                    });
+                    const decryptedUtf8 = decrypted.toString(CryptoJS.enc.Utf8);
+                    if (!decryptedUtf8) {
+                        console.error("解密结果为空，请检查密钥或加密数据。");
+                        return null;
+                    }
+                    return decryptedUtf8;
+                } catch (error) {
+                    console.error("解密视频地址时出错:", error);
+                    return null; // 返回 null 表示解密失败
+                }
+            }
             const mainElement = document.getElementById('main');
             const sidebar = document.getElementById('sidebar');
             const player = document.getElementById('player');
@@ -737,14 +736,16 @@
             let controlsTimeout; let parentDimensionsForDrag = { width: 0, height: 0 };
             let subtitleDragRAF = null; let isRAFScheduled = false;
             let newDragX = 0, newDragY = 0;
+            let isFastForwarding = false;
 
-            // 新增弹幕相关变量
             const danmakuContainer = document.getElementById('danmaku-container');
-            let allCourseBarrages = {}; // 存储所有弹幕，按 sectionId 分组
-            let currentVideoBarrages = []; // 当前视频的弹幕列表
-            let activeDanmakuIds = new Set(); // 存储当前屏幕上活动弹幕的ID
-            let lastProcessedDanmakuTime = -1; // 用于弹幕 timeupdate 优化
+            let allCourseBarrages = {};
+            let currentVideoBarrages = [];
+            let activeDanmakuIds = new Set();
+            let lastProcessedDanmakuTime = -1;
             const BARRAGE_API_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyVHlwZSI6MiwiZXhwIjoxNzUyOTk2NzA2LCJ1c2VySWQiOjIzNTksImlhdCI6MTc1MjM5MTkwNn0.0XalZaKcB_jAR0hUaqPZ0mCDdKMJStp_VCBKtNDtuZ8';
+
+
             if (speedSelect) {
                 speedSelect.addEventListener('mousedown', function () {
                     if (document.activeElement === this) {
@@ -772,7 +773,6 @@
             }
 
             function applyLastKnownStyleOrDefault(parentElementForSubtitleCalc, isFullscreenView) {
-                // console.log("[SubtitleDebug] applyLastKnownStyleOrDefault called. Fullscreen:", isFullscreenView);
                 const styleToApply = lastKnownSubtitleStyle;
                 const newParentWidth = parentElementForSubtitleCalc.clientWidth;
                 const newParentHeight = parentElementForSubtitleCalc.clientHeight;
@@ -780,13 +780,13 @@
                 if (typeof styleToApply.left === 'string' && styleToApply.left.includes('px') &&
                     typeof styleToApply.top === 'string' && styleToApply.top.includes('px')) {
 
-                    // console.log("[SubtitleDebug] Applying last known pixel style.");
                     subtitleContainer.style.transform = styleToApply.transform || '';
                     let targetTopPx = parseFloat(styleToApply.top);
                     if (styleToApply.parentHeightAtSave && styleToApply.parentHeightAtSave > 0 && newParentHeight > 0) {
                         const scaleY = newParentHeight / styleToApply.parentHeightAtSave;
                         targetTopPx *= scaleY;
                     }
+
                     subtitleContainer.style.width = styleToApply.width || (isFullscreenView ? '80%' : '90%');
                     subtitleContainer.style.maxWidth = styleToApply.maxWidth || (isFullscreenView ? '900px' : '800px');
                     void subtitleContainer.offsetWidth;
@@ -798,6 +798,7 @@
                     let sHeight = subtitleContainer.offsetHeight || 50;
                     targetLeftPx = Math.round(Math.max(0, Math.min(targetLeftPx, newParentWidth - sWidth)));
                     targetTopPx = Math.round(Math.max(0, Math.min(targetTopPx, newParentHeight - sHeight)));
+
                     subtitleContainer.style.left = targetLeftPx + 'px';
                     subtitleContainer.style.top = targetTopPx + 'px';
 
@@ -814,9 +815,7 @@
                     }, 100);
                 }
             }
-
             function setSubtitleDefaultPosition(parentElementForSubtitleCalc, isFullscreenView) {
-                // console.log("[SubtitleDebug] setSubtitleDefaultPosition called. Fullscreen:", isFullscreenView);
                 subtitleContainer.style.width = isFullscreenView ? '80%' : '90%';
                 subtitleContainer.style.maxWidth = isFullscreenView ? '900px' : '800px';
                 subtitleContainer.style.transform = '';
@@ -865,7 +864,6 @@
                     }
                 }
                 subtitleHeight = subtitleHeight || 50;
-                // 如果 customControlsBar 存在，则访问其 offsetHeight，否则整个表达式为假，最后由 || 40 提供默认值
                 const controlsBarHeight = (customControlsBar && customControlsBar.offsetHeight) || 40;
                 const spacingAboveControls = Math.round(parentHeight * 0.015);
                 const bottomMargin = (isFullscreenView ? Math.round(parentHeight * 0.12) : controlsBarHeight + Math.max(5, spacingAboveControls));
@@ -940,7 +938,6 @@
                     saveSubtitleStyle();
                 }
             }
-
 
             window.addEventListener('load', () => {
                 setTimeout(() => {
@@ -1027,7 +1024,6 @@
                     errorText += "视频地址无效或未设置。";
                 } else { errorText += "未知错误，请检查网络和视频源。"; }
                 showToast(errorText, 'error');
-                console.error("Video Error Event:", e, "Player Error Object:", player.error, "Source:", videoSource.src);
                 showControls(true);
             });
             player.addEventListener('loadedmetadata', () => {
@@ -1076,10 +1072,47 @@
             videoContainer.addEventListener('mouseleave', () => { if (!player.paused && !isDraggingProgress && !isDragging) { clearTimeout(controlsTimeout); controlsTimeout = setTimeout(hideControls, 500); } });
             customControlsBar.addEventListener('mouseenter', () => { clearTimeout(controlsTimeout); showControls(true); });
             customControlsBar.addEventListener('mouseleave', () => { if (!player.paused && !isDraggingProgress && !isDragging) showControls(); });
+
             document.addEventListener('keydown', function (e) {
                 if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) { return; }
-                if (e.code === 'Space') { e.preventDefault(); if (player.paused || player.ended) player.play(); else player.pause(); }
+                switch (e.key) {
+                    case ' ':
+                        e.preventDefault();
+                        if (player.paused || player.ended) player.play(); else player.pause();
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        player.currentTime -= 3;
+                        showToast(`-3s`, 'info');
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        if (e.repeat) {
+                            if (!isFastForwarding) {
+                                isFastForwarding = true;
+                            }
+                            player.playbackRate = 3.0;
+                            showToast('3倍速播放', 'info');
+                        } else {
+                            if (!isFastForwarding) {
+                                player.currentTime += 3;
+                                showToast(`+3s`, 'info');
+                            }
+                        }
+                        break;
+                }
             });
+
+            document.addEventListener('keyup', function (e) {
+                if (e.key === 'ArrowRight') {
+                    if (isFastForwarding) {
+                        player.playbackRate = parseFloat(speedSelect.value);
+                        showToast(`恢复原速: ${player.playbackRate}x`, 'info');
+                        isFastForwarding = false;
+                    }
+                }
+            });
+
             player.addEventListener('ended', function () {
                 subtitleTextElement.textContent = '';
                 playIcon.classList.remove('fa-pause'); playIcon.classList.add('fa-play');
@@ -1109,6 +1142,26 @@
                 return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
             }
 
+            // ===== 断点续播：保存进度 =====
+            function savePlaybackPosition() {
+                const activeItem = document.querySelector('.list li.active');
+                if (activeItem && player.currentTime > 0 && isFinite(player.duration)) {
+                    const sectionId = activeItem.dataset.sectionId;
+                    if (sectionId) {
+                        const position = {
+                            sectionId: sectionId,
+                            time: player.currentTime
+                        };
+                        localStorage.setItem('videoPlaybackPosition', JSON.stringify(position));
+                    }
+                }
+            }
+
+            // 每5秒保存一次进度
+            setInterval(savePlaybackPosition, 5000);
+            // 页面关闭前也保存一次
+            window.addEventListener('beforeunload', savePlaybackPosition);
+
             player.addEventListener('timeupdate', () => {
                 if (!isDraggingProgress && isFinite(player.duration)) {
                     const currentTime = player.currentTime;
@@ -1120,8 +1173,8 @@
                 } else if (!isFinite(player.duration)) {
                     currentTimeDisplay.textContent = formatTime(player.currentTime);
                 }
-                handleTimeUpdate(); // 字幕更新
-                handleDanmakuDisplay(); // 弹幕更新
+                handleTimeUpdate();
+                handleDanmakuDisplay();
             });
 
             player.addEventListener('progress', () => {
@@ -1254,7 +1307,7 @@
                 }
                 if (subtitlesEnabled) subtitleTextElement.textContent = '字幕加载中...';
 
-                const token = BARRAGE_API_TOKEN; // Reuse token
+                const token = BARRAGE_API_TOKEN;
                 const subtitleUrl = `https://course.wenyanzsb.com/section/get?sectionId=${sectionId}`;
                 try {
                     const res = await fetch(subtitleUrl, { headers: { 'Content-Type': 'application/json', 'Token': token } });
@@ -1305,7 +1358,6 @@
                 }
             }
             player.onseeking = () => {
-                // 字幕 seeking 逻辑
                 let low = 0, high = currentSubtitles.length - 1, closestIndex = 0;
                 if (currentSubtitles.length > 0) {
                     while (low <= high) {
@@ -1319,7 +1371,6 @@
                 currentSubtitleIndex = closestIndex;
                 if (subtitlesEnabled) { subtitleTextElement.textContent = ''; handleTimeUpdate(); }
 
-                // 弹幕 seeking 逻辑
                 if (danmakuContainer) {
                     while (danmakuContainer.firstChild) {
                         danmakuContainer.removeChild(danmakuContainer.firstChild);
@@ -1328,23 +1379,19 @@
                 activeDanmakuIds.clear();
             };
 
-            player.onseeked = () => { // 新增/修改 onseeked
-                handleTimeUpdate(); // 更新字幕
-                // 重置弹幕处理状态并尝试立即显示当前时间点的弹幕
-                lastProcessedDanmakuTime = player.currentTime - 0.5; // 给一个小的提前量
-                activeDanmakuIds.clear(); // 清空，允许重新显示弹幕
-                if (danmakuContainer) { // 确保再次清空，以防 seeking 时未完全清掉
+            player.onseeked = () => {
+                handleTimeUpdate();
+                lastProcessedDanmakuTime = player.currentTime - 0.5;
+                activeDanmakuIds.clear();
+                if (danmakuContainer) {
                     while (danmakuContainer.firstChild) {
                         danmakuContainer.removeChild(danmakuContainer.firstChild);
                     }
                 }
-                handleDanmakuDisplay(); // 立即处理一次弹幕
+                handleDanmakuDisplay();
             };
 
 
-            /**
-             * 新增：获取并处理所有课程弹幕
-             */
             async function fetchAndProcessAllBarrages(courseId = '80') {
                 const barrageApiUrl = 'https://course.wenyanzsb.com/barrage/getSectionBarrageList';
                 try {
@@ -1374,9 +1421,9 @@
                                 const barrageContent = JSON.parse(record.barrageContent);
                                 if (barrageContent && typeof barrageContent.time === 'number' && typeof barrageContent.text === 'string') {
                                     const barrageItem = {
-                                        id: String(record.barrageId), // 确保ID是字符串，便于Set操作
+                                        id: String(record.barrageId),
                                         sectionId: String(record.sectionId),
-                                        time: Number(barrageContent.time), // 时间 (秒)
+                                        time: Number(barrageContent.time),
                                         text: barrageContent.text,
                                     };
                                     if (!allCourseBarrages[barrageItem.sectionId]) {
@@ -1391,7 +1438,6 @@
                         for (const sectionId in allCourseBarrages) {
                             allCourseBarrages[sectionId].sort((a, b) => a.time - b.time);
                         }
-                        // console.log('所有弹幕加载并处理完毕。');
                     } else {
                         console.error('弹幕数据格式错误或加载失败:', data.msg || '未知错误');
                     }
@@ -1400,52 +1446,43 @@
                 }
             }
 
-            /**
-             * 新增：创建并播放单个弹幕
-             */
             function createAndAnimateDanmaku(barrage) {
-                if (!danmakuContainer || player.paused) return; // 如果播放器暂停，则不发射新弹幕
+                if (!danmakuContainer || player.paused) return;
 
                 const danmakuElement = document.createElement('div');
                 danmakuElement.className = 'danmaku-item';
                 danmakuElement.textContent = barrage.text;
 
                 const containerHeight = danmakuContainer.clientHeight;
-                if (containerHeight <= 20) { // 容器太小
-                    activeDanmakuIds.delete(barrage.id); // 从激活集合中移除，允许下次重试
+                if (containerHeight <= 20) {
+                    activeDanmakuIds.delete(barrage.id);
                     return;
                 }
 
-                // 尝试获取弹幕实际高度，如果失败则使用估算值
-                danmakuContainer.appendChild(danmakuElement); // 先添加到DOM才能获取offsetHeight
+                danmakuContainer.appendChild(danmakuElement);
                 let danmakuHeight = danmakuElement.offsetHeight;
                 if (!danmakuHeight || danmakuHeight <= 0) {
                     danmakuHeight = parseFloat(getComputedStyle(danmakuElement).fontSize) * 1.5 || 25;
                 }
-                if (danmakuElement.parentNode === danmakuContainer) { // 添加后立即移除，仅为获取高度
+                if (danmakuElement.parentNode === danmakuContainer) {
                     danmakuContainer.removeChild(danmakuElement);
                 }
 
-
-                const maxTopValue = containerHeight - danmakuHeight - 10; // 上下各留5px边距
-                if (maxTopValue <= 0) { // 如果计算出的最大top值不合理
+                const maxTopValue = containerHeight - danmakuHeight - 10;
+                if (maxTopValue <= 0) {
                     activeDanmakuIds.delete(barrage.id);
                     return;
                 }
                 const randomTop = Math.floor(Math.random() * maxTopValue) + 5;
                 danmakuElement.style.top = `${randomTop}px`;
-
                 danmakuElement.style.right = '0px';
                 danmakuElement.style.transform = `translateX(100%)`;
 
-                danmakuContainer.appendChild(danmakuElement); // 再次添加
-
+                danmakuContainer.appendChild(danmakuElement);
                 void danmakuElement.offsetWidth;
-
-                const animationDuration = 6 + Math.random() * 4; // 6-10秒
+                const animationDuration = 6 + Math.random() * 4;
                 danmakuElement.style.transition = `transform ${animationDuration}s linear`;
-
-                const targetTranslateX = -(danmakuContainer.offsetWidth + danmakuElement.offsetWidth + 30); // 确保完全移出
+                const targetTranslateX = -(danmakuContainer.offsetWidth + danmakuElement.offsetWidth + 30);
                 danmakuElement.style.transform = `translateX(${targetTranslateX}px)`;
 
                 const transitionEndHandler = () => {
@@ -1454,10 +1491,9 @@
                     }
                     activeDanmakuIds.delete(barrage.id);
                 };
-
                 danmakuElement.addEventListener('transitionend', transitionEndHandler, { once: true });
 
-                setTimeout(() => { // 超时安全移除
+                setTimeout(() => {
                     if (danmakuElement.parentNode === danmakuContainer) {
                         danmakuContainer.removeChild(danmakuElement);
                     }
@@ -1465,36 +1501,27 @@
                 }, (animationDuration + 1) * 1000);
             }
 
-            /**
-             * 新增：处理弹幕显示的主逻辑，由 timeupdate 调用
-             */
             function handleDanmakuDisplay() {
                 if (!player || player.paused || currentVideoBarrages.length === 0 || !danmakuContainer) {
                     return;
                 }
                 const currentTime = player.currentTime;
 
-                // 如果时间发生显著变化（seek），重置 lastProcessedDanmakuTime 和 activeDanmakuIds
-                // 注意：更精确的seek处理应在 'seeked' 事件中进行
-                if (Math.abs(currentTime - lastProcessedDanmakuTime) > 1.5) { // 阈值1.5秒
-                    // console.log(`Danmaku time jump detected. Current: ${currentTime}, Last: ${lastProcessedDanmakuTime}`);
-                    lastProcessedDanmakuTime = currentTime - 0.25; // 回溯一点点，以包含当前时间点附近的弹幕
-                    // activeDanmakuIds.clear(); // 在seeked中清空，这里不清，避免播放时小跳动导致弹幕重发
+                if (Math.abs(currentTime - lastProcessedDanmakuTime) > 1.5) {
+                    lastProcessedDanmakuTime = currentTime - 0.25;
                 }
 
                 let danmakuBufferToDisplay = [];
 
                 for (let i = 0; i < currentVideoBarrages.length; i++) {
                     const barrage = currentVideoBarrages[i];
-                    // 弹幕时间在 (lastProcessedDanmakuTime, currentTime] 区间内
                     if (barrage.time > lastProcessedDanmakuTime && barrage.time <= currentTime) {
                         if (!activeDanmakuIds.has(barrage.id)) {
                             danmakuBufferToDisplay.push(barrage);
-                            activeDanmakuIds.add(barrage.id); // 先加入，避免并发问题
+                            activeDanmakuIds.add(barrage.id);
                         }
                     }
-                    // 优化：如果当前弹幕时间已经远超播放时间，后续的肯定也超了（假设已排序）
-                    if (barrage.time > currentTime + 1) { // 1秒的预读窗口
+                    if (barrage.time > currentTime + 1) {
                         break;
                     }
                 }
@@ -1503,17 +1530,14 @@
 
                 if (danmakuBufferToDisplay.length > 0) {
                     danmakuBufferToDisplay.forEach((barrage, index) => {
-                        // 使用 setTimeout 稍微错开弹幕的创建，避免同时渲染过多DOM影响性能
-                        // 对于大量弹幕，这个延时可能需要更智能的管理（如弹幕轨道）
                         setTimeout(() => {
                             createAndAnimateDanmaku(barrage);
-                        }, index * (Math.random() * 200 + 50)); // 50-250ms 随机延迟
+                        }, index * (Math.random() * 200 + 50));
                     });
                 }
             }
 
 
-            // 修改课程列表加载和视频切换逻辑
             (async function initCourseList() {
                 try {
                     const courseListRes = await fetch('https://course.wenyanzsb.com/section/getCourseSectionList?courseId=25', {
@@ -1527,7 +1551,7 @@
                     if (json.code !== 1001) throw new Error('课程列表加载失败: ' + json.msg);
 
                     if (json.body && Array.isArray(json.body)) {
-                        await fetchAndProcessAllBarrages('80'); // 加载所有弹幕数据
+                        await fetchAndProcessAllBarrages('80');
 
                         json.body.forEach(courseGroup => {
                             if (courseGroup.children && Array.isArray(courseGroup.children)) {
@@ -1554,36 +1578,45 @@
                                         chapter.sectionList.forEach(sec => {
                                             const li = document.createElement('li');
                                             li.innerHTML = `<i class="fas fa-play-circle"></i> ${sec.sectionName}`;
+                                            li.dataset.sectionId = sec.sectionId; // 关键：存储sectionId
                                             li.onclick = () => {
                                                 document.querySelectorAll('.list li.active').forEach(el => el.classList.remove('active'));
                                                 document.querySelectorAll('.title.active').forEach(el => el.classList.remove('active'));
                                                 titleEl.classList.add('active'); li.classList.add('active');
 
                                                 if (sec.sectionVideo) {
-                                                    videoSource.src = sec.sectionVideo;
-                                                    player.load();
-                                                    player.play().catch(error => {
-                                                        console.error("播放失败:", error);
-                                                        showToast(`视频播放失败: ${sec.sectionName}`, 'error');
-                                                    });
+                                                    // 解密视频地址
+                                                    const decryptedUrl = decryptSectionVideo(sec.sectionVideo, decryptionKey);
+
+                                                    // 检查解密是否成功
+                                                    if (decryptedUrl) {
+                                                        videoSource.src = decryptedUrl;
+                                                        player.load();
+                                                        player.play().catch(error => {
+                                                            console.error("视频播放失败:", error);
+                                                            showToast('视频播放失败，链接可能已失效', 'error');
+                                                        });
+                                                    } else {
+                                                        showToast('视频地址解密失败', 'error');
+                                                        videoSource.src = ""; // 清空播放器源
+                                                        player.load();
+                                                    }
                                                 } else {
                                                     videoSource.src = "";
                                                     player.load();
-                                                    showToast(`视频地址无效: ${sec.sectionName}`, 'error');
+                                                    showToast(`未找到视频地址: ${sec.sectionName}`, 'error');
                                                 }
                                                 fetchAndProcessSubtitles(sec.sectionId);
 
-                                                // 弹幕处理
                                                 if (danmakuContainer) {
                                                     while (danmakuContainer.firstChild) {
                                                         danmakuContainer.removeChild(danmakuContainer.firstChild);
                                                     }
                                                 }
                                                 activeDanmakuIds.clear();
-                                                currentVideoBarrages = allCourseBarrages[String(sec.sectionId)] || []; //确保 sectionId 是字符串
-                                                lastProcessedDanmakuTime = -1; // 重置，以便从头开始
-                                                // console.log(`切换到视频 ID: ${sec.sectionId}, 弹幕数量: ${currentVideoBarrages.length}`);
-                                                handleDanmakuDisplay(); // 尝试立即显示一次
+                                                currentVideoBarrages = allCourseBarrages[String(sec.sectionId)] || [];
+                                                lastProcessedDanmakuTime = -1;
+                                                handleDanmakuDisplay();
 
                                                 const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
                                                 applyLastKnownStyleOrDefault(playerWrapper, isFullscreen);
@@ -1605,11 +1638,35 @@
                                 });
                             }
                         });
-                        const firstVideoItem = sidebar.querySelector('.list li:not([style*="cursor: default"])');
-                        if (firstVideoItem && typeof firstVideoItem.click === 'function') {
-                            firstVideoItem.click();
+                        // ===== 断点续播：读取与应用 =====
+                        const savedPositionJSON = localStorage.getItem('videoPlaybackPosition');
+                        if (savedPositionJSON) {
+                            try {
+                                const savedPosition = JSON.parse(savedPositionJSON);
+                                const targetLi = document.querySelector(`.list li[data-section-id='${savedPosition.sectionId}']`);
+                                if (targetLi && typeof targetLi.click === 'function') {
+                                    targetLi.click(); // 触发点击以加载视频等
+
+                                    const onCanPlay = () => {
+                                        player.currentTime = savedPosition.time;
+                                        showToast(`已为您恢复到上次观看的位置`, 'success');
+                                        player.removeEventListener('canplay', onCanPlay);
+                                    };
+                                    player.addEventListener('canplay', onCanPlay);
+                                } else {
+                                    // 如果找不到保存的视频，则播放第一个
+                                    const firstVideoItem = sidebar.querySelector('.list li:not([style*="cursor: default"])');
+                                    if (firstVideoItem) firstVideoItem.click();
+                                }
+                            } catch (e) {
+                                console.error("解析续播数据失败", e);
+                                const firstVideoItem = sidebar.querySelector('.list li:not([style*="cursor: default"])');
+                                if (firstVideoItem) firstVideoItem.click();
+                            }
                         } else {
-                            showToast('课程列表为空或无有效视频。', 'info');
+                            // 正常播放第一个视频
+                            const firstVideoItem = sidebar.querySelector('.list li:not([style*="cursor: default"])');
+                            if (firstVideoItem) firstVideoItem.click();
                         }
                     } else { showToast('课程数据格式不正确。', 'error'); }
                 } catch (err) {
@@ -1619,10 +1676,13 @@
                     sidebar.appendChild(errEl);
                     console.error(err);
                 }
-            })(); // End of initCourseList IIFE
-
-        })(); // End of Main IIFE
+            })();
+        })(); 
     </script>
+</body>
+
+</html>
+</script>
 </body>
 
 </html>
