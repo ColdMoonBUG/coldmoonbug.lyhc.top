@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>智能视频学习系统</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/js/crypto-js.min.js"></script>
     <script src="/js/favicon-loader.js"></script>
     <style>
         * {
@@ -635,7 +636,7 @@
                 <video id="player">
                     <source id="video-source" src="" type="video/mp4">您的浏览器不支持 video 标签。
                 </video>
-                 <div id="danmaku-container"></div>
+                <div id="danmaku-container"></div>
             </div>
             <div id="subtitle-container">
                 <p id="subtitle-text"></p>
@@ -677,11 +678,32 @@
     <div class="toast" id="toast"></div>
 
     <script>
-      let originalSubtitleTransition = ''; // 用于禁用/恢复transition
+        let originalSubtitleTransition = ''; // 用于禁用/恢复transition
         let initialMouseOffsetXOnSubtitle = 0;
         let initialMouseOffsetYOnSubtitle = 0;
 
         (async function () {
+            // --- 新增：解密函数和密钥 ---
+            const decryptionKey = "zx1fwu1VN1rE7f3VC2BqHbaL+B5149Q6yK37G49k0vg=";
+
+            function decryptSectionVideo(encryptedBase64, keyBase64) {
+                try {
+                    const key = CryptoJS.enc.Base64.parse(keyBase64);
+                    const decrypted = CryptoJS.AES.decrypt(encryptedBase64, key, {
+                        mode: CryptoJS.mode.ECB,
+                        padding: CryptoJS.pad.Pkcs7
+                    });
+                    const decryptedUtf8 = decrypted.toString(CryptoJS.enc.Utf8);
+                    if (!decryptedUtf8) {
+                        console.error("解密结果为空，请检查密钥或加密数据。");
+                        return null;
+                    }
+                    return decryptedUtf8;
+                } catch (error) {
+                    console.error("解密视频地址时出错:", error);
+                    return null; // 返回 null 表示解密失败
+                }
+            }
             const mainElement = document.getElementById('main');
             const sidebar = document.getElementById('sidebar');
             const player = document.getElementById('player');
@@ -715,10 +737,10 @@
             let subtitleDragRAF = null; let isRAFScheduled = false;
             let newDragX = 0, newDragY = 0;
             let isFastForwarding = false;
-            
+
             const danmakuContainer = document.getElementById('danmaku-container');
-            let allCourseBarrages = {}; 
-            let currentVideoBarrages = []; 
+            let allCourseBarrages = {};
+            let currentVideoBarrages = [];
             let activeDanmakuIds = new Set();
             let lastProcessedDanmakuTime = -1;
             const BARRAGE_API_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyVHlwZSI6MiwiZXhwIjoxNzUyOTk2NzA2LCJ1c2VySWQiOjIzNTksImlhdCI6MTc1MjM5MTkwNn0.0XalZaKcB_jAR0hUaqPZ0mCDdKMJStp_VCBKtNDtuZ8';
@@ -1081,8 +1103,8 @@
                 }
             });
 
-            document.addEventListener('keyup', function(e) {
-                 if (e.key === 'ArrowRight') {
+            document.addEventListener('keyup', function (e) {
+                if (e.key === 'ArrowRight') {
                     if (isFastForwarding) {
                         player.playbackRate = parseFloat(speedSelect.value);
                         showToast(`恢复原速: ${player.playbackRate}x`, 'info');
@@ -1563,13 +1585,26 @@
                                                 titleEl.classList.add('active'); li.classList.add('active');
 
                                                 if (sec.sectionVideo) {
-                                                    videoSource.src = sec.sectionVideo;
-                                                    player.load();
-                                                    player.play().catch(error => {});
-                                                } else { 
+                                                    // 解密视频地址
+                                                    const decryptedUrl = decryptSectionVideo(sec.sectionVideo, decryptionKey);
+
+                                                    // 检查解密是否成功
+                                                    if (decryptedUrl) {
+                                                        videoSource.src = decryptedUrl;
+                                                        player.load();
+                                                        player.play().catch(error => {
+                                                            console.error("视频播放失败:", error);
+                                                            showToast('视频播放失败，链接可能已失效', 'error');
+                                                        });
+                                                    } else {
+                                                        showToast('视频地址解密失败', 'error');
+                                                        videoSource.src = ""; // 清空播放器源
+                                                        player.load();
+                                                    }
+                                                } else {
                                                     videoSource.src = "";
                                                     player.load();
-                                                    showToast(`视频地址无效: ${sec.sectionName}`, 'error');
+                                                    showToast(`未找到视频地址: ${sec.sectionName}`, 'error');
                                                 }
                                                 fetchAndProcessSubtitles(sec.sectionId);
 
@@ -1611,7 +1646,7 @@
                                 const targetLi = document.querySelector(`.list li[data-section-id='${savedPosition.sectionId}']`);
                                 if (targetLi && typeof targetLi.click === 'function') {
                                     targetLi.click(); // 触发点击以加载视频等
-                                    
+
                                     const onCanPlay = () => {
                                         player.currentTime = savedPosition.time;
                                         showToast(`已为您恢复到上次观看的位置`, 'success');
@@ -1619,11 +1654,11 @@
                                     };
                                     player.addEventListener('canplay', onCanPlay);
                                 } else {
-                                     // 如果找不到保存的视频，则播放第一个
-                                     const firstVideoItem = sidebar.querySelector('.list li:not([style*="cursor: default"])');
-                                     if (firstVideoItem) firstVideoItem.click();
+                                    // 如果找不到保存的视频，则播放第一个
+                                    const firstVideoItem = sidebar.querySelector('.list li:not([style*="cursor: default"])');
+                                    if (firstVideoItem) firstVideoItem.click();
                                 }
-                            } catch(e) {
+                            } catch (e) {
                                 console.error("解析续播数据失败", e);
                                 const firstVideoItem = sidebar.querySelector('.list li:not([style*="cursor: default"])');
                                 if (firstVideoItem) firstVideoItem.click();
@@ -1641,13 +1676,13 @@
                     sidebar.appendChild(errEl);
                     console.error(err);
                 }
-            })(); 
+            })();
         })(); 
     </script>
 </body>
 
 </html>
-    </script>
+</script>
 </body>
 
 </html>
