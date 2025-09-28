@@ -3,6 +3,7 @@
 -->
 <!DOCTYPE html>
 <html lang="zh">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -67,7 +68,7 @@
             gap: 16px 24px;
             align-items: center;
         }
-        
+
         .highlight {
             font-size: 52px;
             font-weight: 600;
@@ -190,14 +191,20 @@
             font-size: 13px;
         }
 
-        .loading, .error {
+        .loading,
+        .error {
             text-align: center;
             margin: 120px 0;
             font-size: 18px;
         }
-        .loading { color: #0b7285; }
-        .error { color: #d64545; }
 
+        .loading {
+            color: #0b7285;
+        }
+
+        .error {
+            color: #d64545;
+        }
     </style>
 </head>
 
@@ -243,7 +250,7 @@
             <p class="aqi-value" id="aqi">--</p>
             <span class="aqi-badge" id="aqi-quality">--</span>
             <div class="info-grid" id="aqi-details">
-                 </div>
+            </div>
         </section>
 
         <section class="card" id="sun-card">
@@ -263,7 +270,7 @@
         <section class="card" id="life-card">
             <h2>生活指数</h2>
             <div class="life-indices" id="life-list">
-                </div>
+            </div>
         </section>
     </div>
 
@@ -271,7 +278,7 @@
     <p class="error" id="error" hidden>无法获取天气信息，请稍后再试。</p>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
 
             const loadingElement = document.getElementById('loading');
             const errorElement = document.getElementById('error');
@@ -279,16 +286,27 @@
 
             async function getCity() {
                 try {
-                    // IP定位接口
+                    // *** 使用 vore.top 的IP定位接口 ***
                     const response = await fetch('https://api.vore.top/api/IPdata?ip=');
                     if (!response.ok) {
                         throw new Error('IP定位接口响应失败');
                     }
                     const data = await response.json();
-                    return data.ipdata.infor2 || '郑州市'; // 如果获取失败，默认返回郑州
+
+                    // 从返回的数据中提取城市名称
+                    if (data && data.ipdata && data.ipdata.info2) {
+                        return data.ipdata.info2; // 优先使用 info2
+                    } else if (data && data.adcode && data.adcode.c) {
+                        return data.adcode.c; // 备选 adcode.c
+                    }
+
+                    // 如果上面两个字段都找不到，则抛出错误
+                    throw new Error("IP数据中未找到城市信息");
+
                 } catch (error) {
                     console.error("获取城市信息失败:", error);
-                    return '郑州市'; // 发生任何错误都返回默认城市
+                    alert("获取ip失败，已使用默认替换")
+                    return '南阳市'; // 发生任何错误都返回默认城市
                 }
             }
 
@@ -305,7 +323,12 @@
                     }
                     return data.data;
                 } catch (error) {
+                    alert("获取ip失败，请注意VPN代理，已使用默认替换！")
                     console.error(`获取“${city}”的天气失败:`, error);
+                    city = "南阳市"
+                    const response = await fetch(`https://60s.viki.moe/v2/weather?query=${encodeURIComponent(city)}`);
+                    const data = await response.json();
+                    return data.data;
                     throw error; // 将错误继续抛出，由主函数处理
                 }
             }
