@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>河南高职本科招生信息查询系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40data: {"tag":"final","content":"px;\n            color"}: white;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 0 8px 8px 8px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .search-box button {
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .search-box button:hover {
+            background: #5568d3;
+        }
+
+        .filter-tags {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tag {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .filter-tag:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-tag.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .results {
+            display: grid;
+            gap: 15px;
+        }
+
+        .result-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .result-card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .card-code {
+            font-size: 12px;
+            color: #999;
+            background: #f5f5f5;
+            padding: 3px 8px;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+
+        .majors-list, .universities-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .major-item, .university-item {
+            padding: 12px;
+            background: #f9f9f9;
+            border-left: 3px solid #667eea;
+            border-radius: 4px;
+        }
+
+        .major-name, .university-name {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .major-code, .university-code {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 3px;
+        }
+
+        .major-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            color: #666;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .badge-teacher {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-art {
+            background: #fce4ec;
+            color: #c2185b;
+        }
+
+        .remarks {
+            margin-top: 10px;
+            padding: 10px;
+            background: #fffbea;
+            border-left: 2px solid #ffb300;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: #f5f7fa;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab-btn {
+                border-radius: 6px;
+            }
+
+            .tab-content {
+                border-radius: 6px;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 河南高职本科招生查询系统</h1>
+            <p>2026年普通高职(专科)毕业生进入本科阶段学习</p>
+        </div>
+
+        <div id="loadingContainer" class="loading">
+            <div class="loading-spinner"></div>
+            <p>正在加载数据...</p>
+        </div>
+
+        <div id="mainContent" style="display: none;">
+            <div id="errorContainer"></div>
+
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('by-major')">按专业搜招生院校</button>
+                <button class="tab-btn" onclick="switchTab('by-university')">按院校搜招生专业</button>
+            </div>
+
+            <!-- 按专业搜招生院校 -->
+            <div id="by-major" class="tab-content active">
+                <div class="search-box">
+                    <input type="text" id="majorInput" placeholder="输入专业名称或代码（如：软件工程）" onkeyup="handleMajorKeyup(event)">
+                    <button onclick="searchMajor()">搜索</button>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-number" id="totalMajors">0</div>
+                        <div class="stat-label">总专业数</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="totalUniversities">0</div>
+                        <div class="stat-label">招生院校</div>
+                    </div>
+                </div>
+
+                <div class="filter-tags">
+                    <div class="filter-tag" onclick="toggleFilter(this, 'teacher')">师范专业</div>
+                    <div class="filter-tag" onclick="toggleFilter(this, 'art')">艺术专业</div>
+                    <div class="filter-tag" onclick="clearFilters()">清除筛选</div>
+                </div>
+
+                <div id="majorResults" class="results"></div>
+            </div>
+
+            <!-- 按院校搜招生专业 -->
+            <div id="by-university" class="tab-content">
+                <div class="search-box">
+                    <input type="text" id="universityInput" placeholder="输入院校名称或代码（如：河南理工大学）" onkeyup="handleUniversityKeyup(event)">
+                    <button onclick="searchUniversity()">搜索</button>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-number" id="searchedUniversities">0</div>
+                        <div class="stat-label">搜索结果</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="totalPrograms">0</div>
+                        <div class="stat-label">招生专业</div>
+                    </div>
+                </div>
+
+                <div id="universityResults" class="results"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let schoolData = [];
+
+        let activeFilters = {
+            teacher: false,
+            art: false
+        };
+
+        // 加载数据
+        async function loadData() {
+            try {
+                const response = await fetch('majors_data.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                schoolData = await response.json();
+                
+                // 支持两种格式
+                if (schoolData.schools) {
+                    schoolData = schoolData.schools;
+                }
+
+                document.getElementById('loadingContainer').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                
+                initStats();
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                document.getElementById('loadingContainer').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                document.getElementById('errorContainer').innerHTML = `
+                    <div class="error">
+                        ⚠️ 加载数据失败: ${error.message}
+                        <br>请确保 majors_data.json 文件在同一目录下
+                    </div>
+                `;
+            }
+        }
+
+        // 初始化统计
+        function initStats() {
+            const uniqueMajors = new Set();
+            schoolData.forEach(school => {
+                school.majors.forEach(major => {
+                    uniqueMajors.add(major.major_name);
+                });
+            });
+            document.getElementById('totalMajors').textContent = uniqueMajors.size;
+            document.getElementById('totalUniversities').textContent = schoolData.length;
+        }
+
+        // 切换标签页
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // 回车键搜索
+        function handleMajorKeyup(event) {
+            if (event.key === 'Enter') {
+                searchMajor();
+            }
+        }
+
+        function handleUniversityKeyup(event) {
+            if (event.key === 'Enter') {
+                searchUniversity();
+            }
+        }
+
+        // 按专业搜索
+        function searchMajor() {
+            const keyword = document.getElementById('majorInput').value.toLowerCase().trim();
+            const resultsDiv = document.getElementById('majorResults');
+
+            if (!keyword) {
+                resultsDiv.innerHTML = '<div class="no-results">请输入专业名称或代码</div>';
+                return;
+            }
+
+            const majorMap = {};
+
+            // 构建专业->院校映射
+            schoolData.forEach(school => {
+                school.majors.forEach(major => {
+                    const majorName = major.major_name.toLowerCase();
+                    const majorCode = major.major_code.toLowerCase();
+
+                    if (majorName.includes(keyword) || majorCode.includes(keyword)) {
+                        // 检查筛选条件
+                        if (activeFilters.teacher && !major.is_teacher_training) return;
+                        if (activeFilters.art && !major.is_art) return;
+
+                        if (!majorMap[major.major_name]) {
+                            majorMap[major.major_name] = {
+                                code: major.major_code,
+                                duration: major.duration,
+                                is_teacher_training: major.is_teacher_training,
+                                is_art: major.is_art,
+                                universities: []
+                            };
+                        }
+
+                        majorMap[major.major_name].universities.push({
+                            code: school.university_code,
+                            name: school.university_name,
+                            remarks: major.remarks
+                        });
+                    }
+                });
+            });
+
+            if (Object.keys(majorMap).length === 0) {
+                resultsDiv.innerHTML = '<div class="no-results"><p>未找到匹配的专业</p></div>';
+                return;
+            }
+
+            let html = '';
+            Object.entries(majorMap).forEach(([majorName, majorInfo]) => {
+                html += `
+                    <div class="result-card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">${majorName}</div>
+                                <div class="card-code">${majorInfo.code}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 14px; color: #667eea; font-weight: 600;">${majorInfo.universities.length} 所院校</div>
+                            </div>
+                        </div>
+                        <div class="major-meta">
+                            <span>学制: ${majorInfo.duration}</span>
+                            ${majorInfo.is_teacher_training ? '<span class="badge badge-teacher">师范</span>' : ''}
+                            ${majorInfo.is_art ? '<span class="badge badge-art">艺术</span>' : ''}
+                        </div>
+                        <div class="universities-list" style="margin-top: 15px;">
+                            ${majorInfo.universities.map(uni => `
+                                <div class="university-item">
+                                    <div class="university-name">${uni.name}</div>
+                                    <div class="university-code">${uni.code}</div>
+                                    ${uni.remarks ? `<div class="remarks">${uni.remarks}</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            resultsDiv.innerHTML = html;
+        }
+
+        // 按院校搜索
+        function searchUniversity() {
+            const keyword = document.getElementById('universityInput').value.toLowerCase().trim();
+            const resultsDiv = document.getElementById('universityResults');
+
+            if (!keyword) {
+                resultsDiv.innerHTML = '<div class="no-results">请输入院校名称或代码</div>';
+                return;
+            }
+
+            const results = schoolData.filter(school => {
+                const uniName = school.university_name.toLowerCase();
+                const uniCode = school.university_code.toLowerCase();
+                return uniName.includes(keyword) || uniCode.includes(keyword);
+            });
+
+            if (results.length === 0) {
+                resultsDiv.innerHTML = '<div class="no-results"><p>未找到匹配的院校</p></div>';
+                return;
+            }
+
+            document.getElementById('searchedUniversities').textContent = results.length;
+            const totalPrograms = results.reduce((sum, school) => sum + school.majors.length, 0);
+            document.getElementById('totalPrograms').textContent = totalPrograms;
+
+            let html = '';
+            results.forEach(school => {
+                html += `
+                    <div class="result-card">
+                        <div class="card-header">
+                            <div>
+                                <div class="card-title">${school.university_name}</div>
+                                <div class="card-code">${school.university_code}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 14px; color: #667eea; font-weight: 600;">${school.majors.length} 个专业</div>
+                            </div>
+                        </div>
+                        <div class="majors-list">
+                            ${school.majors.map(major => `
+                                <div class="major-item">
+                                    <div class="major-name">${major.major_name}</div>
+                                    <div class="major-code">${major.major_code}</div>
+                                    <div class="major-meta">
+                                        <span>学制: ${major.duration}</span>
+                                        ${major.is_teacher_training ? '<span class="badge badge-teacher">师范</span>' : ''}
+                                        ${major.is_art ? '<span class="badge badge-art">艺术</span>' : ''}
+                                    </div>
+                                    ${major.remarks ? `<div class="remarks">${major.remarks}</div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            resultsDiv.innerHTML = html;
+        }
+
+        // 切换筛选
+        function toggleFilter(element, filterType) {
+            element.classList.toggle('active');
+            activeFilters[filterType] = element.classList.contains('active');
+            searchMajor();
+        }
+
+        // 清除筛选
+        function clearFilters() {
+            activeFilters = { teacher: false, art: false };
+            document.querySelectorAll('#by-major .filter-tag').forEach((tag, index) => {
+                if (index < 2) tag.classList.remove('active');
+            });
+            document.getElementById('majorInput').value = '';
+            document.getElementById('majorResults').innerHTML = '';
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('load', () => {
+            loadData();
+        });
+    </script>
+</body>
+</html>
