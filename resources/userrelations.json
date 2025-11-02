@@ -131,6 +131,126 @@
         "shadowColor": "rgba(0,0,0,0.5)",
         "shadowBlur": 10
       }
+    },
+    {
+      "id": "node_1762085225411",
+      "name": "木博士",
+      "x": 761.0332923038534,
+      "y": 423.4473930053774,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=393261036&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762085250796",
+      "name": "木老师",
+      "x": 839.4065321790886,
+      "y": 281.16264204140884,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=3276244376&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762085322984",
+      "name": "i猫猫",
+      "x": 806.7510155644065,
+      "y": 289.5597748851839,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=2846428563&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762085384484",
+      "name": "Bdbmzwsc",
+      "x": 786.2246908351783,
+      "y": 276.9640756195211,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=1726016497&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762085495847",
+      "name": "Bt老师",
+      "x": 800.5210215505081,
+      "y": 280.6706888040932,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=1921944926&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762085549211",
+      "name": "纯芳唯",
+      "x": 810.3176765349124,
+      "y": 268.5414969186401,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=3421351924&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762085577920",
+      "name": "粗细",
+      "x": 795.8559477484107,
+      "y": 261.5438862154941,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=2746254109&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762086597504",
+      "name": "周猫猫",
+      "x": 942.9329989711935,
+      "y": 529.9956275720166,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=690560442&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
     }
   ],
   "links": [
@@ -146,14 +266,6 @@
       "source": "meo",
       "target": "node_1762071303217_825",
       "relationName": "暗恋",
-      "lineStyle": {
-        "type": "solid"
-      }
-    },
-    {
-      "source": "node_1762071356844",
-      "target": "node_1762071256752",
-      "relationName": "无关",
       "lineStyle": {
         "type": "solid"
       }
@@ -180,6 +292,22 @@
       "relationName": "单相思",
       "lineStyle": {
         "type": "solid"
+      }
+    },
+    {
+      "source": "node_1762085384484",
+      "target": "node_1762071560639_831",
+      "relationName": "暗恋",
+      "lineStyle": {
+        "type": "dashed"
+      }
+    },
+    {
+      "source": "node_1762071413988_897",
+      "target": "node_1762085495847",
+      "relationName": "疑似调教（残猫猫单方面宣布）",
+      "lineStyle": {
+        "type": "dashed"
       }
     }
   ]

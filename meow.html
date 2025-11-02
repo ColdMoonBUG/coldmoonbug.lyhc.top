@@ -225,6 +225,13 @@
         <div class="menu-item" id="canvas-menu-add-node">新增角色</div>
     </div>
 
+    <div id="edge-menu" class="menu-wrapper">
+        <div class="menu-item" id="edge-menu-edit-remark">修改备注</div>
+        <div class="menu-item" id="edge-menu-delete-link">删除关系</div>
+        <div class="menu-item" id="edge-menu-add-node">新增角色</div>
+        </div>
+
+
     <div id="add-relation-box" class="modal-box">
         <div class="modal-title">添加关系</div>
         <div class="modal-content">
@@ -284,6 +291,20 @@
         </div>
     </div>
 
+    <div id="edit-remark-box" class="modal-box">
+        <div class="modal-title">修改备注</div>
+        <div class="modal-content">
+            <div class="input-row">
+                <span>新备注:</span>
+                <input type="text" id="edit-remark-input" placeholder="输入关系备注">
+            </div>
+        </div>
+        <div class="modal-buttons">
+            <button id="edit-remark-confirm" class="primary-btn">确定</button>
+            <button class="cancel-btn">取消</button>
+        </div>
+    </div>
+
     <div id="modal-mask"></div>
 
     <script>
@@ -292,6 +313,7 @@ $(document).ready(function () {
     var nodes = [];
     var links = [];
     var currentClickedNode = null;
+    var currentClickedEdge = null;
     var canvasClickPosition = null;
 
     var $modalMask = $('#modal-mask');
@@ -323,6 +345,22 @@ $(document).ready(function () {
                 if (params.dataType === 'node') return params.data.name || '';
             }
         },
+        
+        // (修复拖拽和空白处右键的功能已保留)
+        graphic: [
+            {
+                type: 'rect',
+                left: 0,
+                top: 0,
+                width: '100%',
+                height: '100%',
+                style: {
+                    fill: 'transparent'
+                }
+                // (移除了 z: -1, 这是正确的)
+            }
+        ],
+
         series: [{
             type: 'graph',
             layout: 'force',
@@ -363,7 +401,7 @@ $(document).ready(function () {
     }
 
     function loadData() {
-        fetch('./resources/userrelations.json')
+        fetch('./resources/userrelations.json') 
             .then(response => {
                 if (!response.ok) throw new Error('加载失败');
                 return response.json();
@@ -390,7 +428,6 @@ $(document).ready(function () {
         return nodes.find(function(n) { return (n.name || '').trim() === name.trim(); });
     }
    
-    // --- 这是被修改的函数 ---
     function findOrCreateNodeByName(name) {
         var node = findNodeByName(name);
         if (node) return node;
@@ -402,20 +439,14 @@ $(document).ready(function () {
                 newNode.x = canvasClickPosition[0];
                 newNode.y = canvasClickPosition[1];
                 newNode.fixed = false;
-                canvasClickPosition = null; // 用完后重置，避免影响下次创建
+                canvasClickPosition = null; 
             }
             nodes.push(newNode);
-
-            // --- 修复点 START ---
-            // 在创建新节点后，立即调用 askForQQ 函数
             askForQQ(newNode);
-            // --- 修复点 END ---
-
             return newNode;
         }
         return null;
     }
-    // --- 函数修改结束 ---
 
     function assignAvatarToNode(node, url) {
         if (!url || url.trim() === '') {
@@ -445,7 +476,6 @@ $(document).ready(function () {
         hideModals();
     }
 
-    // 创建新角色后询问QQ
     function askForQQ(node) {
         if (!node) return;
         var qq = prompt('请输入 ' + node.name + ' 的QQ号 (可留空):');
@@ -459,6 +489,7 @@ $(document).ready(function () {
     // ECharts 事件
     document.getElementById('relation-graph').oncontextmenu = function () { return false; };
 
+    // 右键菜单逻辑
     myChart.on('contextmenu', function (params) {
         if (params.event && params.event.event) {
             params.event.event.preventDefault();
@@ -468,16 +499,38 @@ $(document).ready(function () {
         hideModals();
 
         if (params.dataType === 'node') {
+            // 右键点击了 节点
             currentClickedNode = params.data;
+            currentClickedEdge = null; 
             showMenu($('#node-menu'), params.event.offsetX, params.event.offsetY);
-        } else {
-            // 点击的是画布
-            currentClickedNode = null;
+        
+        } else if (params.dataType === 'edge') {
+            // 右键点击了 线条
+            currentClickedNode = null; 
+            currentClickedEdge = params.data; 
+            
+            // 关键修复: 当点击线条时，也记录一下坐标，
+            // 这样"新增角色"时可以把节点放在点击处附近
             try {
-                // 记录点击画布的坐标，以便创建新节点时使用
+                canvasClickPosition = myChart.convertFromPixel({ seriesIndex: 0 }, [params.event.offsetX, params.event.offsetY]);
+            } catch(e) {
+                canvasClickPosition = null;
+            }
+            
+            showMenu($('#edge-menu'), params.event.offsetX, params.event.offsetY);
+
+        } else {
+            // 右键点击了 空白画布
+            currentClickedNode = null; 
+            currentClickedEdge = null; 
+            try {
                 canvasClickPosition = myChart.convertFromPixel({ seriesIndex: 0 }, [params.event.offsetX, params.event.offsetY]);
             } catch (e) {
-                canvasClickPosition = null;
+                 try {
+                    canvasClickPosition = myChart.convertFromPixel('grid', [params.event.offsetX, params.event.offsetY]);
+                } catch (e2) {
+                     canvasClickPosition = null; 
+                }
             }
             showMenu($('#canvas-menu'), params.event.offsetX, params.event.offsetY);
         }
@@ -491,7 +544,7 @@ $(document).ready(function () {
 
     $('.menu-wrapper').on('click', function (e) { e.stopPropagation(); });
 
-    // 菜单事件
+    // 节点菜单事件
     $('#node-menu-add-active').on('click', function () {
         $('#relation-from').val(currentClickedNode.name);
         $('#relation-to').val('');
@@ -527,27 +580,56 @@ $(document).ready(function () {
         }
     });
 
-    // 右键空白处创建角色 (此功能已按要求正常工作)
-    $('#canvas-menu-add-node').on('click', function () {
+    
+    // --- 关键修复: 将新增角色的逻辑提取为公共函数 ---
+    function handleAddNode() {
         var name = prompt('请输入新角色名称:');
         if (!name) return;
         if (findNodeByName(name)) { alert('该名称已存在！'); return; }
 
         var id = 'node_' + Date.now();
         var newNode = { id: id, name: name };
-        if (canvasClickPosition) {
+        
+        // (此逻辑现在对空白处点击和线条点击都有效)
+        if (canvasClickPosition) { 
             newNode.x = canvasClickPosition[0];
             newNode.y = canvasClickPosition[1];
             newNode.fixed = false;
-            canvasClickPosition = null; // 用完后重置
+            canvasClickPosition = null; 
         }
         nodes.push(newNode);
         refreshChart();
-       
-        // 创建后询问QQ
         askForQQ(newNode);
+    }
+    
+    // 画布菜单(空白处)的"新增角色"
+    $('#canvas-menu-add-node').on('click', handleAddNode);
+    
+    // 线条菜单的"新增角色" (你原来的方式)
+    $('#edge-menu-add-node').on('click', handleAddNode);
+    // --- 修复结束 ---
+    
+
+    // 线条菜单事件 (修改/删除)
+    $('#edge-menu-edit-remark').on('click', function () {
+        if (!currentClickedEdge) return;
+        $('#edit-remark-input').val(currentClickedEdge.relationName || '');
+        showModal($('#edit-remark-box'));
     });
 
+    $('#edge-menu-delete-link').on('click', function () {
+        if (!currentClickedEdge) return;
+        if (confirm('确定要删除这条关系吗？')) {
+            links = links.filter(function(l) {
+                return !(l.source === currentClickedEdge.source && l.target === currentClickedEdge.target);
+            });
+            refreshChart();
+            currentClickedEdge = null; 
+        }
+    });
+
+
+    // 弹窗确认按钮
     $('#add-relation-confirm').on('click', function () {
         var fromName = $('#relation-from').val();
         var toName = $('#relation-to').val();
@@ -556,7 +638,6 @@ $(document).ready(function () {
 
         if (!fromName || !toName) { alert('必须填写来源和去向！'); return; }
 
-        // findOrCreateNodeByName 现在会自动询问QQ号（如果节点是新创建的）
         var fromNode = findOrCreateNodeByName(fromName);
         if (!fromNode) return;
         var toNode = findOrCreateNodeByName(toName);
@@ -610,6 +691,26 @@ $(document).ready(function () {
         }
     });
 
+    // (修改备注的 BUG 修复已保留)
+    $('#edit-remark-confirm').on('click', function () {
+        if (!currentClickedEdge) return;
+        
+        var newRemark = $('#edit-remark-input').val() || ' ';
+
+        var linkToUpdate = links.find(function(l) {
+            return l.source === currentClickedEdge.source && l.target === currentClickedEdge.target;
+        });
+
+        if (linkToUpdate) {
+            linkToUpdate.relationName = newRemark;
+        }
+        
+        refreshChart(); 
+        hideModals();
+        currentClickedEdge = null; 
+    });
+
+
     // 导出 JSON
     $('#export-btn').on('click', function () {
         var data = { nodes: nodes, links: links };
@@ -626,7 +727,6 @@ $(document).ready(function () {
         myChart.resize();
     });
 
-    // 加载数据
     loadData();
 });
     </script>
