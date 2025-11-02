@@ -399,7 +399,13 @@ $(document).ready(function () {
     }
 
     function loadData() {
-        fetch('./resources/userrelations.json') 
+        
+        // --- 关键修复: 在 JSON 文件的 URL 末尾添加时间戳 ---
+        // 这会穿透 GitHub Pages (10分钟) 和浏览器的缓存
+        var jsonUrl = './resources/userrelations.json?t=' + Date.now();
+        // --- 修复结束 ---
+
+        fetch(jsonUrl) // 使用带时间戳的 URL
             .then(response => {
                 if (!response.ok) throw new Error('加载失败');
                 return response.json();
@@ -408,24 +414,16 @@ $(document).ready(function () {
                 nodes = data.nodes || [];
                 links = data.links || [];
                 
-                // --- 修复 #1: 遍历所有加载的节点, 为QQ头像URL添加时间戳 ---
-                var timestamp = Date.now(); // 获取当前时间戳
+                // (为QQ头像添加时间戳的修复已保留)
+                var timestamp = Date.now(); 
                 nodes.forEach(function(node) {
-                    // 检查这是否是一个QQ头像的 image symbol
                     if (node.symbol && node.symbol.startsWith('image://https://q1.qlogo.cn')) {
-                        
                         var prefix = 'image://';
                         var url = node.symbol.substring(prefix.length);
-                        
-                        // 1. 移除URL中可能存在的旧 &t=... 参数
                         var baseUrl = url.split('&t=')[0];
-                        
-                        // 2. 添加新的时间戳参数
-                        // (QQ URL 已经有 ? 和 & 了, 所以我们直接用 &t=)
                         node.symbol = prefix + baseUrl + '&t=' + timestamp;
                     }
                 });
-                // --- 修复 #1 结束 ---
 
                 refreshChart();
             })
@@ -460,7 +458,7 @@ $(document).ready(function () {
                 canvasClickPosition = null; 
             }
             nodes.push(newNode);
-            askForQQ(newNode); // askForQQ 内部已包含修复
+            askForQQ(newNode); 
             return newNode;
         }
         return null;
@@ -475,7 +473,6 @@ $(document).ready(function () {
         }
 
         node.symbolSize = 35;
-        // URL 在传入这里之前就应该被添加了时间戳
         node.symbol = 'image://' + url; 
         node.itemStyle = {
             borderColor: '#fff',
@@ -490,18 +487,16 @@ $(document).ready(function () {
         var node = findNodeById(currentClickedNode.id);
         if (!node) return;
 
-        // URL 在传入这里之前就应该被添加了时间戳
         assignAvatarToNode(node, url);
         refreshChart();
         hideModals();
     }
 
-    // 创建新角色后询问QQ
+    // (为QQ头像添加时间戳的修复已保留)
     function askForQQ(node) {
         if (!node) return;
         var qq = prompt('请输入 ' + node.name + ' 的QQ号 (可留空):');
         if (qq && /^[1-9][0-9]{4,10}$/.test(qq)) {
-            // --- 修复 #2: 在这里添加时间戳 ---
             var url = 'https://q1.qlogo.cn/g?b=qq&nk=' + qq + '&s=640&t=' + Date.now();
             assignAvatarToNode(node, url);
             refreshChart();
@@ -674,14 +669,13 @@ $(document).ready(function () {
             alert('请输入图片URL！');
             return;
         }
-        // 注意: 非 QQ URL, 我们不自动添加时间戳
         updateAvatar(url); 
     });
 
+    // (为QQ头像添加时间戳的修复已保留)
     $('#edit-avatar-confirm-qq').on('click', function () {
         var qq = $('#avatar-qq').val().trim();
         if (qq && /^[1-9][0-9]{4,10}$/.test(qq)) {
-            // --- 修复 #3: 在这里添加时间戳 ---
             var url = 'https://q1.qlogo.cn/g?b=qq&nk=' + qq + '&s=640&t=' + Date.now();
             updateAvatar(url);
         } else {
@@ -724,10 +718,20 @@ $(document).ready(function () {
 
     // 导出 JSON
     $('#export-btn').on('click', function () {
-        // 导出时, 我们也应该清理掉时间戳, 保持 JSON 干净
-        // 但为了简单起见, 暂时保留带时间戳的 URL。
-        // 如果需要清理, 可以在这里加一个循环。
-        var data = { nodes: nodes, links: links };
+        // 导出时, 我们应该清理掉时间戳, 保持 JSON 干净
+        // 创建一个深拷贝来进行清理，防止影响当前页面
+        var nodesToExport = JSON.parse(JSON.stringify(nodes));
+        
+        nodesToExport.forEach(function(node) {
+            if (node.symbol && node.symbol.includes('&t=')) {
+                var prefix = 'image://';
+                var url = node.symbol.substring(prefix.length);
+                var baseUrl = url.split('&t=')[0];
+                node.symbol = prefix + baseUrl;
+            }
+        });
+
+        var data = { nodes: nodesToExport, links: links };
         var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         var url = URL.createObjectURL(blob);
         var a = document.createElement('a');
