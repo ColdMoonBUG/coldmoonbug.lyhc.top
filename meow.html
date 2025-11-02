@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>淫乱的meo窝 - 关系图谱</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #100c2a;
+            color: #fff;
+            font-family: 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+
+        #relation-graph {
+            width: 100%;
+            height: 100%;
+        }
+
+        .menu-wrapper {
+            position: fixed;
+            display: none;
+            background: #25233d;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            min-width: 150px;
+        }
+
+        .menu-wrapper .menu-item {
+            padding: 12px 16px;
+            color: #eee;
+            cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+            border-bottom: 1px solid #3a375a;
+            transition: background 0.2s;
+        }
+
+        .menu-wrapper .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .menu-wrapper .menu-item:active,
+        .menu-wrapper .menu-item:hover {
+            background: #3a375a;
+        }
+
+        #modal-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 199;
+            display: none;
+        }
+
+        .modal-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 450px;
+            background: #25233d;
+            border-radius: 6px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+            z-index: 200;
+            display: none;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            padding: 15px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            border-bottom: 1px solid #3a375a;
+        }
+
+        .modal-content {
+            padding: 20px;
+        }
+
+        .modal-content .input-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .modal-content .input-row span {
+            width: 100px;
+            font-size: 14px;
+            color: #ccc;
+            flex-shrink: 0;
+        }
+
+        .modal-content .input-row input[type="text"] {
+            flex: 1;
+            background: #100c2a;
+            border: 1px solid #3a375a;
+            border-radius: 4px;
+            padding: 8px 10px;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .modal-content .input-row input[type="text"]:focus {
+            outline: none;
+            border-color: #5f5a9c;
+        }
+
+        .modal-content .radio-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .modal-content .radio-row label {
+            display: flex;
+            align-items: center;
+            color: #ccc;
+            cursor: pointer;
+            gap: 5px;
+            font-size: 14px;
+        }
+
+        .modal-buttons {
+            padding: 15px 20px;
+            text-align: right;
+            background: #1e1c32;
+            border-top: 1px solid #3a375a;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-buttons button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .modal-buttons button.primary-btn {
+            background: #5f5a9c;
+            color: #fff;
+        }
+
+        .modal-buttons button.primary-btn:hover {
+            background: #7a75b8;
+        }
+
+        .modal-buttons button.cancel-btn {
+            background: #4a4a4a;
+            color: #ccc;
+        }
+
+        .modal-buttons button.cancel-btn:hover {
+            background: #5a5a5a;
+        }
+
+        .toolbar {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 50;
+            display: flex;
+            gap: 8px;
+        }
+
+        .toolbar button {
+            padding: 8px 12px;
+            background: #5f5a9c;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .toolbar button:hover {
+            background: #7a75b8;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="relation-graph"></div>
+
+    <div class="toolbar">
+        <button id="export-btn">导出 JSON</button>
+    </div>
+
+    <div id="node-menu" class="menu-wrapper">
+        <div class="menu-item" id="node-menu-add-active">增加一条主动线</div>
+        <div class="menu-item" id="node-menu-add-passive">增加一条被动线</div>
+        <div class="menu-item" id="node-menu-edit-name">修改名称</div>
+        <div class="menu-item" id="node-menu-edit-avatar">修改头像</div>
+        <div class="menu-item" id="node-menu-delete">删除此人</div>
+    </div>
+
+    <div id="canvas-menu" class="menu-wrapper">
+        <div class="menu-item" id="canvas-menu-add-node">新增角色</div>
+    </div>
+
+    <div id="add-relation-box" class="modal-box">
+        <div class="modal-title">添加关系</div>
+        <div class="modal-content">
+            <div class="input-row">
+                <span>来源:</span>
+                <input type="text" id="relation-from" placeholder="主动方">
+            </div>
+            <div class="input-row">
+                <span>去向:</span>
+                <input type="text" id="relation-to" placeholder="被动方">
+            </div>
+            <div class="input-row">
+                <span>备注:</span>
+                <input type="text" id="relation-name" placeholder="例如: 暗恋">
+            </div>
+            <div class="modal-content radio-row">
+                <label><input type="radio" name="line-style" value="solid" checked> 确定</label>
+                <label><input type="radio" name="line-style" value="dashed"> 猜测</label>
+            </div>
+        </div>
+        <div class="modal-buttons">
+            <button id="add-relation-confirm" class="primary-btn">确定</button>
+            <button class="cancel-btn">取消</button>
+        </div>
+    </div>
+
+    <div id="edit-avatar-box" class="modal-box">
+        <div class="modal-title">修改头像</div>
+        <div class="modal-content">
+            <div class="input-row">
+                <span>QQ号:</span>
+                <input type="text" id="avatar-qq" placeholder="输入QQ号">
+            </div>
+            <div class="input-row">
+                <span>图片URL:</span>
+                <input type="text" id="avatar-url" placeholder="粘贴图片URL">
+            </div>
+        </div>
+        <div class="modal-buttons">
+            <button id="edit-avatar-confirm-qq" class="primary-btn">QQ设置</button>
+            <button id="edit-avatar-confirm-url" class="primary-btn">URL设置</button>
+            <button class="cancel-btn">取消</button>
+        </div>
+    </div>
+
+    <div id="edit-name-box" class="modal-box">
+        <div class="modal-title">修改名称</div>
+        <div class="modal-content">
+            <div class="input-row">
+                <span>新名称:</span>
+                <input type="text" id="edit-name-input" placeholder="输入新名称">
+            </div>
+        </div>
+        <div class="modal-buttons">
+            <button id="edit-name-confirm" class="primary-btn">确定</button>
+            <button class="cancel-btn">取消</button>
+        </div>
+    </div>
+
+    <div id="modal-mask"></div>
+
+    <script>
+$(document).ready(function () {
+    var myChart = echarts.init(document.getElementById('relation-graph'));
+    var nodes = [];
+    var links = [];
+    var currentClickedNode = null;
+    var canvasClickPosition = null;
+
+    var $modalMask = $('#modal-mask');
+    var $allModals = $('.modal-box');
+
+    function showModal($modal) { $modalMask.show(); $modal.show(); }
+    function hideModals() { $modalMask.hide(); $allModals.hide(); }
+    $modalMask.on('click', hideModals);
+    $('.cancel-btn').on('click', hideModals);
+
+    $(document).on('click', function() {
+        $('.menu-wrapper').hide();
+    });
+
+    function showMenu($menu, x, y) {
+        var ww = $(window).width(), wh = $(window).height();
+        $menu.css({ display: 'block', visibility: 'hidden' });
+        var mw = $menu.outerWidth(), mh = $menu.outerHeight();
+        $menu.css({ display: 'none', visibility: 'visible' });
+        var left = Math.min(x + 10, ww - mw - 6);
+        var top = Math.min(y + 10, wh - mh - 6);
+        $menu.css({ left: left, top: top }).show();
+    }
+
+    var option = {
+        tooltip: {
+            formatter: function (params) {
+                if (params.dataType === 'edge') return params.data.relationName || '';
+                if (params.dataType === 'node') return params.data.name || '';
+            }
+        },
+        series: [{
+            type: 'graph',
+            layout: 'force',
+            roam: true,
+            draggable: true,
+            force: { repulsion: 150, edgeLength: 100, gravity: 0.1 },
+            data: [],
+            links: [],
+            symbol: 'circle',
+            symbolSize: 30,
+            itemStyle: {
+                borderColor: '#fff',
+                borderWidth: 2,
+                shadowColor: 'rgba(0, 0, 0, 0.5)',
+                shadowBlur: 10
+            },
+            lineStyle: { color: '#7a7dff', width: 3, curveness: 0.1 },
+            edgeSymbol: ['none', 'arrow'],
+            edgeSymbolSize: [6, 14],
+            label: { show: true, position: 'bottom', color: '#fff' },
+            edgeLabel: {
+                show: true,
+                formatter: function (p) { return p.data.relationName || ''; },
+                color: '#fff', fontSize: 10
+            },
+            emphasis: {
+                focus: 'adjacency',
+                lineStyle: { width: 4, color: '#ffff99' },
+                itemStyle: { borderColor: '#ffff99', borderWidth: 3 }
+            }
+        }]
+    };
+
+    function refreshChart() {
+        option.series[0].data = nodes;
+        option.series[0].links = links;
+        myChart.setOption(option, { notMerge: false });
+    }
+
+    function loadData() {
+        fetch('./resources/userrelations.json')
+            .then(response => {
+                if (!response.ok) throw new Error('加载失败');
+                return response.json();
+            })
+            .then(data => {
+                nodes = data.nodes || [];
+                links = data.links || [];
+                refreshChart();
+            })
+            .catch(error => {
+                console.error('加载数据失败:', error);
+                nodes = [{ id: 'meo', name: 'Meo', symbol: 'circle', symbolSize: 40 }];
+                links = [];
+                refreshChart();
+            });
+    }
+
+    function findNodeById(id) {
+        return nodes.find(function(n) { return n.id === id; });
+    }
+   
+    function findNodeByName(name) {
+        if (!name) return null;
+        return nodes.find(function(n) { return (n.name || '').trim() === name.trim(); });
+    }
+   
+    // --- 这是被修改的函数 ---
+    function findOrCreateNodeByName(name) {
+        var node = findNodeByName(name);
+        if (node) return node;
+       
+        if (confirm('角色 "' + name + '" 不存在，是否创建？')) {
+            var id = 'node_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+            var newNode = { id: id, name: name };
+            if (canvasClickPosition) {
+                newNode.x = canvasClickPosition[0];
+                newNode.y = canvasClickPosition[1];
+                newNode.fixed = false;
+                canvasClickPosition = null; // 用完后重置，避免影响下次创建
+            }
+            nodes.push(newNode);
+
+            // --- 修复点 START ---
+            // 在创建新节点后，立即调用 askForQQ 函数
+            askForQQ(newNode);
+            // --- 修复点 END ---
+
+            return newNode;
+        }
+        return null;
+    }
+    // --- 函数修改结束 ---
+
+    function assignAvatarToNode(node, url) {
+        if (!url || url.trim() === '') {
+            node.symbol = 'circle';
+            node.symbolSize = 30;
+            delete node.itemStyle;
+            return;
+        }
+
+        node.symbolSize = 35;
+        node.symbol = 'image://' + url;
+        node.itemStyle = {
+            borderColor: '#fff',
+            borderWidth: 2,
+            shadowColor: 'rgba(0,0,0,0.5)',
+            shadowBlur: 10
+        };
+    }
+
+    function updateAvatar(url) {
+        if (!currentClickedNode) return;
+        var node = findNodeById(currentClickedNode.id);
+        if (!node) return;
+
+        assignAvatarToNode(node, url);
+        refreshChart();
+        hideModals();
+    }
+
+    // 创建新角色后询问QQ
+    function askForQQ(node) {
+        if (!node) return;
+        var qq = prompt('请输入 ' + node.name + ' 的QQ号 (可留空):');
+        if (qq && /^[1-9][0-9]{4,10}$/.test(qq)) {
+            var url = 'https://q1.qlogo.cn/g?b=qq&nk=' + qq + '&s=640';
+            assignAvatarToNode(node, url);
+            refreshChart();
+        }
+    }
+
+    // ECharts 事件
+    document.getElementById('relation-graph').oncontextmenu = function () { return false; };
+
+    myChart.on('contextmenu', function (params) {
+        if (params.event && params.event.event) {
+            params.event.event.preventDefault();
+        }
+
+        $('.menu-wrapper').hide();
+        hideModals();
+
+        if (params.dataType === 'node') {
+            currentClickedNode = params.data;
+            showMenu($('#node-menu'), params.event.offsetX, params.event.offsetY);
+        } else {
+            // 点击的是画布
+            currentClickedNode = null;
+            try {
+                // 记录点击画布的坐标，以便创建新节点时使用
+                canvasClickPosition = myChart.convertFromPixel({ seriesIndex: 0 }, [params.event.offsetX, params.event.offsetY]);
+            } catch (e) {
+                canvasClickPosition = null;
+            }
+            showMenu($('#canvas-menu'), params.event.offsetX, params.event.offsetY);
+        }
+    });
+
+    myChart.on('click', function (params) {
+        if (params.dataType !== 'node' && params.dataType !== 'edge') {
+            hideModals();
+        }
+    });
+
+    $('.menu-wrapper').on('click', function (e) { e.stopPropagation(); });
+
+    // 菜单事件
+    $('#node-menu-add-active').on('click', function () {
+        $('#relation-from').val(currentClickedNode.name);
+        $('#relation-to').val('');
+        $('#relation-name').val('');
+        showModal($('#add-relation-box'));
+    });
+
+    $('#node-menu-add-passive').on('click', function () {
+        $('#relation-from').val('');
+        $('#relation-to').val(currentClickedNode.name);
+        $('#relation-name').val('');
+        showModal($('#add-relation-box'));
+    });
+
+    $('#node-menu-edit-name').on('click', function () {
+        $('#edit-name-input').val(currentClickedNode.name);
+        showModal($('#edit-name-box'));
+    });
+
+    $('#node-menu-edit-avatar').on('click', function () {
+        $('#avatar-url').val('');
+        $('#avatar-qq').val('');
+        showModal($('#edit-avatar-box'));
+    });
+
+    $('#node-menu-delete').on('click', function () {
+        if (confirm('确定要删除 ' + currentClickedNode.name + ' 吗？')) {
+            nodes = nodes.filter(function(n) { return n.id !== currentClickedNode.id; });
+            links = links.filter(function(l) {
+                return l.source !== currentClickedNode.id && l.target !== currentClickedNode.id;
+            });
+            refreshChart();
+        }
+    });
+
+    // 右键空白处创建角色 (此功能已按要求正常工作)
+    $('#canvas-menu-add-node').on('click', function () {
+        var name = prompt('请输入新角色名称:');
+        if (!name) return;
+        if (findNodeByName(name)) { alert('该名称已存在！'); return; }
+
+        var id = 'node_' + Date.now();
+        var newNode = { id: id, name: name };
+        if (canvasClickPosition) {
+            newNode.x = canvasClickPosition[0];
+            newNode.y = canvasClickPosition[1];
+            newNode.fixed = false;
+            canvasClickPosition = null; // 用完后重置
+        }
+        nodes.push(newNode);
+        refreshChart();
+       
+        // 创建后询问QQ
+        askForQQ(newNode);
+    });
+
+    $('#add-relation-confirm').on('click', function () {
+        var fromName = $('#relation-from').val();
+        var toName = $('#relation-to').val();
+        var relationName = $('#relation-name').val() || ' ';
+        var lineStyle = $('input[name="line-style"]:checked').val();
+
+        if (!fromName || !toName) { alert('必须填写来源和去向！'); return; }
+
+        // findOrCreateNodeByName 现在会自动询问QQ号（如果节点是新创建的）
+        var fromNode = findOrCreateNodeByName(fromName);
+        if (!fromNode) return;
+        var toNode = findOrCreateNodeByName(toName);
+        if (!toNode) return;
+
+        var existsLink = links.find(function(l) {
+            return l.source === fromNode.id && l.target === toNode.id;
+        });
+        if (existsLink) { alert('该关系已存在！'); return; }
+
+        links.push({
+            source: fromNode.id,
+            target: toNode.id,
+            relationName: relationName,
+            lineStyle: { type: lineStyle }
+        });
+        refreshChart();
+        hideModals();
+    });
+
+    $('#edit-avatar-confirm-url').on('click', function () {
+        var url = $('#avatar-url').val().trim();
+        if (!url) {
+            alert('请输入图片URL！');
+            return;
+        }
+        updateAvatar(url);
+    });
+
+    $('#edit-avatar-confirm-qq').on('click', function () {
+        var qq = $('#avatar-qq').val().trim();
+        if (qq && /^[1-9][0-9]{4,10}$/.test(qq)) {
+            var url = 'https://q1.qlogo.cn/g?b=qq&nk=' + qq + '&s=640';
+            updateAvatar(url);
+        } else {
+            alert('请输入有效的QQ号！');
+        }
+    });
+
+    $('#edit-name-confirm').on('click', function () {
+        var newName = $('#edit-name-input').val();
+        if (newName && currentClickedNode) {
+            if (findNodeByName(newName) && newName !== currentClickedNode.name) {
+                alert('该名称已存在！');
+                return;
+            }
+            var node = findNodeById(currentClickedNode.id);
+            node.name = newName;
+            refreshChart();
+            hideModals();
+        }
+    });
+
+    // 导出 JSON
+    $('#export-btn').on('click', function () {
+        var data = { nodes: nodes, links: links };
+        var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'userrelations.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+
+    $(window).on('resize', function() {
+        myChart.resize();
+    });
+
+    // 加载数据
+    loadData();
+});
+    </script>
+</body>
+
+</html>
