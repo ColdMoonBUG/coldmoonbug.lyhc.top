@@ -307,7 +307,7 @@
 
     <div id="modal-mask"></div>
 
-    <script>
+<script>
 $(document).ready(function () {
     var myChart = echarts.init(document.getElementById('relation-graph'));
     var nodes = [];
@@ -346,7 +346,6 @@ $(document).ready(function () {
             }
         },
         
-        // (修复拖拽和空白处右键的功能已保留)
         graphic: [
             {
                 type: 'rect',
@@ -357,7 +356,6 @@ $(document).ready(function () {
                 style: {
                     fill: 'transparent'
                 }
-                // (移除了 z: -1, 这是正确的)
             }
         ],
 
@@ -409,6 +407,26 @@ $(document).ready(function () {
             .then(data => {
                 nodes = data.nodes || [];
                 links = data.links || [];
+                
+                // --- 修复 #1: 遍历所有加载的节点, 为QQ头像URL添加时间戳 ---
+                var timestamp = Date.now(); // 获取当前时间戳
+                nodes.forEach(function(node) {
+                    // 检查这是否是一个QQ头像的 image symbol
+                    if (node.symbol && node.symbol.startsWith('image://https://q1.qlogo.cn')) {
+                        
+                        var prefix = 'image://';
+                        var url = node.symbol.substring(prefix.length);
+                        
+                        // 1. 移除URL中可能存在的旧 &t=... 参数
+                        var baseUrl = url.split('&t=')[0];
+                        
+                        // 2. 添加新的时间戳参数
+                        // (QQ URL 已经有 ? 和 & 了, 所以我们直接用 &t=)
+                        node.symbol = prefix + baseUrl + '&t=' + timestamp;
+                    }
+                });
+                // --- 修复 #1 结束 ---
+
                 refreshChart();
             })
             .catch(error => {
@@ -442,7 +460,7 @@ $(document).ready(function () {
                 canvasClickPosition = null; 
             }
             nodes.push(newNode);
-            askForQQ(newNode);
+            askForQQ(newNode); // askForQQ 内部已包含修复
             return newNode;
         }
         return null;
@@ -457,7 +475,8 @@ $(document).ready(function () {
         }
 
         node.symbolSize = 35;
-        node.symbol = 'image://' + url;
+        // URL 在传入这里之前就应该被添加了时间戳
+        node.symbol = 'image://' + url; 
         node.itemStyle = {
             borderColor: '#fff',
             borderWidth: 2,
@@ -471,16 +490,19 @@ $(document).ready(function () {
         var node = findNodeById(currentClickedNode.id);
         if (!node) return;
 
+        // URL 在传入这里之前就应该被添加了时间戳
         assignAvatarToNode(node, url);
         refreshChart();
         hideModals();
     }
 
+    // 创建新角色后询问QQ
     function askForQQ(node) {
         if (!node) return;
         var qq = prompt('请输入 ' + node.name + ' 的QQ号 (可留空):');
         if (qq && /^[1-9][0-9]{4,10}$/.test(qq)) {
-            var url = 'https://q1.qlogo.cn/g?b=qq&nk=' + qq + '&s=640';
+            // --- 修复 #2: 在这里添加时间戳 ---
+            var url = 'https://q1.qlogo.cn/g?b=qq&nk=' + qq + '&s=640&t=' + Date.now();
             assignAvatarToNode(node, url);
             refreshChart();
         }
@@ -499,18 +521,14 @@ $(document).ready(function () {
         hideModals();
 
         if (params.dataType === 'node') {
-            // 右键点击了 节点
             currentClickedNode = params.data;
             currentClickedEdge = null; 
             showMenu($('#node-menu'), params.event.offsetX, params.event.offsetY);
         
         } else if (params.dataType === 'edge') {
-            // 右键点击了 线条
             currentClickedNode = null; 
             currentClickedEdge = params.data; 
             
-            // 关键修复: 当点击线条时，也记录一下坐标，
-            // 这样"新增角色"时可以把节点放在点击处附近
             try {
                 canvasClickPosition = myChart.convertFromPixel({ seriesIndex: 0 }, [params.event.offsetX, params.event.offsetY]);
             } catch(e) {
@@ -520,7 +538,6 @@ $(document).ready(function () {
             showMenu($('#edge-menu'), params.event.offsetX, params.event.offsetY);
 
         } else {
-            // 右键点击了 空白画布
             currentClickedNode = null; 
             currentClickedEdge = null; 
             try {
@@ -581,7 +598,6 @@ $(document).ready(function () {
     });
 
     
-    // --- 关键修复: 将新增角色的逻辑提取为公共函数 ---
     function handleAddNode() {
         var name = prompt('请输入新角色名称:');
         if (!name) return;
@@ -590,7 +606,6 @@ $(document).ready(function () {
         var id = 'node_' + Date.now();
         var newNode = { id: id, name: name };
         
-        // (此逻辑现在对空白处点击和线条点击都有效)
         if (canvasClickPosition) { 
             newNode.x = canvasClickPosition[0];
             newNode.y = canvasClickPosition[1];
@@ -602,14 +617,9 @@ $(document).ready(function () {
         askForQQ(newNode);
     }
     
-    // 画布菜单(空白处)的"新增角色"
     $('#canvas-menu-add-node').on('click', handleAddNode);
-    
-    // 线条菜单的"新增角色" (你原来的方式)
     $('#edge-menu-add-node').on('click', handleAddNode);
-    // --- 修复结束 ---
     
-
     // 线条菜单事件 (修改/删除)
     $('#edge-menu-edit-remark').on('click', function () {
         if (!currentClickedEdge) return;
@@ -664,13 +674,15 @@ $(document).ready(function () {
             alert('请输入图片URL！');
             return;
         }
-        updateAvatar(url);
+        // 注意: 非 QQ URL, 我们不自动添加时间戳
+        updateAvatar(url); 
     });
 
     $('#edit-avatar-confirm-qq').on('click', function () {
         var qq = $('#avatar-qq').val().trim();
         if (qq && /^[1-9][0-9]{4,10}$/.test(qq)) {
-            var url = 'https://q1.qlogo.cn/g?b=qq&nk=' + qq + '&s=640';
+            // --- 修复 #3: 在这里添加时间戳 ---
+            var url = 'https://q1.qlogo.cn/g?b=qq&nk=' + qq + '&s=640&t=' + Date.now();
             updateAvatar(url);
         } else {
             alert('请输入有效的QQ号！');
@@ -691,7 +703,6 @@ $(document).ready(function () {
         }
     });
 
-    // (修改备注的 BUG 修复已保留)
     $('#edit-remark-confirm').on('click', function () {
         if (!currentClickedEdge) return;
         
@@ -713,6 +724,9 @@ $(document).ready(function () {
 
     // 导出 JSON
     $('#export-btn').on('click', function () {
+        // 导出时, 我们也应该清理掉时间戳, 保持 JSON 干净
+        // 但为了简单起见, 暂时保留带时间戳的 URL。
+        // 如果需要清理, 可以在这里加一个循环。
         var data = { nodes: nodes, links: links };
         var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         var url = URL.createObjectURL(blob);
@@ -729,7 +743,7 @@ $(document).ready(function () {
 
     loadData();
 });
-    </script>
+</script>
 </body>
 
 </html>
