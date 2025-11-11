@@ -1,33 +1,115 @@
 <!-- 代码均由ChatGPT生成，如有侵权请联系作者删除
 作者：张敬玉
+时间: 2024年10月8日
 -->
 <!DOCTYPE html>
-<html lang="zh">
-
-<head>
+<html lang="zh"> <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="title">每日新闻</title>
+
+    <script>
+        (function() {
+            let theme = 'light';
+            try {
+                const savedTheme = localStorage.getItem('moyu-theme'); // 沿用 'moyu-theme' 的设置
+                if (savedTheme) {
+                    theme = savedTheme;
+                } else {
+                    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                        theme = 'dark';
+                    }
+                }
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark-mode');
+                } else {
+                    document.documentElement.classList.remove('dark-mode');
+                }
+                document.documentElement.lang = 'zh-CN';
+            } catch (e) {
+                console.warn('无法访问 localStorage 或应用初始主题:', e);
+                document.documentElement.lang = 'zh-CN';
+            }
+        })();
+    </script>
+
     <link href="css/local-fonts.css" rel="stylesheet">
     <script src="/js/favicon-loader.js"></script>
     <style>
-        /* news.html 原有样式 (部分保持不变) */
+        /* 关键改动 2：
+          添加 CSS 变量 (亮色 vs 暗色)
+        */
+        :root {
+            --body-bg: #f0f4f7;
+            --text-color: #333;
+            --card-bg: white;
+            --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            --card-shadow-hover: 0 6px 12px rgba(0, 0, 0, 0.15);
+            --divider: rgba(0,0,0,0.1);
+            --accent-green: #00796b;
+            --accent-green-light: #4db6ac;
+        }
+
+        html.dark-mode {
+            --body-bg: #1a1d2e;
+            --text-color: #eef2f5;
+            --card-bg: #2c303a; /* 暗色卡片 */
+            --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            --card-shadow-hover: 0 6px 12px rgba(0, 0, 0, 0.4);
+            --divider: rgba(255,255,255,0.1);
+            --accent-green: #4db6ac; /* 提高亮度 */
+            --accent-green-light: #80cbc4;
+        }
+
+        /* 关键改动 3：
+          添加主题切换按钮的样式
+        */
+        .theme-toggle {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 100;
+            background: var(--card-bg);
+            border: 1px solid var(--divider);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.2s ease, background 0.2s ease, border 0.2s ease;
+        }
+        .theme-toggle:hover { transform: scale(1.1); }
+        .theme-toggle:active { transform: scale(0.95); }
+        .theme-toggle .icon-sun { display: none; }
+        .theme-toggle .icon-moon { display: block; }
+        html.dark-mode .theme-toggle .icon-sun { display: block; }
+        html.dark-mode .theme-toggle .icon-moon { display: none; }
+
+
+        /* 关键改动 4：
+          将原有样式中的“写死颜色”替换为“CSS变量”
+        */
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f4f7;
-            color: #333;
+            background-color: var(--body-bg); /* <- 替换 */
+            color: var(--text-color); /* <- 替换 */
             padding: 20px;
-            transition: background-color 0.5s ease;
+            transition: background-color 0.5s ease, color 0.5s ease; /* 增加 color 过渡 */
             overflow-x: hidden;
         }
 
         h1#date-title {
             text-align: center;
-            color: #00796b;
+            color: var(--accent-green); /* <- 替换 */
             margin-bottom: 20px;
             font-size: 24px;
             animation: pulse 2s infinite alternate;
-            background: linear-gradient(90deg, #00796b, #4db6ac);
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-green-light)); /* <- 替换 */
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -35,323 +117,234 @@
         @keyframes pulse {
             0% {
                 transform: scale(1);
-                text-shadow: 0 0 5px #00796b;
+                text-shadow: 0 0 5px var(--accent-green); /* <- 替换 */
             }
-
             100% {
                 transform: scale(1.05);
-                text-shadow: 0 0 15px #4db6ac;
+                text-shadow: 0 0 15px var(--accent-green-light); /* <- 替换 */
             }
         }
 
         .container {
             max-width: 800px;
-            /* 新闻列表和卡片都将受此约束 */
             margin: 0 auto;
         }
 
-        /* --- 运势卡片容器的样式 (调整) --- */
         #dailyCardCoverContainer {
             width: 100%;
-            /* 宽度充满 .container */
-            /* max-width: 400px; /* 移除此行，让它和新闻条目同宽 */
             margin: 0 auto 25px auto;
-            /* 调整下方间距 */
         }
 
-        /* --- “今日运势卡片”的CSS (调整尺寸和内部元素) --- */
         .daily-card {
+            /* (布局样式保持不变) */
             width: 100%;
-            /* 卡片宽度充满其父容器 #dailyCardCoverContainer */
-            /* height: auto; /* 高度自适应内容 */
             min-height: 160px;
-            /* 减小最小高度 */
             padding: 15px 20px;
-            /* 减小内边距以压缩高度 */
             border-radius: 12px;
-            /* 可以减小圆角使其更扁平 */
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 0 3px 10px rgba(0, 0, 0, 0.15);
-            /* 调整阴影 */
             display: flex;
             flex-direction: column;
             justify-content: center;
-            /* 内容垂直居中，如果希望更紧凑可以换回 space-between */
             align-items: center;
             text-align: center;
-            color: white;
+            color: white; /* 大部分卡片背景都是暗色，保留 white */
             transition: background 0.7s cubic-bezier(0.25, 0.1, 0.25, 1);
             box-sizing: border-box;
             position: relative;
             overflow: hidden;
         }
-
+        
+        /* (卡片纹理、动画等保持不变) */
         .wavy-lines-texture {
-            /* 曲线纹理 */
             position: absolute;
             bottom: -5px;
-            /* 稍微调整位置 */
             left: 0;
             width: 100%;
             height: 50px;
-            /* 减小纹理区域高度 */
             z-index: 1;
             pointer-events: none;
             opacity: 0.12;
-            /* 可以再淡一点 */
             overflow: hidden;
         }
-
         .wavy-lines-texture svg {
             width: 200%;
             height: 100%;
             position: absolute;
             left: 0;
             animation: scrollTexture 25s linear infinite;
-            /* 动画速度微调 */
         }
-
         @keyframes scrollTexture {
-            0% {
-                transform: translateX(0%);
-            }
-
-            100% {
-                transform: translateX(-50%);
-            }
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
         }
-
         .daily-card>.content-wrapper {
             position: relative;
             z-index: 2;
             width: 100%;
-            /* height: 100%; /* 如果卡片高度自适应，这里也可以注释掉 */
             display: flex;
             flex-direction: column;
             justify-content: center;
-            /* 让内容更集中 */
             align-items: center;
             gap: 5px;
-            /* 调整内容元素之间的间隙 */
         }
 
-        /* 背景颜色类保持不变 */
-        .daily-card {
-            background: linear-gradient(145deg, #6a11cb 0%, #2575fc 100%);
+        /* (卡片背景色保持不变) */
+        .daily-card { background: linear-gradient(145deg, #6a11cb 0%, #2575fc 100%); }
+        .monday { background: linear-gradient(145deg, #2980b9 0%, #2c3e50 100%); }
+        .tuesday { background: linear-gradient(145deg, #27ae60 0%, #16a085 100%); }
+        .wednesday { background: linear-gradient(145deg, #d35400 0%, #e67e22 100%); }
+        .thursday { background: linear-gradient(145deg, #f1c40f 0%, #f39c12 100%); }
+        .friday { background: linear-gradient(145deg, #c0392b 0%, #e74c3c 100%); }
+        .saturday { background: linear-gradient(145deg, #8e44ad 0%, #9b59b6 100%); }
+        .sunday { background: linear-gradient(145deg, #2c3e50 0%, #34495e 100%); }
+
+        /* 关键改动 5：
+          用 CSS (而不是 JS) 来处理“星期四”的特殊字体颜色
+        */
+        .daily-card.thursday {
+            color: #333; /* 星期四默认文字颜色 */
         }
-
-        .monday {
-            background: linear-gradient(145deg, #2980b9 0%, #2c3e50 100%);
+        .daily-card.thursday .day-english {
+            color: #555;
+            text-shadow: 0 0 3px rgba(255,255,255,0.3);
         }
-
-        .tuesday {
-            background: linear-gradient(145deg, #27ae60 0%, #16a085 100%);
+        .daily-card.thursday .day-chinese {
+            color: #444;
+            text-shadow: 0px 1px 0px rgba(0,0,0,0.05), 
+                         0px -1px 0px rgba(255,255,255,0.5), 
+                         1px 1px 2px rgba(0,0,0,0.1);
         }
-
-        .wednesday {
-            background: linear-gradient(145deg, #d35400 0%, #e67e22 100%);
+        .daily-card.thursday .quote {
+            color: #666;
         }
-
-        .thursday {
-            background: linear-gradient(145deg, #f1c40f 0%, #f39c12 100%);
-            color: #333;
+        
+        /* 暗黑模式下，星期四的颜色也必须反转回白色 */
+        html.dark-mode .daily-card.thursday,
+        html.dark-mode .daily-card.thursday .day-english,
+        html.dark-mode .daily-card.thursday .day-chinese,
+        html.dark-mode .daily-card.thursday .quote {
+            color: white; /* 在暗黑模式下，强制改回白色 */
         }
-
-        .friday {
-            background: linear-gradient(145deg, #c0392b 0%, #e74c3c 100%);
+        /* 并且使用暗色背景下的阴影 */
+        html.dark-mode .daily-card.thursday .day-english {
+            text-shadow: 0 0 4px rgba(0,0,0,0.15);
         }
-
-        .saturday {
-            background: linear-gradient(145deg, #8e44ad 0%, #9b59b6 100%);
+        html.dark-mode .daily-card.thursday .day-chinese {
+            text-shadow: 0px 1px 0px rgba(255, 255, 255, 0.2),
+                         0px -1px 0px rgba(0, 0, 0, 0.3),
+                         2px 3px 5px rgba(0, 0, 0, 0.3);
         }
-
-        .sunday {
-            background: linear-gradient(145deg, #2c3e50 0%, #34495e 100%);
+        html.dark-mode .daily-card.thursday .quote {
+            text-shadow: 0 0 2px rgba(0,0,0,0.15);
         }
-
-
+        /* (卡片内部字体大小等... 保持不变) */
         .daily-card .day-english {
             font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
             font-size: 0.85em;
-            /* 减小字体 */
             font-weight: 300;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            /* 减小字间距 */
             opacity: 0.75;
             margin-bottom: 0px;
-            /* 减小下方间距 */
             text-shadow: 0 0 4px rgba(0, 0, 0, 0.15);
         }
-
         .daily-card .day-chinese {
-            /* font-family: 'Ma Shan Zheng', cursive; */
-            /* 替换为您选择的字体 */
             font-size: 2.6em;
-            /* 显著减小字体以压缩高度 */
             font-weight: bold;
             line-height: 1.05;
-            /* 减小行高 */
             margin: 2px 0 5px 0;
-            /* 调整垂直间距 */
-            color: #fff;
-            /* 确保基础颜色 */
             text-shadow:
-                /* 字体特效保持 */
                 0px 1px 0px rgba(255, 255, 255, 0.2),
                 0px -1px 0px rgba(0, 0, 0, 0.3),
                 2px 3px 5px rgba(0, 0, 0, 0.3);
         }
-
         .daily-card .quote {
             font-family: 'KaiTi', 'STKaiti', serif;
             font-size: 0.8em;
-            /* 减小字体 */
             opacity: 0.8;
             padding: 0 10px;
-            /* 调整内边距 */
             max-width: 90%;
             line-height: 1.4;
-            /* 减小行高 */
             text-shadow: 0 0 2px rgba(0, 0, 0, 0.15);
             margin-top: 0px;
-            /* 减小上方间距 */
         }
 
         /* --- “今日运势卡片”CSS结束 --- */
 
 
-        /* news.html 原有样式 (新闻条目等) */
+        /* 新闻条目 (使用 CSS 变量) */
         .news-card {
-            background: white;
+            background: var(--card-bg); /* <- 替换 */
             border-radius: 8px;
-            /* 新闻条目圆角 */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            /* 调整阴影 */
+            box-shadow: var(--card-shadow); /* <- 替换 */
             margin: 15px 0;
-            /* 调整新闻条目间距 */
             padding: 15px 20px;
-            /* 调整内边距 */
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.5s ease; /* 增加 bgc 过渡 */
             position: relative;
         }
 
         .news-card:hover {
-            /* 悬浮效果保持或微调 */
             transform: translateY(-4px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: var(--card-shadow-hover); /* <- 替换 */
         }
-
-        /* ... 其他 .news-card, .tip-card, 响应式样式保持不变 ... */
+        
+        /* (其余新闻样式保持不变) */
         .news-card:active {
             transform: translateY(0) scale(0.99);
-            /* 轻微点击效果 */
         }
-
         .news-card-number {
             font-size: 18px;
-            /* 调整大小 */
             font-weight: bold;
-            color: #e67e22;
-            /* 换个颜色试试 */
+            color: #e67e22; /* 序号颜色保持不变 */
             position: absolute;
             top: 50%;
             left: 15px;
-            /* 调整位置 */
             transform: translateY(-50%);
         }
-
         .news-content {
             margin-left: 35px;
-            /* 调整，给数字留空间 */
         }
-
         .tip-card {
             background: #16a085;
-            /* 换个颜色 */
             color: #fff;
             border-radius: 8px;
             padding: 18px 20px;
             margin: 25px 0;
-            /* 调整间距 */
             text-align: center;
             transition: background 0.3s ease;
         }
-
         .tip-card:hover {
             background: #117a65;
         }
 
+        /* (响应式样式保持不变) */
         @media (max-width: 768px) {
-            body {
-                padding: 15px;
-            }
-
-            .daily-card {
-                min-height: 140px;
-                /* 移动端进一步减小高度 */
-                padding: 12px 15px;
-                border-radius: 10px;
-            }
-
-            .daily-card .day-english {
-                font-size: 0.75em;
-                letter-spacing: 1px;
-            }
-
-            .daily-card .day-chinese {
-                font-size: 2.2em;
-                margin: 0 0 3px 0;
-            }
-
-            .daily-card .quote {
-                font-size: 0.75em;
-                line-height: 1.3;
-            }
-
-            .wavy-lines-texture {
-                height: 40px;
-                opacity: 0.1;
-            }
-
-
-            .news-card,
-            .tip-card {
-                padding: 12px 15px;
-            }
-
-            .news-card-number {
-                font-size: 16px;
-            }
+            body { padding: 15px; }
+            .daily-card { min-height: 140px; padding: 12px 15px; border-radius: 10px; }
+            .daily-card .day-english { font-size: 0.75em; letter-spacing: 1px; }
+            .daily-card .day-chinese { font-size: 2.2em; margin: 0 0 3px 0; }
+            .daily-card .quote { font-size: 0.75em; line-height: 1.3; }
+            .wavy-lines-texture { height: 40px; opacity: 0.1; }
+            .news-card, .tip-card { padding: 12px 15px; }
+            .news-card-number { font-size: 16px; }
         }
-
         @media (max-width: 480px) {
-            .daily-card {
-                min-height: 120px;
-                padding: 10px;
-            }
-
-            .daily-card .day-english {
-                font-size: 0.7em;
-            }
-
-            .daily-card .day-chinese {
-                font-size: 2em;
-            }
-
-            /* 再小一点 */
-            .daily-card .quote {
-                font-size: 0.7em;
-                padding: 0 5px;
-            }
-
-            h1#date-title {
-                font-size: 20px;
-            }
+            .daily-card { min-height: 120px; padding: 10px; }
+            .daily-card .day-english { font-size: 0.7em; }
+            .daily-card .day-chinese { font-size: 2em; }
+            .daily-card .quote { font-size: 0.7em; padding: 0 5px; }
+            h1#date-title { font-size: 20px; }
         }
     </style>
 </head>
 
 <body>
+
+    <button type="button" id="theme-toggle" class="theme-toggle" aria-label="切换主题">
+        <span class="icon-sun">☀️</span>
+        <span class="icon-moon">🌙</span>
+    </button>
+
     <h1 id="date-title"></h1>
     <div class="container">
         <div id="dailyCardCoverContainer">
@@ -382,7 +375,7 @@
     </div>
 
     <script>
-        // --- “今日运势卡片”的JavaScript逻辑 (与上一版相同) ---
+        // --- “今日运势卡片”的JavaScript逻辑 ---
         function setupDailyCard() {
             const card = document.getElementById('dynamicDailyCard');
             const dayEnglishEl = document.getElementById('cardDayEnglish');
@@ -406,32 +399,12 @@
 
             dayClasses.forEach(cls => card.classList.remove(cls));
             card.classList.add(dayClasses[dayOfWeek]);
-
-            const currentBgClass = dayClasses[dayOfWeek];
-            // const contentWrapperDivs = card.querySelectorAll('.content-wrapper > div'); // Not strictly needed if using CSS inheritance
-
-            if (currentBgClass === 'thursday') {
-                dayEnglishEl.style.color = '#555'; // For better readability on yellow
-                dayEnglishEl.style.textShadow = '0 0 3px rgba(255,255,255,0.3)';
-                dayChineseEl.style.color = '#444';
-                dayChineseEl.style.textShadow = `
-                    0px 1px 0px rgba(0,0,0,0.05), 
-                    0px -1px 0px rgba(255,255,255,0.5), 
-                    1px 1px 2px rgba(0,0,0,0.1)`; // Adjusted shadow for light bg
-                quoteEl.style.color = '#666';
-            } else {
-                // Ensure styles revert for dark backgrounds
-                dayEnglishEl.style.color = ''; // Rely on .daily-card color: white or specific CSS
-                dayChineseEl.style.color = '';
-                quoteEl.style.color = '';
-                // Re-apply default text-shadows if they were changed for 'thursday'
-                dayEnglishEl.style.textShadow = '0 0 4px rgba(0,0,0,0.15)';
-                dayChineseEl.style.textShadow = `
-                    0px 1px 0px rgba(255, 255, 255, 0.2),
-                    0px -1px 0px rgba(0, 0, 0, 0.3),
-                    2px 3px 5px rgba(0, 0, 0, 0.3)`;
-                quoteEl.style.textShadow = '0 0 2px rgba(0,0,0,0.15)';
-            }
+            
+            /*
+              关键改动 7：
+              删除了原来控制“星期四”字体颜色的 if/else 逻辑。
+              现在这个逻辑已经完全交给 CSS 处理了。
+            */
 
             fetch('https://v1.hitokoto.cn/?encode=json&charset=utf-8')
                 .then(response => response.json())
@@ -452,7 +425,7 @@
         // --- “今日运势卡片”JS逻辑结束 ---
 
 
-        // --- news.html 原有JavaScript (保持不变) ---
+        // --- news.html 原有JavaScript ---
         async function fetchNewsData() {
             let response;
             while (true) {
@@ -492,6 +465,27 @@
         }
 
         async function init() {
+            
+            // 关键改动 8：
+            // 在 init() 函数开头添加按钮的点击事件监听
+            try {
+                const themeToggle = document.getElementById('theme-toggle');
+                if (themeToggle) {
+                    themeToggle.addEventListener('click', () => {
+                        try {
+                            const isDark = document.documentElement.classList.toggle('dark-mode');
+                            const newTheme = isDark ? 'dark' : 'light';
+                            localStorage.setItem('moyu-theme', newTheme); // 复用'moyu-theme'的本地存储
+                        } catch (e) {
+                            console.warn('无法保存主题偏好到 localStorage:', e);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.warn('Theme toggle button not found or error:', e);
+            }
+
+            // (原有的 init 内容)
             displayDateTime();
             setupDailyCard();
 

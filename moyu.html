@@ -1,0 +1,636 @@
+<!-- 代码均由ChatGPT生成，如有侵权请联系作者删除
+作者：张敬玉
+时间: 2024年10月8日
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🐟 摸鱼办·打工人日历</title>
+    <script src="/js/favicon-loader.js"></script>
+    <script>
+        // (V1 - 立即执行主题脚本 - 保持不变)
+        (function() {
+            let theme = 'light';
+            try {
+                const savedTheme = localStorage.getItem('moyu-theme');
+                if (savedTheme) {
+                    theme = savedTheme;
+                } else {
+                    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                        theme = 'dark';
+                    }
+                }
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark-mode');
+                } else {
+                    document.documentElement.classList.remove('dark-mode');
+                }
+                document.documentElement.lang = 'zh-CN';
+            } catch (e) {
+                console.warn('无法访问 localStorage 或应用初始主题:', e);
+                document.documentElement.lang = 'zh-CN';
+            }
+        })();
+    </script>
+
+    <style>
+        /* (V2 - CSS 变量 - 保持不变) */
+        :root {
+            --bg-top: #fdf5ef;
+            --bg-bottom: #eef2ff;
+            --bg-glow-1: rgba(255, 197, 137, 0.4);
+            --bg-glow-2: rgba(117, 133, 255, 0.35);
+            --bg-sheen: rgba(255, 255, 255, 0.2);
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --card-border: rgba(255, 255, 255, 0.6);
+            --card-shadow: rgba(31, 38, 135, 0.18);
+            --text-main: #2d3440;
+            --text-muted: #6d7382;
+            --accent: #f9a826;
+            --accent-strong: #ff6b6b;
+            --link: #3f7aff;
+            --divider: rgba(0, 0, 0, 0.06);
+            --table-header-bg: rgba(0, 0, 0, 0.02);
+            --table-inset-shadow: rgba(255, 255, 255, 0.5);
+            --blockquote-bg: rgba(255, 255, 255, 0.75);
+            --progress-bar-bg: linear-gradient(90deg, var(--accent), var(--accent-strong));
+        }
+
+        html.dark-mode {
+            --bg-top: #1a1d2e;
+            --bg-bottom: #1f1f33;
+            --bg-glow-1: rgba(249, 168, 38, 0.1);
+            --bg-glow-2: rgba(117, 133, 255, 0.1);
+            --bg-sheen: rgba(255, 255, 255, 0.08);
+            --card-bg: rgba(28, 30, 40, 0.85);
+            --card-border: rgba(255, 255, 255, 0.15);
+            --card-shadow: rgba(0, 0, 0, 0.3);
+            --text-main: #eef2f5;
+            --text-muted: #a0a8b4;
+            --link: #5a9bff;
+            --divider: rgba(255, 255, 255, 0.1);
+            --table-header-bg: rgba(255, 255, 255, 0.04);
+            --table-inset-shadow: rgba(255, 255, 255, 0.05);
+            --blockquote-bg: rgba(0, 0, 0, 0.15);
+        }
+
+        /* (V3 - 全局样式 - 保持不变) */
+        *, *::before, *::after { box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
+            color: var(--text-main);
+            background: radial-gradient(circle at 20% 20%, var(--bg-glow-1), transparent 45%),
+                        radial-gradient(circle at 80% 0%, var(--bg-glow-2), transparent 50%),
+                        linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+            padding: clamp(16px, 4vw, 48px);
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(120deg, var(--bg-sheen) 0, transparent 60%);
+            pointer-events: none;
+        }
+        
+        /* (V4 - 页面布局/三栏 - 保持不变) */
+        .page-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 24px;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .moyu-stage {
+            flex: 0 0 540px;
+            position: relative;
+        }
+        .news-column {
+            flex: 1 1 0;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        @media (max-width: 1199px) {
+            .page-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .moyu-stage {
+                flex-basis: 540px;
+                width: 100%;
+                max-width: 540px;
+                order: 2; 
+            }
+            .news-column {
+                width: 100%;
+                max-width: 540px;
+                min-width: unset;
+            }
+            #news-col-left { order: 1; }
+            #news-col-right { order: 3; }
+        }
+        @media (max-width: 570px) {
+             .moyu-stage, .news-column {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+
+
+        /* (V5 - 主题按钮 - 保持不变) */
+        .theme-toggle {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 100;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease, background 0.2s ease, border 0.2s ease;
+        }
+        .theme-toggle:hover { transform: scale(1.1); }
+        .theme-toggle:active { transform: scale(0.95); }
+        .theme-toggle .icon-sun { display: none; }
+        .theme-toggle .icon-moon { display: block; }
+        html.dark-mode .theme-toggle .icon-sun { display: block; }
+        html.dark-mode .theme-toggle .icon-moon { display: none; }
+
+
+        /* (V6：摸鱼卡片 (方形) - 保持不变) */
+        .moyu-card {
+            width: 100%;
+            height: 540px;
+            border-radius: 28px;
+            padding: clamp(20px, 4vw, 32px);
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            box-shadow: 0 25px 70px var(--card-shadow);
+            backdrop-filter: blur(18px);
+            line-height: 1.6;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        @media (max-width: 570px) {
+            .moyu-card { height: auto; min-height: 500px; }
+        }
+        .moyu-card.loaded { animation: card-pop 0.5s ease forwards; }
+        @keyframes card-pop {
+            0% { opacity: 0; transform: translateY(12px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .moyu-header-block {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .moyu-date h1 {
+            font-size: clamp(1.6rem, 6vw, 2.1rem);
+            color: var(--text-main);
+            margin: 0;
+            letter-spacing: 0.02em;
+        }
+        .moyu-date p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin: 4px 0 0;
+        }
+        .moyu-status {
+            text-align: center;
+            font-weight: 600;
+            padding: 10px 15px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .moyu-status.work { background-color: rgba(249, 168, 38, 0.15); color: #b97d1a; }
+        .moyu-status.rest { background-color: rgba(22, 163, 74, 0.15); color: #15803d; }
+        .moyu-status.holiday { background-color: rgba(255, 107, 107, 0.15); color: #dd4a4a; }
+        html.dark-mode .moyu-status.work { color: #f9a826; }
+        html.dark-mode .moyu-status.rest { color: #34d399; }
+        html.dark-mode .moyu-status.holiday { color: #ff6b6b; }
+        .moyu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 15px; }
+        .grid-item { background: var(--table-header-bg); border: 1px solid var(--divider); border-radius: 16px; padding: 12px; text-align: center; box-shadow: inset 0 0 0 1px var(--table-inset-shadow); }
+        .grid-item span { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; }
+        .grid-item strong { display: block; font-size: clamp(1.5rem, 6vw, 1.8rem); color: var(--link); line-height: 1.1; }
+        .grid-item strong span { font-size: 0.8rem; display: inline; color: var(--text-muted); }
+        .moyu-progress { margin-bottom: 15px; }
+        .progress-item { margin-bottom: 8px; }
+        .progress-item .label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px; }
+        .progress-bar { height: 8px; background: var(--divider); border-radius: 4px; overflow: hidden; }
+        .progress-bar div { height: 100%; background: var(--progress-bar-bg); border-radius: 4px; transition: width 0.5s ease; }
+        .moyu-holiday { background: var(--blockquote-bg); border-radius: 14px; padding: 12px 16px; text-align: center; border: 1px solid var(--divider); }
+        .moyu-holiday h3 { margin: 0 0 4px; font-size: 1rem; color: var(--text-main); }
+        .moyu-holiday p { margin: 0; font-size: 0.9rem; color: var(--text-muted); }
+        .moyu-holiday p strong { color: var(--accent-strong); font-weight: 600; }
+        .moyu-spacer { flex-grow: 1; min-height: 10px; }
+        .moyu-quote { text-align: center; font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; }
+        .moyu-quote p { margin: 0; }
+        
+        
+        /* ---------------------------------- */
+        /* V7：新闻卡片 (格子) 样式 */
+        /* ---------------------------------- */
+        .news-card {
+            width: 100%;
+            border-radius: 28px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            box-shadow: 0 25px 70px var(--card-shadow);
+            backdrop-filter: blur(18px);
+            padding: clamp(20px, 4vw, 28px);
+            line-height: 1.6;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 80px var(--card-shadow);
+        }
+        .news-card h3 {
+            margin: 0 0 10px;
+            font-size: 1.15rem;
+        }
+        .news-card h3 a {
+            color: var(--text-main);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .news-card h3 a:hover {
+            color: var(--link);
+            text-decoration: underline;
+        }
+        
+        /* * 关键改动：滚动条优化 V5
+         */
+        .news-card p {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin: 0 0 12px;
+            max-height: 115px; /* 约 5 行 */
+            overflow-y: auto;
+            padding-right: 8px; /* 为滚动条留出空间 */
+            
+            /* (Firefox) 默认透明 */
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent; 
+        }
+        
+        /* (Chrome/Edge/Safari) 默认透明 */
+        .news-card p::-webkit-scrollbar {
+            width: 6px;
+        }
+        .news-card p::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .news-card p::-webkit-scrollbar-thumb {
+            background: transparent;
+            border-radius: 3px;
+        }
+        
+        /* 悬停在 *整张卡片* 上时，显示滚动条 */
+        .news-card:hover p {
+            scrollbar-color: var(--divider) transparent; /* For Firefox */
+        }
+        .news-card:hover p::-webkit-scrollbar-thumb {
+            background: var(--divider); /* For Webkit */
+        }
+        
+        /* 暗黑模式下的悬停颜色 */
+        html.dark-mode .news-card:hover p {
+            scrollbar-color: var(--text-muted) transparent;
+        }
+        html.dark-mode .news-card:hover p::-webkit-scrollbar-thumb {
+            background: var(--text-muted);
+        }
+        /* * 滚动条优化结束
+         */
+
+
+        .news-card-footer {
+            display: flex;
+            justify-content: flex-start; 
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            opacity: 0.8;
+            border-top: 1px solid var(--divider);
+            padding-top: 10px;
+        }
+        
+        /* (V8：加载和错误状态 - 保持不变) */
+        .loading-state,
+        .error-state {
+            text-align: center;
+            color: var(--text-muted);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 150px; 
+            padding: 20px;
+        }
+        .moyu-card .loading-state,
+        .moyu-card .error-state {
+            height: 100%;
+            min-height: 540px;
+        }
+        @media (max-width: 570px) {
+            .moyu-card .loading-state,
+            .moyu-card .error-state {
+                min-height: 400px;
+            }
+        }
+        .loading-icon {
+            font-size: 2.5rem;
+            display: inline-block;
+            animation: swim 1.5s ease-in-out infinite;
+        }
+        @keyframes swim {
+            0% { transform: translateX(-8px); }
+            50% { transform: translateX(8px); }
+            100% { transform: translateX(-8px); }
+        }
+        .error-state p { margin-bottom: 0.5rem; }
+        .retry-btn {
+            margin-top: 1rem;
+            border: none;
+            border-radius: 999px;
+            padding: 0.75rem 1.8rem;
+            background: linear-gradient(135deg, #ff9a8b, #ff6a88);
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(255, 106, 136, 0.35);
+            transition: transform 0.2s ease;
+        }
+        .retry-btn:active { transform: scale(0.97); }
+    </style>
+</head>
+
+<body>
+    <button type="button" id="theme-toggle" class="theme-toggle" aria-label="切换主题">
+        <span class="icon-sun">☀️</span>
+        <span class="icon-moon">🌙</span>
+    </button>
+
+    <div class="page-container">
+        <aside class="news-column" id="news-col-left"></aside>
+        <main class="moyu-stage" id="moyu-stage">
+            <section class="moyu-card" id="content-container">
+                <div class="loading-state">
+                    <span class="loading-icon">🐟</span>
+                    <p>摸鱼办排班中，稍等一下...</p>
+                </div>
+            </section>
+        </main>
+        <aside class="news-column" id="news-col-right"></aside>
+    </div>
+
+    <script>
+        /* ---------------------------------- */
+        /* V11：JS 逻辑 (V4版) */
+        /* ---------------------------------- */
+        document.addEventListener('DOMContentLoaded', () => {
+            const apiUrl_Moyu = 'https://60s.viki.moe/v2/moyu?encoding=json';
+            const apiUrl_News = 'https://60s.viki.moe/v2/ai-news?encoding=json';
+            
+            const container_Moyu = document.getElementById('content-container');
+            const container_NewsLeft = document.getElementById('news-col-left');
+            const container_NewsRight = document.getElementById('news-col-right');
+            
+            // (主题切换按钮逻辑 - 保持不变)
+            const themeToggle = document.getElementById('theme-toggle');
+            themeToggle.addEventListener('click', () => {
+                try {
+                    const isDark = document.documentElement.classList.toggle('dark-mode');
+                    const newTheme = isDark ? 'dark' : 'light';
+                    localStorage.setItem('moyu-theme', newTheme);
+                } catch (e) {
+                    console.warn('无法保存主题偏好到 localStorage:', e);
+                }
+            });
+
+            
+            /* (摸鱼日历 (Moyu) 的函数 - V3版 - 保持不变) */
+            async function fetchMoyu() {
+                setLoading_Moyu();
+                try {
+                    const response = await fetch(apiUrl_Moyu, { cache: 'no-store' });
+                    if (!response.ok) throw new Error(`网络响应失败: ${response.status}`);
+                    const jsonData = await response.json();
+                    if (jsonData.code !== 200 || !jsonData.data) throw new Error('Moyu API 数据格式不正确');
+                    
+                    const html = buildHtml_Moyu(jsonData.data);
+                    container_Moyu.classList.remove('loading');
+                    container_Moyu.classList.add('loaded');
+                    container_Moyu.innerHTML = html;
+                } catch (error) {
+                    console.error('获取摸鱼数据失败:', error);
+                    setError_Moyu();
+                }
+            }
+            function buildHtml_Moyu(data) {
+                const date = data.date;
+                const today = data.today;
+                const progress = data.progress;
+                const countdown = data.countdown;
+                const nextHoliday = data.nextHoliday;
+
+                let statusText, statusClass;
+                if (today.isHoliday) {
+                    statusText = `🎉 ${today.holidayName || '假期中'}`; statusClass = "holiday";
+                } else if (today.isWorkday) {
+                    statusText = "💼 低调摸鱼"; statusClass = "work";
+                } else {
+                    statusText = "😎 尽情放假"; statusClass = "rest";
+                }
+
+                let holidayHtml = '';
+                if (nextHoliday) {
+                    holidayHtml = `<h3>🎯 下个假期：${nextHoliday.name}</h3><p>还要 <strong>${nextHoliday.until}</strong> 天，可摸 ${nextHoliday.duration} 天</p>`;
+                } else if (data.currentHoliday) {
+                     holidayHtml = `<h3>🎯 正在 ${data.currentHoliday.name}</h3><p>假期余额 <strong>${data.currentHoliday.until}</strong> 天</p>`;
+                } else {
+                    holidayHtml = `<h3>🎯 暂无假期</h3><p>安心摸鱼</p>`;
+                }
+
+                return `
+                    <div class="moyu-header-block">
+                        <div class="moyu-date">
+                            <h1>${date.gregorian}</h1>
+                            <p>${date.weekday} | 农历 ${date.lunar.monthCN}${date.lunar.dayCN}</p>
+                        </div>
+                        <div class="moyu-status ${statusClass}">
+                            ${statusText}
+                        </div>
+                    </div>
+                    <div class="moyu-grid">
+                        <div class="grid-item">
+                            <span>📅 距周末</span>
+                            <strong>${countdown.toWeekEnd} <span>天</span></strong>
+                        </div>
+                        <div class="grid-item">
+                            <span>🎊 距年底</span>
+                            <strong>${countdown.toYearEnd} <span>天</span></strong>
+                        </div>
+                        <div class="grid-item">
+                            <span>🌙 距月底</span>
+                            <strong>${countdown.toMonthEnd} <span>天</span></strong>
+                        </div>
+                    </div>
+                    <div class="moyu-progress">
+                        <div class="progress-item">
+                            <span class="label">本周进度 ${progress.week.percentage}%</span>
+                            <div class="progress-bar"><div style="width: ${progress.week.percentage}%"></div></div>
+                        </div>
+                        <div class="progress-item">
+                            <span class="label">本月进度 ${progress.month.percentage}%</span>
+                            <div class="progress-bar"><div style="width: ${progress.month.percentage}%"></div></div>
+                        </div>
+                        <div class="progress-item">
+                            <span class="label">本年进度 ${progress.year.percentage}%</span>
+                            <div class="progress-bar"><div style="width: ${progress.year.percentage}%"></div></div>
+                        </div>
+                    </div>
+                    <div class="moyu-holiday">${holidayHtml}</div>
+                    <div class="moyu-spacer"></div>
+                    <div class="moyu-quote"><p>“${data.moyuQuote}”</p></div>
+                `;
+            }
+            function setLoading_Moyu() {
+                container_Moyu.classList.remove('loaded');
+                container_Moyu.classList.add('loading');
+                container_Moyu.innerHTML = `
+                    <div class="loading-state">
+                        <span class="loading-icon">🐟</span>
+                        <p>摸鱼办排班中，稍等一下...</p>
+                    </div>`;
+            }
+            function setError_Moyu() {
+                container_Moyu.classList.remove('loading', 'loaded');
+                container_Moyu.innerHTML = `
+                    <div class="error-state">
+                        <p>❌ 摸鱼失败！</p>
+                        <p>稍候再试，或点按钮重试。</p>
+                        <button type="button" class="retry-btn" id="retry-moyu">重新抓鱼</button>
+                    </div>`;
+                container_Moyu.querySelector('#retry-moyu')?.addEventListener('click', fetchMoyu, { once: true });
+            }
+            
+            /* ---------------------------------- */
+            /* AI 新闻 (News) 的函数 (V4版) */
+            /* ---------------------------------- */
+            
+            async function fetchNews() {
+                setLoading_News();
+                try {
+                    const response = await fetch(apiUrl_News, { cache: 'no-store' });
+                    if (!response.ok) throw new Error(`网络响应失败: ${response.status}`);
+                    
+                    const jsonData = await response.json();
+                    if (jsonData.code !== 200 || !jsonData.data || !jsonData.data.news) throw new Error('News API 数据格式不正确');
+                    
+                    let newsList = jsonData.data.news;
+                    
+                    // (V3版 过滤器 - 保持不变)
+                    newsList = newsList.filter(item => item.title && item.detail);
+
+                    if (newsList.length === 0) {
+                        setError_News("今天没有 AI 新闻哦");
+                        return;
+                    }
+                    
+                    const midPoint = Math.ceil(newsList.length / 2);
+                    const leftNews = newsList.slice(0, midPoint);
+                    const rightNews = newsList.slice(midPoint);
+
+                    // 关键改动：使用 V4 版的 buildHtml_News
+                    container_NewsLeft.innerHTML = buildHtml_News(leftNews, jsonData.data.date);
+                    container_NewsRight.innerHTML = buildHtml_News(rightNews, jsonData.data.date);
+
+                } catch (error) {
+                    console.error('获取新闻数据失败:', error);
+                    setError_News();
+                }
+            }
+
+            // 关键改动：V4 版 buildHtml_News (移除了日期 span)
+            function buildHtml_News(newsList, fallbackDate) {
+                let html = '';
+                for (const item of newsList) {
+                    const title = item.title || '无标题';
+                    const detail = item.detail || '暂无详情';
+                    const source = item.source || '未知来源';
+                    // const date = item.date || fallbackDate; // <- 日期已不需要
+                    const link = item.link || '#';
+                    
+                    html += `
+                        <article class="news-card">
+                            <h3><a href="${link}" target="_blank" rel="noopener noreferrer">${title}</a></h3>
+                            <p>${detail}</p>
+                            <footer class="news-card-footer">
+                                <span>${source}</span>
+                                </footer>
+                        </article>
+                    `;
+                }
+                return html;
+            }
+
+            // (setLoading_News / setError_News - 真正 V4版，无变化)
+            function setLoading_News() {
+                const loadingHtml = `
+                    <div class="news-card" style="min-height: 150px; display: flex; align-items: center; justify-content: center;">
+                        <div class="loading-state">
+                            <span class="loading-icon">📰</span>
+                            <p>获取 AI 早报...</p>
+                        </div>
+                    </div>`;
+                container_NewsLeft.innerHTML = loadingHtml;
+                container_NewsRight.innerHTML = loadingHtml.replace("获取 AI 早报...", "&nbsp;");
+            }
+            function setError_News(message = '新闻获取失败！') {
+                const errorHtml = `
+                    <div class="news-card">
+                        <div class="error-state">
+                            <p>❌ ${message}</p>
+                            ${message.includes('失败') ? '<button type="button" class="retry-btn" id="retry-news">重试</button>' : ''}
+                        </div>
+                    </div>`;
+                container_NewsLeft.innerHTML = errorHtml;
+                container_NewsRight.innerHTML = '';
+                container_NewsLeft.querySelector('#retry-news')?.addEventListener('click', fetchNews, { once: true });
+            }
+            
+            
+            // 初始加载 (两个都启动)
+            fetchMoyu();
+            fetchNews();
+            
+        });
+    </script>
+</body>
+</html>
