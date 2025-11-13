@@ -193,8 +193,7 @@
             justify-content: flex-start;
         }
         @media (max-width: 570px) {
-            .moyu-card { height: auto; min-height: 500px; }
-        }
+        .moyu-card { height: auto; min-height: 500px; }
         .moyu-card.loaded { animation: card-pop 0.5s ease forwards; }
         @keyframes card-pop {
             0% { opacity: 0; transform: translateY(12px) scale(0.98); }
@@ -417,6 +416,16 @@
             const apiUrl_Moyu = 'https://60s.viki.moe/v2/moyu?encoding=json';
             const apiUrl_News = 'https://60s.viki.moe/v2/ai-news?encoding=json';
             
+            // 返回昨天的 yyyy-mm-dd 字符串（本地时区）
+            function getYesterdayDateString() {
+                const d = new Date();
+                d.setDate(d.getDate() - 1);
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+            }
+            
             const container_Moyu = document.getElementById('content-container');
             const container_NewsLeft = document.getElementById('news-col-left');
             const container_NewsRight = document.getElementById('news-col-right');
@@ -548,7 +557,9 @@
             async function fetchNews() {
                 setLoading_News();
                 try {
-                    const url = apiUrl_News + '&t=' + Date.now();
+                    // 为 news 接口附加 date=昨天（yyyy-mm-dd）和时间戳，避免缓存
+                    const yesterday = getYesterdayDateString();
+                    const url = apiUrl_News + '&date=' + yesterday + '&t=' + Date.now();
                     const response = await fetch(url, { cache: 'no-store' });
                     if (!response.ok) throw new Error(`网络响应失败: ${response.status}`);
                     
