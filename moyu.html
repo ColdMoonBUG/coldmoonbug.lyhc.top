@@ -438,7 +438,8 @@
             async function fetchMoyu() {
                 setLoading_Moyu();
                 try {
-                    const response = await fetch(apiUrl_Moyu, { cache: 'no-store' });
+                    const url = apiUrl_Moyu + '&t=' + Date.now();
+                    const response = await fetch(url, { cache: 'no-store' });
                     if (!response.ok) throw new Error(`网络响应失败: ${response.status}`);
                     const jsonData = await response.json();
                     if (jsonData.code !== 200 || !jsonData.data) throw new Error('Moyu API 数据格式不正确');
@@ -547,7 +548,8 @@
             async function fetchNews() {
                 setLoading_News();
                 try {
-                    const response = await fetch(apiUrl_News, { cache: 'no-store' });
+                    const url = apiUrl_News + '&t=' + Date.now();
+                    const response = await fetch(url, { cache: 'no-store' });
                     if (!response.ok) throw new Error(`网络响应失败: ${response.status}`);
                     
                     const jsonData = await response.json();
