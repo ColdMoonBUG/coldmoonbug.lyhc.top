@@ -1,0 +1,718 @@
+{
+  "nodes": [
+    {
+      "id": "meo",
+      "name": "左孩子",
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=2830242259&s=640",
+      "symbolSize": 35,
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762071238086_786",
+      "name": "mxmm",
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=1870788712&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762071256752",
+      "name": "张敬玉",
+      "x": 782.0496017656853,
+      "y": 397.85949655783384,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=2991742315&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762071303217_825",
+      "name": "yanami",
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=2605528968&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762071356844",
+      "name": "Line",
+      "x": 769.7507708328833,
+      "y": 386.40886086177676,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=2755259411&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762071413988_897",
+      "name": "残猫猫",
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=1520530570&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762071449347_394",
+      "name": "try猫猫",
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=3321942279&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762071519650",
+      "name": "卡比比",
+      "x": 772.7194541614906,
+      "y": 472.07657977301864,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=1009284251&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762071560639_831",
+      "name": "bmm",
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=289732555&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762071601348",
+      "name": "小喵包",
+      "x": 747.697694677514,
+      "y": 488.192289271173,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=2776303378&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762085225411",
+      "name": "木博士",
+      "x": 761.0332923038534,
+      "y": 423.4473930053774,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=393261036&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762085250796",
+      "name": "木老师",
+      "x": 839.4065321790886,
+      "y": 281.16264204140884,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=3276244376&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762085322984",
+      "name": "i猫猫",
+      "x": 806.7510155644065,
+      "y": 289.5597748851839,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=2846428563&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762085384484",
+      "name": "Bdbmzwsc",
+      "x": 786.2246908351783,
+      "y": 276.9640756195211,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=1726016497&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762085495847",
+      "name": "Bt老师",
+      "x": 800.5210215505081,
+      "y": 280.6706888040932,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=1921944926&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762085549211",
+      "name": "纯芳唯",
+      "x": 810.3176765349124,
+      "y": 268.5414969186401,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=3421351924&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762085577920",
+      "name": "粗细",
+      "x": 795.8559477484107,
+      "y": 261.5438862154941,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=2746254109&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762086597504",
+      "name": "周猫猫",
+      "x": 942.9329989711935,
+      "y": 529.9956275720166,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=690560442&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762087482636",
+      "name": "流星",
+      "x": 438,
+      "y": 282,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=2312336256&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762087551349_18",
+      "name": "橙猫猫",
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=2865132096&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762087626318",
+      "name": "周金宇",
+      "x": 475.9885994180044,
+      "y": 245.5729495061163,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=3021813747&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762087657715",
+      "name": "影子",
+      "x": 376.9885994180044,
+      "y": 274.5729495061163,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=2473385356&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762087684316",
+      "name": "源心有灵犀",
+      "x": 465.3629374667818,
+      "y": 250.9718642599213,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=852747782&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762087729178",
+      "name": "汽水",
+      "x": 453.54475564859996,
+      "y": 260.9718642599213,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=1035916530&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762087751890",
+      "name": "咸鱼",
+      "x": 465.3629374667818,
+      "y": 266.42640971446673,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=2240099396&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762087772740",
+      "name": "群逆天",
+      "x": 471.7265738304181,
+      "y": 258.24459153264854,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=2840290966&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762087815280",
+      "name": "头头猫",
+      "x": 455.81021019405455,
+      "y": 264.73731880537593,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=2122130181&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762087852275",
+      "name": "祈月猫猫",
+      "x": 467.9102101940545,
+      "y": 72.34731880537606,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=3319682713&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762087891440",
+      "name": "Misaki",
+      "x": 389.7302101940528,
+      "y": 191.12368244173922,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=3527959791&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762087954573",
+      "name": "开心超人",
+      "x": 449.1302101940525,
+      "y": 250.42368244173917,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=1275853382&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762087974507",
+      "name": "九fox",
+      "x": 406.2302101940526,
+      "y": 303.22368244173913,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=291110700&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762088024974",
+      "name": "大雷哥",
+      "x": 406.2302101940526,
+      "y": 231.7236824417392,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=1519751339&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762088037406",
+      "name": "瓜子",
+      "x": 459.03021019405253,
+      "y": 236.12368244173916,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=3258733187&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1762088053468",
+      "name": "二六猫猫",
+      "x": 422.7302101940525,
+      "y": 236.12368244173916,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=303108189&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    },
+    {
+      "id": "node_1763440573557",
+      "name": "ZZZ",
+      "x": 954.7678755144013,
+      "y": 416.81725823045,
+      "fixed": false,
+      "symbolSize": 35,
+      "symbol": "image://https://q1.qlogo.cn/g?b=qq&nk=2154928168&s=640",
+      "itemStyle": {
+        "borderColor": "#fff",
+        "borderWidth": 2,
+        "shadowColor": "rgba(0,0,0,0.5)",
+        "shadowBlur": 10
+      }
+    }
+  ],
+  "links": [
+    {
+      "source": "node_1762071238086_786",
+      "target": "meo",
+      "relationName": "单恋",
+      "lineStyle": {
+        "type": "solid"
+      }
+    },
+    {
+      "source": "meo",
+      "target": "node_1762071303217_825",
+      "relationName": "控制恋",
+      "lineStyle": {
+        "type": "solid"
+      }
+    },
+    {
+      "source": "node_1762071413988_897",
+      "target": "node_1762071238086_786",
+      "relationName": "病态恋",
+      "lineStyle": {
+        "type": "solid"
+      }
+    },
+    {
+      "source": "node_1762071449347_394",
+      "target": "meo",
+      "relationName": "玩物",
+      "lineStyle": {
+        "type": "solid"
+      }
+    },
+    {
+      "source": "node_1762071560639_831",
+      "target": "meo",
+      "relationName": "单相思",
+      "lineStyle": {
+        "type": "solid"
+      }
+    },
+    {
+      "source": "node_1762085384484",
+      "target": "node_1762071560639_831",
+      "relationName": "暗恋",
+      "lineStyle": {
+        "type": "dashed"
+      }
+    },
+    {
+      "source": "node_1762071413988_897",
+      "target": "node_1762085495847",
+      "relationName": "残猫猫调教bt",
+      "lineStyle": {
+        "type": "dashed"
+      }
+    },
+    {
+      "source": "node_1762087551349_18",
+      "target": "meo",
+      "relationName": "幻想左孩子是正太",
+      "lineStyle": {
+        "type": "solid"
+      }
+    },
+    {
+      "source": "node_1762071413988_897",
+      "target": "node_1762087772740",
+      "relationName": "好基友",
+      "lineStyle": {
+        "type": "solid"
+      }
+    },
+    {
+      "source": "node_1762071238086_786",
+      "target": "node_1762087891440",
+      "relationName": "跑友",
+      "lineStyle": {
+        "type": "dashed"
+      }
+    },
+    {
+      "source": "node_1762087974507",
+      "target": "meo",
+      "relationName": "吃瓜",
+      "lineStyle": {
+        "type": "solid"
+      }
+    },
+    {
+      "source": "node_1762085322984",
+      "target": "meo",
+      "relationName": "玩恋",
+      "lineStyle": {
+        "type": "dashed"
+      }
+    },
+    {
+      "source": "node_1763440573557",
+      "target": "node_1762071560639_831",
+      "relationName": "明恋",
+      "lineStyle": {
+        "type": "dashed"
+      }
+    },
+    {
+      "source": "node_1762085549211",
+      "target": "meo",
+      "relationName": "依恋",
+      "lineStyle": {
+        "type": "dashed"
+      }
+    },
+    {
+      "source": "node_1762087729178",
+      "target": "meo",
+      "relationName": "调戏",
+      "lineStyle": {
+        "type": "dashed"
+      }
+    },
+    {
+      "source": "node_1762087482636",
+      "target": "meo",
+      "relationName": "依恋",
+      "lineStyle": {
+        "type": "dashed"
+      }
+    },
+    {
+      "source": "node_1762071413988_897",
+      "target": "node_1762071303217_825",
+      "relationName": "喜欢",
+      "lineStyle": {
+        "type": "solid"
+      }
+    },
+    {
+      "source": "node_1762071413988_897",
+      "target": "node_1762087551349_18",
+      "relationName": "喜欢",
+      "lineStyle": {
+        "type": "dashed"
+      }
+    },
+    {
+      "source": "node_1762071303217_825",
+      "target": "node_1762071560639_831",
+      "relationName": "喜欢",
+      "lineStyle": {
+        "type": "dashed"
+      }
+    },
+    {
+      "source": "node_1762071303217_825",
+      "target": "meo",
+      "relationName": "主仆",
+      "lineStyle": {
+        "type": "solid"
+      }
+    },
+    {
+      "source": "node_1762071303217_825",
+      "target": "node_1762087482636",
+      "relationName": "喜欢",
+      "lineStyle": {
+        "type": "dashed"
+      }
+    },
+    {
+      "source": "node_1762071303217_825",
+      "target": "node_1762071238086_786",
+      "relationName": "喜欢",
+      "lineStyle": {
+        "type": "dashed"
+      }
+    },
+    {
+      "source": "node_1762087482636",
+      "target": "node_1762085322984",
+      "relationName": "喜欢",
+      "lineStyle": {
+        "type": "dashed"
+      }
+    },
+    {
+      "source": "node_1762087482636",
+      "target": "node_1762071303217_825",
+      "relationName": "喜欢",
+      "lineStyle": {
+        "type": "dashed"
+      }
+    },
+    {
+      "source": "node_1762087482636",
+      "target": "node_1762071238086_786",
+      "relationName": "怜爱",
+      "lineStyle": {
+        "type": "dashed"
+      }
+    },
+    {
+      "source": "node_1762085549211",
+      "target": "node_1762071238086_786",
+      "relationName": "怜爱",
+      "lineStyle": {
+        "type": "dashed"
+      }
+    }
+  ]
+}

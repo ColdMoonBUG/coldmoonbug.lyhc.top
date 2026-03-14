@@ -20,10 +20,11 @@
         }
 
         body {
-            background-color: #100c2a;
+            background: linear-gradient(135deg, #0a0515 0%, #1a0d3a 50%, #150c2a 100%);
             color: #fff;
-            font-family: 'Microsoft YaHei', sans-serif;
+            font-family: 'Microsoft YaHei', 'Segoe UI', sans-serif;
             overflow: hidden;
+            position: relative;
         }
 
         html, body {
@@ -34,35 +35,58 @@
         #relation-graph {
             width: 100%;
             height: 100%;
+            position: relative;
+            z-index: 2;
         }
 
         .menu-wrapper {
             position: fixed;
             display: none;
-            background: #25233d;
-            border-radius: 4px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            background: rgba(37, 35, 61, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
             z-index: 100;
             min-width: 150px;
         }
 
         .menu-wrapper .menu-item {
             padding: 12px 16px;
-            color: #eee;
+            color: #e0e0ff;
             cursor: pointer;
             font-size: 14px;
             white-space: nowrap;
-            border-bottom: 1px solid #3a375a;
-            transition: background 0.2s;
+            border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+            transition: background 0.15s ease;
+            position: relative;
         }
 
         .menu-wrapper .menu-item:last-child {
             border-bottom: none;
         }
 
+        .menu-wrapper .menu-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: linear-gradient(180deg, #8a2be2, #6a5acd);
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+
+        .menu-wrapper .menu-item:hover::before {
+            opacity: 1;
+        }
+
         .menu-wrapper .menu-item:active,
         .menu-wrapper .menu-item:hover {
-            background: #3a375a;
+            background: rgba(106, 90, 205, 0.3);
+            color: #fff;
+            padding-left: 20px;
         }
 
         #modal-mask {
@@ -71,7 +95,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
             z-index: 199;
             display: none;
         }
@@ -83,9 +108,11 @@
             transform: translate(-50%, -50%);
             width: 90%;
             max-width: 450px;
-            background: #25233d;
-            border-radius: 6px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+            background: rgba(37, 35, 61, 0.98);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
             z-index: 200;
             display: none;
             max-height: 80vh;
@@ -93,10 +120,11 @@
         }
 
         .modal-title {
-            padding: 15px 20px;
+            padding: 20px 20px;
             font-size: 18px;
-            font-weight: bold;
-            border-bottom: 1px solid #3a375a;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.08), rgba(106, 90, 205, 0.04));
         }
 
         .modal-content {
@@ -113,23 +141,26 @@
         .modal-content .input-row span {
             width: 100px;
             font-size: 14px;
-            color: #ccc;
+            color: #b0a0d0;
             flex-shrink: 0;
         }
 
         .modal-content .input-row input[type="text"] {
             flex: 1;
-            background: #100c2a;
-            border: 1px solid #3a375a;
-            border-radius: 4px;
-            padding: 8px 10px;
+            background: rgba(16, 12, 42, 0.8);
+            border: 1px solid rgba(138, 43, 226, 0.4);
+            border-radius: 6px;
+            padding: 10px 12px;
             color: #fff;
             font-size: 14px;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
 
         .modal-content .input-row input[type="text"]:focus {
             outline: none;
-            border-color: #5f5a9c;
+            border-color: #8a2be2;
+            box-shadow: 0 0 8px rgba(138, 43, 226, 0.2);
+            background: rgba(16, 12, 42, 1);
         }
 
         .modal-content .radio-row {
@@ -142,71 +173,83 @@
         .modal-content .radio-row label {
             display: flex;
             align-items: center;
-            color: #ccc;
+            color: #b0a0d0;
             cursor: pointer;
             gap: 5px;
             font-size: 14px;
+            transition: color 0.15s;
+        }
+
+        .modal-content .radio-row label:hover {
+            color: #e0e0ff;
         }
 
         .modal-buttons {
             padding: 15px 20px;
             text-align: right;
-            background: #1e1c32;
-            border-top: 1px solid #3a375a;
+            background: rgba(30, 28, 50, 0.6);
+            border-top: 1px solid rgba(138, 43, 226, 0.2);
             display: flex;
             gap: 10px;
             justify-content: flex-end;
         }
 
         .modal-buttons button {
-            padding: 8px 16px;
+            padding: 10px 18px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
-            transition: background 0.2s;
+            font-weight: 500;
+            transition: background 0.15s ease, transform 0.1s ease;
         }
 
         .modal-buttons button.primary-btn {
-            background: #5f5a9c;
+            background: linear-gradient(135deg, #8a2be2, #6a5acd);
             color: #fff;
+            box-shadow: 0 2px 10px rgba(138, 43, 226, 0.3);
         }
 
         .modal-buttons button.primary-btn:hover {
-            background: #7a75b8;
+            background: linear-gradient(135deg, #9a3bf2, #7a6acd);
         }
 
         .modal-buttons button.cancel-btn {
-            background: #4a4a4a;
+            background: rgba(100, 100, 120, 0.5);
             color: #ccc;
+            border: 1px solid rgba(138, 43, 226, 0.2);
         }
 
         .modal-buttons button.cancel-btn:hover {
-            background: #5a5a5a;
+            background: rgba(100, 100, 120, 0.7);
+            color: #fff;
         }
 
         .toolbar {
             position: fixed;
-            top: 10px;
-            right: 10px;
+            top: 20px;
+            right: 20px;
             z-index: 50;
             display: flex;
-            gap: 8px;
+            gap: 10px;
         }
 
         .toolbar button {
-            padding: 8px 12px;
-            background: #5f5a9c;
+            padding: 10px 16px;
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.8), rgba(106, 90, 205, 0.8));
             color: #fff;
-            border: none;
-            border-radius: 4px;
+            border: 1px solid rgba(138, 43, 226, 0.5);
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 12px;
-            transition: background 0.2s;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.15s ease;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 2px 10px rgba(138, 43, 226, 0.2);
         }
 
         .toolbar button:hover {
-            background: #7a75b8;
+            background: linear-gradient(135deg, #8a2be2, #6a5acd);
         }
     </style>
 </head>
@@ -216,6 +259,7 @@
 
     <div class="toolbar">
         <button id="export-btn">导出 JSON</button>
+        <button id="sync-btn">同步数据</button>
     </div>
 
     <div id="node-menu" class="menu-wrapper">
@@ -228,6 +272,10 @@
 
     <div id="canvas-menu" class="menu-wrapper">
         <div class="menu-item" id="canvas-menu-add-node">新增角色</div>
+    </div>
+
+    <div id="simple-menu" class="menu-wrapper">
+        <div class="menu-item" id="simple-menu-add-node">新增角色</div>
     </div>
 
     <div id="edge-menu" class="menu-wrapper">
@@ -401,16 +449,66 @@ $(document).ready(function () {
         option.series[0].data = nodes;
         option.series[0].links = links;
         myChart.setOption(option, { notMerge: false });
+        saveDataToLocalStorage();
+    }
+
+    function saveDataToLocalStorage() {
+        var dataToSave = {
+            nodes: JSON.parse(JSON.stringify(nodes)),
+            links: links
+        };
+        
+        // 清理导出数据中的时间戳
+        dataToSave.nodes.forEach(function(node) {
+            if (node.symbol && node.symbol.includes('&t=')) {
+                var prefix = 'image://';
+                var url = node.symbol.substring(prefix.length);
+                var baseUrl = url.split('&t=')[0];
+                node.symbol = prefix + baseUrl;
+            }
+        });
+        
+        localStorage.setItem('meoGraphData', JSON.stringify(dataToSave));
+        console.log('数据已自动保存到本地');
+    }
+
+    function loadDataFromLocalStorage() {
+        var savedData = localStorage.getItem('meoGraphData');
+        if (savedData) {
+            try {
+                var data = JSON.parse(savedData);
+                nodes = data.nodes || [];
+                links = data.links || [];
+                console.log('已从本地加载数据');
+                return true;
+            } catch (e) {
+                console.error('本地数据读取失败:', e);
+                return false;
+            }
+        }
+        return false;
     }
 
     function loadData() {
-        
-        // --- 关键修复: 在 JSON 文件的 URL 末尾添加时间戳 ---
-        // 这会穿透 GitHub Pages (10分钟) 和浏览器的缓存
-        var jsonUrl = './resources/userrelations.json?t=' + Date.now();
-        // --- 修复结束 ---
+        // 优先从本地存储加载
+        if (loadDataFromLocalStorage()) {
+            var timestamp = Date.now(); 
+            nodes.forEach(function(node) {
+                if (node.symbol && node.symbol.startsWith('image://https://q1.qlogo.cn')) {
+                    var prefix = 'image://';
+                    var url = node.symbol.substring(prefix.length);
+                    var baseUrl = url.split('&t=')[0];
+                    node.symbol = prefix + baseUrl + '&t=' + timestamp;
+                }
+            });
+            refreshChart();
+            return;
+        }
 
-        fetch(jsonUrl) // 使用带时间戳的 URL
+        // 如果本地没有数据，从服务器加载
+        var jsonUrl = './resources/userrelations.json?t=' + Date.now();
+
+        fetch(jsonUrl)
             .then(response => {
                 if (!response.ok) throw new Error('加载失败');
                 return response.json();
@@ -419,7 +517,6 @@ $(document).ready(function () {
                 nodes = data.nodes || [];
                 links = data.links || [];
                 
-                // (为QQ头像添加时间戳的修复已保留)
                 var timestamp = Date.now(); 
                 nodes.forEach(function(node) {
                     if (node.symbol && node.symbol.startsWith('image://https://q1.qlogo.cn')) {
@@ -431,6 +528,7 @@ $(document).ready(function () {
                 });
 
                 refreshChart();
+                saveDataToLocalStorage();
             })
             .catch(error => {
                 console.error('加载数据失败:', error);
@@ -509,10 +607,17 @@ $(document).ready(function () {
     }
 
     // ECharts 事件
-    document.getElementById('relation-graph').oncontextmenu = function () { return false; };
+    document.getElementById('relation-graph').oncontextmenu = function (e) { 
+        e.preventDefault();
+        return false; 
+    };
+
+    var echartsContextMenuHandled = false;
 
     // 右键菜单逻辑
     myChart.on('contextmenu', function (params) {
+        echartsContextMenuHandled = true;
+        
         if (params.event && params.event.event) {
             params.event.event.preventDefault();
         }
@@ -536,8 +641,8 @@ $(document).ready(function () {
             }
             
             showMenu($('#edge-menu'), params.event.offsetX, params.event.offsetY);
-
         } else {
+            // 空白区域右键
             currentClickedNode = null; 
             currentClickedEdge = null; 
             try {
@@ -549,8 +654,25 @@ $(document).ready(function () {
                      canvasClickPosition = null; 
                 }
             }
-            showMenu($('#canvas-menu'), params.event.offsetX, params.event.offsetY);
+            showMenu($('#simple-menu'), params.event.offsetX, params.event.offsetY);
         }
+
+        setTimeout(function() { echartsContextMenuHandled = false; }, 50);
+    });
+
+    // 全局右键菜单事件（处理页面任意位置 - 只在 ECharts 未处理时触发）
+    document.addEventListener('contextmenu', function(e) {
+        if (echartsContextMenuHandled) return;
+        
+        e.preventDefault();
+        currentClickedNode = null;
+        currentClickedEdge = null;
+        try {
+            canvasClickPosition = myChart.convertFromPixel({ seriesIndex: 0 }, [e.offsetX || e.clientX, e.offsetY || e.clientY]);
+        } catch (err) {
+            canvasClickPosition = null;
+        }
+        showMenu($('#simple-menu'), e.clientX, e.clientY);
     });
 
     myChart.on('click', function (params) {
@@ -619,6 +741,7 @@ $(document).ready(function () {
     
     $('#canvas-menu-add-node').on('click', handleAddNode);
     $('#edge-menu-add-node').on('click', handleAddNode);
+    $('#simple-menu-add-node').on('click', handleAddNode);
     
     // 线条菜单事件 (修改/删除)
     $('#edge-menu-edit-remark').on('click', function () {
@@ -744,6 +867,45 @@ $(document).ready(function () {
         a.download = 'userrelations.json';
         a.click();
         URL.revokeObjectURL(url);
+    });
+
+    // 同步数据到服务器
+    $('#sync-btn').on('click', function () {
+        var nodesToSync = JSON.parse(JSON.stringify(nodes));
+        
+        nodesToSync.forEach(function(node) {
+            if (node.symbol && node.symbol.includes('&t=')) {
+                var prefix = 'image://';
+                var url = node.symbol.substring(prefix.length);
+                var baseUrl = url.split('&t=')[0];
+                node.symbol = prefix + baseUrl;
+            }
+        });
+
+        var data = { nodes: nodesToSync, links: links };
+        var jsonString = JSON.stringify(data, null, 2);
+
+        // 使用 GitHub API 或其他方式上传
+        // 这里我们使用一个简单的方法：通过 API 端点
+        fetch('./api/save-relations', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: jsonString
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('服务器保存失败');
+            return response.json();
+        })
+        .then(result => {
+            alert('✓ 数据已成功同步到服务器！');
+            console.log('服务器同步成功:', result);
+        })
+        .catch(error => {
+            console.error('同步失败:', error);
+            alert('✗ 同步失败，请检查网络连接。\n\n提示：您可以使用"导出 JSON"按钮将数据下载下来，然后手动更新服务器上的 JSON 文件。');
+        });
     });
 
     $(window).on('resize', function() {
